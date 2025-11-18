@@ -1,0 +1,56 @@
+# Flask Core
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+Flask-Migrate==4.0.5
+Flask-Mail==0.9.1
+
+# Real-time Communication
+Flask-SocketIO==5.3.5
+python-socketio==5.10.0
+redis==5.0.1
+eventlet==0.33.3
+
+# Database
+PyMySQL==1.1.0
+SQLAlchemy==2.0.23
+
+# AI & API Integrations
+anthropic==0.39.0
+retell-sdk==4.56.0
+stripe==7.8.0
+requests==2.31.0
+
+# Social Media Automation
+# social-post-api not needed - using Ayrshare API directly via requests
+
+# Task Scheduling
+APScheduler==3.10.4
+
+# WSGI Server
+gunicorn==21.2.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Forms & Validation
+WTForms==3.1.1
+email-validator==2.1.0
+
+# Security
+Flask-Bcrypt==1.0.1
+Flask-CORS==4.0.0
+Flask-Talisman==1.1.0
+Flask-Limiter==3.5.0
+
+# Performance & SEO
+Flask-Compress==1.14
+
+# Utilities
+python-dateutil==2.8.2
+Pillow==10.1.0
+
+# Testing (development/CI only)
+pytest==7.4.3
+pytest-cov==4.1.0

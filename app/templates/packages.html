@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Packages & Pricing - Momentum Clips{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative hero-gradient text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-5xl font-bold mb-6 heading">CHOOSE YOUR PACKAGE</h1>
+        <p class="text-2xl text-gray-300 font-medium">Professional video production for every skill level</p>
+    </div>
+</section>
+
+<!-- Packages Grid -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if packages %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for package in packages %}
+            <div class="bg-white rounded-lg shadow-xl overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-1 flex flex-col
+                        {% if package.name == 'Pro Session' %}ring-4 ring-[#00D4FF]{% endif %}">
+                <!-- Package Header -->
+                <div class="{% if package.name == 'Pro Session' %}hero-gradient{% else %}bg-[#0F172A]{% endif %} text-white p-6">
+                    {% if package.name == 'Pro Session' %}
+                    <div class="text-center mb-2">
+                        <span class="bg-[#00D4FF] text-[#0F172A] px-3 py-1 rounded-full text-xs font-bold uppercase pulse-chat">
+                            Most Popular
+                        </span>
+                    </div>
+                    {% endif %}
+                    <h2 class="text-3xl font-bold text-center mb-2 heading">{{ package.name }}</h2>
+                    <div class="text-center">
+                        <span class="text-5xl font-bold">${{ "%.0f"|format(package.price) }}</span>
+                        <span class="text-gray-300 font-medium">/ {{ package.duration }}hrs</span>
+                    </div>
+                </div>
+
+                <!-- Package Body -->
+                <div class="p-8 flex flex-col flex-1">
+                    <p class="text-gray-600 text-center mb-6">{{ package.description }}</p>
+
+                    <!-- Features List -->
+                    <ul class="space-y-3 mb-6 flex-1">
+                        {% for feature in package.features.split(',') %}
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1 flex-shrink-0"></i>
+                            <span class="text-gray-700">{{ feature.strip() }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <!-- Additional Details -->
+                    <div class="space-y-2 mb-6 text-sm text-gray-600">
+                        <div class="flex items-center">
+                            <i class="fas fa-video w-5 text-[#00D4FF]"></i>
+                            <span class="ml-2">{{ package.video_count }} edited video(s)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-users w-5 text-[#00D4FF]"></i>
+                            <span class="ml-2">Up to {{ package.max_riders }} rider(s)</span>
+                        </div>
+                        {% if package.includes_drone %}
+                        <div class="flex items-center">
+                            <i class="fas fa-helicopter w-5 text-[#00D4FF]"></i>
+                            <span class="ml-2">Includes drone footage</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Book Button -->
+                    <a href="{{ url_for('booking.new_booking', package_id=package.id) }}" 
+                       class="block w-full text-center {% if package.name == 'Pro Session' %}bg-[#00D4FF] hover:bg-[#00D4FF]{% else %}bg-[#0F172A] hover:bg-[#0F172A]{% endif %} text-white px-6 py-4 rounded-lg font-bold text-lg transition mt-auto">
+                        Book {{ package.name }}
+                    </a>
+
+                    <!-- View Details Link -->
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('main.package_detail', package_id=package.id) }}" 
+                           class="text-[#00D4FF] hover:text-[#00D4FF] text-sm">
+                            View Full Details <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <p class="text-gray-600 text-xl">No packages available at this time.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Comparison Table -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-[#0F172A] mb-8 text-center">Compare Packages</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-[#0F172A]">Feature</th>
+                        {% for package in packages %}
+                        <th class="px-6 py-3 text-center text-sm font-semibold text-[#0F172A]">{{ package.name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-700">Session Duration</td>
+                        {% for package in packages %}
+                        <td class="px-6 py-4 text-sm text-[#0F172A] text-center font-semibold">{{ package.duration }} hours</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-700">Edited Videos</td>
+                        {% for package in packages %}
+                        <td class="px-6 py-4 text-sm text-[#0F172A] text-center font-semibold">{{ package.video_count }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-700">Max Riders</td>
+                        {% for package in packages %}
+                        <td class="px-6 py-4 text-sm text-[#0F172A] text-center font-semibold">{{ package.max_riders }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-700">Drone Footage</td>
+                        {% for package in packages %}
+                        <td class="px-6 py-4 text-sm text-center">
+                            {% if package.includes_drone %}
+                            <i class="fas fa-check text-green-500 text-lg"></i>
+                            {% else %}
+                            <i class="fas fa-times text-gray-400 text-lg"></i>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-700">Price</td>
+                        {% for package in packages %}
+                        <td class="px-6 py-4 text-sm text-[#00D4FF] text-center font-bold text-lg">${{ "%.2f"|format(package.price) }}</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-[#0F172A] mb-4">Have Questions?</h2>
+        <p class="text-xl text-gray-600 mb-8">Check out our FAQ or chat with our AI assistant</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('main.faq') }}" 
+               class="bg-[#00D4FF] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#00D4FF] transition">
+                View FAQ
+            </a>
+            <button onclick="document.getElementById('claude-chat-bubble').click()" 
+                    class="bg-white border-2 border-[#00D4FF] text-[#00D4FF] px-8 py-3 rounded-lg font-bold hover:bg-[#00D4FF] hover:text-white transition">
+                <i class="fas fa-robot mr-2"></i> CHAT WITH AI
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

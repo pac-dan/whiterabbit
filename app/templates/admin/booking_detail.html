@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Booking #{{ booking.id }} - Admin - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{{ url_for('admin.bookings') }}" class="text-[#00D4FF] hover:text-[#00D4FF]">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Bookings
+        </a>
+    </div>
+
+    <!-- Booking Header -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold text-[#0F172A] mb-2">Booking #{{ booking.id }}</h1>
+                <p class="text-gray-600">Created: {{ booking.created_at|datetime('%B %d, %Y at %I:%M %p') }}</p>
+            </div>
+            <span class="px-4 py-2 rounded-full text-sm font-bold
+                {% if booking.status == 'confirmed' %}bg-green-100 text-green-800
+                {% elif booking.status == 'pending' %}bg-yellow-100 text-yellow-800
+                {% elif booking.status == 'completed' %}bg-blue-100 text-[#00D4FF]
+                {% elif booking.status == 'cancelled' %}bg-red-100 text-red-800
+                {% else %}bg-gray-100 text-[#0F172A]{% endif %}">
+                {{ booking.status|upper }}
+            </span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Details -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Customer Information -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">
+                    <i class="fas fa-user text-[#00D4FF] mr-2"></i> Customer Information
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Name</p>
+                        <p class="font-semibold text-[#0F172A]">{{ booking.user.name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Email</p>
+                        <p class="font-semibold text-[#0F172A]">{{ booking.user.email }}</p>
+                    </div>
+                    {% if booking.user.phone %}
+                    <div>
+                        <p class="text-sm text-gray-600">Phone</p>
+                        <p class="font-semibold text-[#0F172A]">{{ booking.user.phone }}</p>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <p class="text-sm text-gray-600">Experience Level</p>
+                        <p class="font-semibold text-[#0F172A]">{{ booking.rider_experience or 'Not specified' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session Details -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">
+                    <i class="fas fa-calendar-alt text-[#00D4FF] mr-2"></i> Session Details
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Package</p>
+                        <p class="text-lg font-semibold text-[#0F172A]">{{ booking.package.name }}</p>
+                        <p class="text-gray-600">{{ booking.package.duration }} hours session</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Date & Time</p>
+                        <p class="text-lg font-semibold text-[#0F172A]">
+                            {{ booking.booking_date|datetime('%A, %B %d, %Y at %I:%M %p') }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Location</p>
+                        <p class="text-lg font-semibold text-[#0F172A]">{{ booking.location }}</p>
+                        {% if booking.location_details %}
+                        <p class="text-gray-600 mt-1">{{ booking.location_details }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Number of Riders</p>
+                        <p class="text-lg font-semibold text-[#0F172A]">{{ booking.number_of_riders }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Special Requests -->
+            {% if booking.special_requests %}
+            <div class="bg-blue-50 rounded-lg p-6">
+                <h3 class="font-bold text-[#0F172A] mb-2">
+                    <i class="fas fa-comment text-[#00D4FF] mr-2"></i> Special Requests
+                </h3>
+                <p class="text-gray-700">{{ booking.special_requests }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Admin Notes -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">
+                    <i class="fas fa-sticky-note text-yellow-600 mr-2"></i> Admin Notes
+                </h2>
+                <form method="POST" action="{{ url_for('admin.update_booking_status', booking_id=booking.id) }}">
+                    <textarea name="admin_notes" rows="4" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Add internal notes about this booking...">{{ booking.admin_notes or '' }}</textarea>
+                    <button type="submit" class="mt-3 bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00D4FF] transition">
+                        Save Notes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions -->
+        <div class="space-y-6">
+            <!-- Update Status -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="font-bold text-[#0F172A] mb-4">Update Status</h3>
+                <form method="POST" action="{{ url_for('admin.update_booking_status', booking_id=booking.id) }}">
+                    <select name="status" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mb-3">
+                        <option value="pending" {% if booking.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="confirmed" {% if booking.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="in_progress" {% if booking.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                        <option value="completed" {% if booking.status == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="cancelled" {% if booking.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        <option value="refunded" {% if booking.status == 'refunded' %}selected{% endif %}>Refunded</option>
+                    </select>
+                    <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                        Update Status
+                    </button>
+                </form>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="font-bold text-[#0F172A] mb-4">Payment</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Amount</span>
+                        <span class="font-bold text-[#0F172A]">${{ "%.2f"|format(booking.amount) }}</span>
+                    </div>
+                    {% if booking.paid_at %}
+                    <div class="bg-green-50 rounded p-3">
+                        <p class="text-sm font-semibold text-green-800">
+                            <i class="fas fa-check-circle mr-2"></i> Paid
+                        </p>
+                        <p class="text-xs text-green-700 mt-1">
+                            {{ booking.paid_at|datetime('%b %d, %Y') }}
+                        </p>
+                    </div>
+                    {% else %}
+                    <div class="bg-yellow-50 rounded p-3">
+                        <p class="text-sm font-semibold text-yellow-800">
+                            <i class="fas fa-exclamation-circle mr-2"></i> Payment Pending
+                        </p>
+                    </div>
+                    {% endif %}
+                    {% if booking.stripe_payment_intent_id %}
+                    <div class="text-xs text-gray-500 break-all">
+                        <strong>Payment ID:</strong><br>
+                        {{ booking.stripe_payment_intent_id }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Deliver Videos -->
+            {% if booking.status in ['completed', 'in_progress'] %}
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="font-bold text-[#0F172A] mb-4">Deliver Videos</h3>
+                <form method="POST" action="{{ url_for('admin.deliver_booking', booking_id=booking.id) }}">
+                    <textarea name="video_links" rows="4" 
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mb-3"
+                              placeholder="Paste video links (Vimeo, Dropbox, etc.)">{{ booking.video_links or '' }}</textarea>
+                    <button type="submit" class="w-full bg-[#8B5CF6] text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-paper-plane mr-2"></i> Mark as Delivered
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                <a href="mailto:{{ booking.user.email }}" 
+                   class="block w-full text-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fas fa-envelope mr-2"></i> Email Customer
+                </a>
+                <a href="{{ url_for('admin.view_user', user_id=booking.user.id) }}" 
+                   class="block w-full text-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fas fa-user mr-2"></i> View Customer
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

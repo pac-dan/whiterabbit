@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}{% if video %}Edit{% else %}New{% endif %} Video - Admin - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{{ url_for('admin.videos') }}" class="text-[#00D4FF] hover:text-[#00D4FF]">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Videos
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-[#0F172A] mb-2">
+            {% if video %}Edit Video{% else %}Add New Video{% endif %}
+        </h1>
+        <p class="text-xl text-gray-600">
+            {% if video %}Update video details{% else %}Add a new video to the gallery{% endif %}
+        </p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="bg-white rounded-lg shadow-md p-8">
+        <div class="space-y-6">
+            <!-- Basic Information -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Basic Information</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                            Video Title *
+                        </label>
+                        <input type="text" id="title" name="title" 
+                               value="{{ video.title if video else '' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               required>
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                            Description *
+                        </label>
+                        <textarea id="description" name="description" rows="3"
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  required>{{ video.description if video else '' }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="vimeo_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                Vimeo Video ID *
+                            </label>
+                            <input type="text" id="vimeo_id" name="vimeo_id" 
+                                   value="{{ video.vimeo_id if video else '' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="e.g., 123456789"
+                                   required>
+                            <p class="text-sm text-gray-500 mt-1">Get from Vimeo video URL</p>
+                        </div>
+
+                        <div>
+                            <label for="thumbnail_url" class="block text-sm font-medium text-gray-700 mb-2">
+                                Thumbnail URL
+                            </label>
+                            <input type="url" id="thumbnail_url" name="thumbnail_url" 
+                                   value="{{ video.thumbnail_url if video else '' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="/static/images/thumb.jpg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categorization -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Categorization</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="location_tag" class="block text-sm font-medium text-gray-700 mb-2">
+                            Location Tag *
+                        </label>
+                        <input type="text" id="location_tag" name="location_tag" 
+                               value="{{ video.location_tag if video else '' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., Vail Resort"
+                               required>
+                    </div>
+
+                    <div>
+                        <label for="style_tag" class="block text-sm font-medium text-gray-700 mb-2">
+                            Style Tag *
+                        </label>
+                        <input type="text" id="style_tag" name="style_tag" 
+                               value="{{ video.style_tag if video else '' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., Freestyle"
+                               required>
+                    </div>
+
+                    <div>
+                        <label for="rider_level" class="block text-sm font-medium text-gray-700 mb-2">
+                            Rider Level *
+                        </label>
+                        <select id="rider_level" name="rider_level" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                            <option value="">Select level...</option>
+                            <option value="Beginner" {% if video and video.rider_level == 'Beginner' %}selected{% endif %}>Beginner</option>
+                            <option value="Intermediate" {% if video and video.rider_level == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                            <option value="Advanced" {% if video and video.rider_level == 'Advanced' %}selected{% endif %}>Advanced</option>
+                            <option value="Expert" {% if video and video.rider_level == 'Expert' %}selected{% endif %}>Expert</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Before/After Comparison -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Before/After Comparison (Optional)</h2>
+                <div class="space-y-4">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" id="is_comparison" name="is_comparison" value="true"
+                               {% if video and video.is_comparison %}checked{% endif %}
+                               class="w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-blue-500"
+                               onchange="toggleComparison(this)">
+                        <span class="ml-3 text-gray-700">
+                            <i class="fas fa-exchange-alt text-[#00D4FF] mr-2"></i>
+                            This is a before/after comparison
+                        </span>
+                    </label>
+
+                    <div id="comparison-fields" class="pl-8 space-y-4" style="display: {% if video and video.is_comparison %}block{% else %}none{% endif %};">
+                        <div>
+                            <label for="before_vimeo_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                Before Vimeo ID
+                            </label>
+                            <input type="text" id="before_vimeo_id" name="before_vimeo_id" 
+                                   value="{{ video.before_vimeo_id if video else '' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Raw footage Vimeo ID">
+                        </div>
+
+                        <div>
+                            <label for="after_vimeo_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                After Vimeo ID
+                            </label>
+                            <input type="text" id="after_vimeo_id" name="after_vimeo_id" 
+                                   value="{{ video.after_vimeo_id if video else '' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Edited footage Vimeo ID">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Options -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Display Options</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="display_order" class="block text-sm font-medium text-gray-700 mb-2">
+                            Display Order
+                        </label>
+                        <input type="number" id="display_order" name="display_order" min="0"
+                               value="{{ video.display_order if video else 0 }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-sm text-gray-500 mt-1">Lower numbers appear first</p>
+                    </div>
+
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="is_featured" value="true"
+                               {% if video and video.is_featured %}checked{% endif %}
+                               class="w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-3 text-gray-700">
+                            <i class="fas fa-star text-yellow-500 mr-2"></i>
+                            Featured (show on homepage)
+                        </span>
+                    </label>
+
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="is_published" value="true"
+                               {% if not video or video.is_published %}checked{% endif %}
+                               class="w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-3 text-gray-700">
+                            <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                            Published (visible to public)
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex space-x-4 pt-6 border-t">
+                <button type="submit" 
+                        class="flex-1 bg-[#00D4FF] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#00D4FF] transition">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if video %}Update Video{% else %}Add Video{% endif %}
+                </button>
+                <a href="{{ url_for('admin.videos') }}" 
+                   class="flex-1 text-center bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-300 transition">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleComparison(checkbox) {
+    const fields = document.getElementById('comparison-fields');
+    fields.style.display = checkbox.checked ? 'block' : 'none';
+}
+</script>
+{% endblock %}
+

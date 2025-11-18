@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}{% if testimonial %}Edit{% else %}New{% endif %} Testimonial - Admin - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{{ url_for('admin.testimonials') }}" class="text-[#00D4FF] hover:text-[#00D4FF]">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Testimonials
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-[#0F172A] mb-2">
+            {% if testimonial %}Edit Testimonial{% else %}Add New Testimonial{% endif %}
+        </h1>
+        <p class="text-xl text-gray-600">
+            {% if testimonial %}Update testimonial details{% else %}Add a new customer testimonial{% endif %}
+        </p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="bg-white rounded-lg shadow-md p-8">
+        <div class="space-y-6">
+            <!-- Client Information -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Client Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="client_name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Client Name *
+                        </label>
+                        <input type="text" id="client_name" name="client_name" 
+                               value="{{ testimonial.client_name if testimonial else '' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               required>
+                    </div>
+
+                    <div>
+                        <label for="client_location" class="block text-sm font-medium text-gray-700 mb-2">
+                            Client Location
+                        </label>
+                        <input type="text" id="client_location" name="client_location" 
+                               value="{{ testimonial.client_location if testimonial else '' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., Denver, CO">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="client_photo_url" class="block text-sm font-medium text-gray-700 mb-2">
+                            Client Photo URL
+                        </label>
+                        <input type="url" id="client_photo_url" name="client_photo_url" 
+                               value="{{ testimonial.client_photo_url if testimonial else '' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="/static/images/client.jpg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial Content -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Testimonial Content</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="testimonial_text" class="block text-sm font-medium text-gray-700 mb-2">
+                            Testimonial Text *
+                        </label>
+                        <textarea id="testimonial_text" name="testimonial_text" rows="5"
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  required>{{ testimonial.testimonial_text if testimonial else '' }}</textarea>
+                        <p class="text-sm text-gray-500 mt-1">The client's review or testimonial</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="rating" class="block text-sm font-medium text-gray-700 mb-2">
+                                Rating (1-5 stars) *
+                            </label>
+                            <select id="rating" name="rating" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required>
+                                <option value="">Select rating...</option>
+                                {% for i in range(1, 6) %}
+                                <option value="{{ i }}" {% if testimonial and testimonial.rating == i %}selected{% endif %}>
+                                    {{ i }} star{% if i > 1 %}s{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="project_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                Project Type
+                            </label>
+                            <input type="text" id="project_type" name="project_type" 
+                                   value="{{ testimonial.project_type if testimonial else '' }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="e.g., Pro Session, Epic Package">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Options -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Display Options</h2>
+                <div class="space-y-3">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="is_featured" value="true"
+                               {% if testimonial and testimonial.is_featured %}checked{% endif %}
+                               class="w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-3 text-gray-700">
+                            <i class="fas fa-star text-yellow-500 mr-2"></i>
+                            Featured (show on homepage)
+                        </span>
+                    </label>
+
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="is_published" value="true"
+                               {% if not testimonial or testimonial.is_published %}checked{% endif %}
+                               class="w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-3 text-gray-700">
+                            <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                            Published (visible to public)
+                        </span>
+                    </label>
+
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="verified_purchase" value="true"
+                               {% if testimonial and testimonial.verified_purchase %}checked{% endif %}
+                               class="w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-3 text-gray-700">
+                            <i class="fas fa-check-circle text-[#00D4FF] mr-2"></i>
+                            Verified Purchase
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex space-x-4 pt-6 border-t">
+                <button type="submit" 
+                        class="flex-1 bg-[#00D4FF] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#00D4FF] transition">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if testimonial %}Update Testimonial{% else %}Add Testimonial{% endif %}
+                </button>
+                <a href="{{ url_for('admin.testimonials') }}" 
+                   class="flex-1 text-center bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-300 transition">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

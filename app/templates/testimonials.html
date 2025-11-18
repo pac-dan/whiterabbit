@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Testimonials - Momentum Clips{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative hero-gradient text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-5xl font-bold mb-6 heading">WHAT OUR CLIENTS SAY</h1>
+        <p class="text-2xl text-gray-300 font-medium">Real stories from real riders</p>
+        <div class="mt-6 flex items-center justify-center space-x-6 text-lg">
+            <div class="flex items-center">
+                <div class="text-[#00D4FF] text-3xl mr-2">
+                    {% for i in range(5) %}
+                    <i class="fas fa-star"></i>
+                    {% endfor %}
+                </div>
+                <span class="font-bold">{{ average_rating|round(1) }}/5.0</span>
+            </div>
+            <span>•</span>
+            <span>{{ testimonials|length }} Reviews</span>
+        </div>
+    </div>
+</section>
+
+<!-- Rating Distribution -->
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-gray-50 rounded-lg p-8">
+            <h2 class="text-2xl font-bold text-[#0F172A] mb-6 text-center">Rating Distribution</h2>
+            <div class="max-w-2xl mx-auto space-y-3">
+                {% for rating, count in rating_distribution.items() | sort(reverse=True) %}
+                <div class="flex items-center">
+                    <div class="w-16 text-sm font-semibold text-gray-700">{{ rating }} stars</div>
+                    <div class="flex-1 mx-4">
+                        <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div class="bg-[#00D4FF] h-full" style="width: {{ (count / testimonials|length * 100) if testimonials|length > 0 else 0 }}%"></div>
+                        </div>
+                    </div>
+                    <div class="w-12 text-sm text-gray-600">{{ count }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Grid -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if testimonials %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for testimonial in testimonials %}
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition">
+                <!-- Client Info -->
+                <div class="flex items-center mb-4">
+                    <img src="{{ testimonial.client_photo_url }}" 
+                         alt="{{ testimonial.client_name }}" 
+                         class="w-14 h-14 rounded-full object-cover mr-4">
+                    <div>
+                        <h3 class="font-bold text-[#0F172A]">{{ testimonial.client_name }}</h3>
+                        {% if testimonial.client_location %}
+                        <p class="text-sm text-gray-600">{{ testimonial.client_location }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Rating -->
+                <div class="flex items-center mb-4">
+                    <div class="text-[#00D4FF] mr-2">
+                        {% for i in range(testimonial.rating) %}
+                        <i class="fas fa-star"></i>
+                        {% endfor %}
+                        {% for i in range(5 - testimonial.rating) %}
+                        <i class="far fa-star"></i>
+                        {% endfor %}
+                    </div>
+                    {% if testimonial.verified_purchase %}
+                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">
+                        <i class="fas fa-check-circle mr-1"></i> Verified
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Testimonial Text -->
+                <p class="text-gray-700 italic mb-4">"{{ testimonial.testimonial_text }}"</p>
+
+                <!-- Project Type -->
+                <div class="text-sm text-gray-600">
+                    <i class="fas fa-tag mr-2"></i> {{ testimonial.project_type }}
+                </div>
+
+                <!-- Date -->
+                <div class="text-xs text-gray-500 mt-3">
+                    {{ testimonial.created_at|datetime('%B %Y') }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <p class="text-gray-600">No testimonials yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-16 hero-gradient text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-4 heading">READY TO CREATE YOUR OWN STORY?</h2>
+        <p class="text-xl mb-8 text-gray-300 font-medium">Join hundreds of satisfied riders and book your session today</p>
+        <a href="{{ url_for('booking.new_booking') }}" 
+           class="inline-block bg-[#00D4FF] text-[#0F172A] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#8B5CF6] transition">
+            Book Your Session
+        </a>
+    </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}New Booking - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-[#0F172A] mb-2">Book Your Session</h1>
+        <p class="text-xl text-gray-600">Fill out the details below to reserve your spot</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('booking.create_booking') }}" class="space-y-8">
+        <!-- Package Selection -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-[#0F172A] mb-6">
+                <i class="fas fa-box text-[#00D4FF] mr-2"></i> Choose Your Package
+            </h2>
+
+            <div class="space-y-4">
+                {% for package in packages %}
+                <label class="block cursor-pointer">
+                    <input type="radio" name="package_id" value="{{ package.id }}" 
+                           class="peer sr-only" 
+                           {% if selected_package and selected_package.id == package.id %}checked{% endif %}
+                           {% if loop.first and not selected_package %}checked{% endif %}
+                           required>
+                    <div class="border-2 border-gray-200 rounded-lg p-4 peer-checked:border-[#00D4FF] peer-checked:bg-blue-50 hover:border-blue-300 transition">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-[#0F172A]">{{ package.name }}</h3>
+                                <p class="text-gray-600 mt-2">{{ package.description }}</p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    {% for feature in package.features.split(',')[:3] %}
+                                    <span class="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
+                                        <i class="fas fa-check text-green-500 mr-1"></i> {{ feature.strip() }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="text-right ml-4">
+                                <div class="text-3xl font-bold text-[#00D4FF]">${{ "%.2f"|format(package.price) }}</div>
+                                <div class="text-sm text-gray-600">{{ package.duration }} hours</div>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Session Details -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-[#0F172A] mb-6">
+                <i class="fas fa-calendar-alt text-[#00D4FF] mr-2"></i> Session Details
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Date & Time -->
+                <div>
+                    <label for="booking_date" class="block text-sm font-medium text-gray-700 mb-2">
+                        Date & Time *
+                    </label>
+                    <input type="datetime-local" id="booking_date" name="booking_date" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           required>
+                    <p class="text-sm text-gray-500 mt-1">Must be at least 24 hours in advance</p>
+                </div>
+
+                <!-- Number of Riders -->
+                <div>
+                    <label for="number_of_riders" class="block text-sm font-medium text-gray-700 mb-2">
+                        Number of Riders *
+                    </label>
+                    <input type="number" id="number_of_riders" name="number_of_riders" 
+                           min="1" max="10" value="1"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           required>
+                </div>
+
+                <!-- Location -->
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-700 mb-2">
+                        Resort/Location *
+                    </label>
+                    <select id="location" name="location" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required>
+                        <option value="">Select a location...</option>
+                        <option value="Vail Resort">Vail Resort, CO</option>
+                        <option value="Breckenridge">Breckenridge, CO</option>
+                        <option value="Park City">Park City, UT</option>
+                        <option value="Aspen Snowmass">Aspen Snowmass, CO</option>
+                        <option value="Whistler Blackcomb">Whistler Blackcomb, BC</option>
+                        <option value="Jackson Hole">Jackson Hole, WY</option>
+                        <option value="Big Sky">Big Sky, MT</option>
+                        <option value="Mammoth Mountain">Mammoth Mountain, CA</option>
+                        <option value="Other">Other (specify below)</option>
+                    </select>
+                </div>
+
+                <!-- Experience Level -->
+                <div>
+                    <label for="rider_experience" class="block text-sm font-medium text-gray-700 mb-2">
+                        Experience Level
+                    </label>
+                    <select id="rider_experience" name="rider_experience" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Expert">Expert</option>
+                        <option value="Mixed">Mixed Group</option>
+                    </select>
+                </div>
+
+                <!-- Location Details -->
+                <div class="md:col-span-2">
+                    <label for="location_details" class="block text-sm font-medium text-gray-700 mb-2">
+                        Meeting Point / Additional Location Details
+                    </label>
+                    <textarea id="location_details" name="location_details" rows="2"
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="e.g., Base of Gondola, Main Lodge, etc."></textarea>
+                </div>
+
+                <!-- Special Requests -->
+                <div class="md:col-span-2">
+                    <label for="special_requests" class="block text-sm font-medium text-gray-700 mb-2">
+                        Special Requests
+                    </label>
+                    <textarea id="special_requests" name="special_requests" rows="3"
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Any specific shots you want? Music preferences? Special occasions?"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms & Submit -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="mb-6">
+                <label class="flex items-start cursor-pointer">
+                    <input type="checkbox" class="mt-1 mr-3" required>
+                    <span class="text-sm text-gray-700">
+                        I agree to the <a href="#" class="text-[#00D4FF] hover:underline">terms and conditions</a> 
+                        and <a href="#" class="text-[#00D4FF] hover:underline">cancellation policy</a>. 
+                        Bookings can be cancelled up to 24 hours before the session for a full refund.
+                    </span>
+                </label>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="submit" 
+                        class="flex-1 bg-[#00D4FF] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00D4FF] transition">
+                    <i class="fas fa-check mr-2"></i> Proceed to Payment
+                </button>
+                <a href="{{ url_for('booking.index') }}" 
+                   class="flex-1 text-center bg-gray-200 text-gray-700 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-300 transition">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Set minimum date to 24 hours from now
+    const now = new Date();
+    now.setHours(now.getHours() + 24);
+    const minDate = now.toISOString().slice(0, 16);
+    document.getElementById('booking_date').min = minDate;
+
+    // Set maximum date to 90 days from now
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + 90);
+    document.getElementById('booking_date').max = maxDate.toISOString().slice(0, 16);
+</script>
+{% endblock %}
+

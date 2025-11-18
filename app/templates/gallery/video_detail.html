@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}{{ video.title }} - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{{ url_for('main.gallery') }}" class="text-[#00D4FF] hover:text-[#00D4FF]">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Gallery
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Video Area -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Video Player -->
+            <div class="bg-black rounded-lg overflow-hidden shadow-2xl">
+                {% if video.is_comparison %}
+                <!-- Before/After Comparison -->
+                <div class="grid grid-cols-2">
+                    <div>
+                        <div class="bg-[#0F172A] text-white text-center py-2 font-semibold">
+                            <i class="fas fa-video mr-2"></i> BEFORE
+                        </div>
+                        <div style="padding:56.25% 0 0 0;position:relative;">
+                            <iframe src="https://www.youtube.com/embed/{{ video.before_youtube_id }}" 
+                                    style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+                                    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-[#00D4FF] text-white text-center py-2 font-semibold">
+                            <i class="fas fa-magic mr-2"></i> AFTER EDITING
+                        </div>
+                        <div style="padding:56.25% 0 0 0;position:relative;">
+                            <iframe src="https://www.youtube.com/embed/{{ video.after_youtube_id }}" 
+                                    style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+                                    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Regular Video -->
+                <div style="padding:56.25% 0 0 0;position:relative;">
+                    <iframe src="https://www.youtube.com/embed/{{ video.youtube_id }}" 
+                            style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+                            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Video Info -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h1 class="text-3xl font-bold text-[#0F172A] mb-2">{{ video.title }}</h1>
+                        <div class="flex items-center space-x-4 text-gray-600">
+                            <span><i class="fas fa-eye mr-2"></i> {{ video.view_count }} views</span>
+                            <span><i class="fas fa-calendar mr-2"></i> {{ video.created_at|datetime('%b %d, %Y') }}</span>
+                        </div>
+                    </div>
+                    <button onclick="likeVideo({{ video.id }})" 
+                            class="flex items-center space-x-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg hover:bg-red-200 transition">
+                        <i class="fas fa-heart"></i>
+                        <span id="like-count">{{ video.like_count }}</span>
+                    </button>
+                </div>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="bg-blue-100 text-[#00D4FF] px-3 py-1 rounded-full text-sm font-semibold">
+                        <i class="fas fa-map-marker-alt mr-1"></i> {{ video.location_tag }}
+                    </span>
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                        <i class="fas fa-snowboarding mr-1"></i> {{ video.style_tag }}
+                    </span>
+                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">
+                        <i class="fas fa-signal mr-1"></i> {{ video.rider_level }}
+                    </span>
+                    {% if video.is_featured %}
+                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
+                        <i class="fas fa-star mr-1"></i> Featured
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="prose max-w-none">
+                    <p class="text-gray-700 text-lg leading-relaxed">{{ video.description }}</p>
+                </div>
+
+                <!-- Share Buttons -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-sm font-semibold text-gray-700 mb-3">Share this video:</p>
+                    <div class="flex space-x-3">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank"
+                           class="bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00D4FF] transition">
+                            <i class="fab fa-facebook-f mr-2"></i> Facebook
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ video.title }}" target="_blank"
+                           class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition">
+                            <i class="fab fa-twitter mr-2"></i> Twitter
+                        </a>
+                        <button onclick="copyLink()" 
+                                class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+                            <i class="fas fa-link mr-2"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section (Placeholder) -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-[#0F172A] mb-4">
+                    <i class="fas fa-comments text-[#00D4FF] mr-2"></i> Comments
+                </h2>
+                <div class="text-center py-8 text-gray-600">
+                    <i class="fas fa-comment-slash text-4xl mb-3"></i>
+                    <p>Comments coming soon!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Book Now CTA -->
+            <div class="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-lg shadow-md p-6">
+                <h3 class="text-2xl font-bold mb-3">Want your own epic video?</h3>
+                <p class="mb-6">Book a session and we'll create amazing content just like this!</p>
+                <a href="{{ url_for('booking.new_booking') }}" 
+                   class="block w-full text-center bg-[#00D4FF] text-[#0F172A] px-6 py-3 rounded-lg font-bold hover:bg-[#8B5CF6] transition">
+                    Book Your Session
+                </a>
+            </div>
+
+            <!-- Video Stats -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-bold text-[#0F172A] mb-4">Video Stats</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600"><i class="fas fa-eye w-5"></i> Views</span>
+                        <span class="font-semibold text-[#0F172A]">{{ video.view_count }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600"><i class="fas fa-heart w-5"></i> Likes</span>
+                        <span class="font-semibold text-[#0F172A]" id="sidebar-likes">{{ video.like_count }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600"><i class="fas fa-calendar w-5"></i> Published</span>
+                        <span class="font-semibold text-[#0F172A]">{{ video.created_at|datetime('%b %d, %Y') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Videos -->
+            {% if related_videos %}
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-bold text-[#0F172A] mb-4">
+                    <i class="fas fa-film text-[#00D4FF] mr-2"></i> Related Videos
+                </h3>
+                <div class="space-y-4">
+                    {% for related in related_videos %}
+                    <a href="{{ url_for('main.video_detail', video_id=related.id) }}" 
+                       class="flex space-x-3 group">
+                        <img src="https://img.youtube.com/vi/{{ related.youtube_id }}/mqdefault.jpg" 
+                             alt="{{ related.title }}" 
+                             class="w-32 h-20 object-cover rounded group-hover:opacity-80 transition">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-[#0F172A] text-sm group-hover:text-[#00D4FF] transition line-clamp-2">
+                                {{ related.title }}
+                            </h4>
+                            <p class="text-xs text-gray-600 mt-1">
+                                <i class="fas fa-eye mr-1"></i> {{ related.view_count }} views
+                            </p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Contact CTA -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center">
+                <i class="fas fa-question-circle text-[#00D4FF] text-3xl mb-3"></i>
+                <h3 class="font-bold text-[#0F172A] mb-2">Have Questions?</h3>
+                <p class="text-gray-600 text-sm mb-4">Chat with our AI assistant or contact us directly</p>
+                <button onclick="toggleChat()" 
+                        class="w-full bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00D4FF] transition">
+                    <i class="fas fa-robot mr-2"></i> Chat Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function likeVideo(videoId) {
+        fetch(`/api/video/${videoId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('like-count').textContent = data.like_count;
+                document.getElementById('sidebar-likes').textContent = data.like_count;
+                
+                // Show animation
+                const button = event.target.closest('button');
+                button.classList.add('scale-110');
+                setTimeout(() => button.classList.remove('scale-110'), 200);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function copyLink() {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+    }
+
+    function toggleChat() {
+        document.getElementById('chat-toggle').click();
+    }
+</script>
+
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+

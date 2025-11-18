@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Video Gallery - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Page Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-[#0F172A] mb-4">Video Gallery</h1>
+        <p class="text-xl text-gray-600">Check out our latest snowboard action and epic moments</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="flex items-center mb-4">
+            <i class="fas fa-filter text-[#00D4FF] text-xl mr-3"></i>
+            <h2 class="text-xl font-bold text-[#0F172A]">Filter Videos</h2>
+        </div>
+        
+        <form method="GET" action="{{ url_for('main.gallery') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Location Filter -->
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <select name="location" id="location" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All Locations</option>
+                    {% for location in all_tags.locations %}
+                    <option value="{{ location }}" {% if active_location == location %}selected{% endif %}>
+                        {{ location }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Style Filter -->
+            <div>
+                <label for="style" class="block text-sm font-medium text-gray-700 mb-2">Style</label>
+                <select name="style" id="style" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All Styles</option>
+                    {% for style in all_tags.styles %}
+                    <option value="{{ style }}" {% if active_style == style %}selected{% endif %}>
+                        {{ style }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Level Filter -->
+            <div>
+                <label for="level" class="block text-sm font-medium text-gray-700 mb-2">Rider Level</label>
+                <select name="level" id="level" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All Levels</option>
+                    {% for level in all_tags.levels %}
+                    <option value="{{ level }}" {% if active_level == level %}selected{% endif %}>
+                        {{ level }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex items-end">
+                <button type="submit" 
+                        class="w-full bg-[#00D4FF] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#00D4FF] transition">
+                    <i class="fas fa-search mr-2"></i> Apply Filters
+                </button>
+            </div>
+        </form>
+
+        <!-- Active Filters -->
+        {% if active_location or active_style or active_level %}
+        <div class="mt-4 pt-4 border-t border-gray-200">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm text-gray-600">Active filters:</span>
+                {% if active_location %}
+                <span class="inline-flex items-center bg-blue-100 text-[#00D4FF] px-3 py-1 rounded-full text-sm">
+                    {{ active_location }}
+                    <a href="{{ url_for('main.gallery', style=active_style, level=active_level) }}" 
+                       class="ml-2 hover:text-blue-900">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </span>
+                {% endif %}
+                {% if active_style %}
+                <span class="inline-flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                    {{ active_style }}
+                    <a href="{{ url_for('main.gallery', location=active_location, level=active_level) }}" 
+                       class="ml-2 hover:text-green-900">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </span>
+                {% endif %}
+                {% if active_level %}
+                <span class="inline-flex items-center bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                    {{ active_level }}
+                    <a href="{{ url_for('main.gallery', location=active_location, style=active_style) }}" 
+                       class="ml-2 hover:text-purple-900">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </span>
+                {% endif %}
+                <a href="{{ url_for('main.gallery') }}" 
+                   class="text-sm text-[#00D4FF] hover:text-[#00D4FF] ml-2">
+                    Clear all
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Video Grid -->
+    {% if videos %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {% for video in videos %}
+        <div class="group cursor-pointer transform hover:-translate-y-1 transition duration-300" 
+             onclick="window.location='{{ url_for('main.video_detail', video_id=video.id) }}'">
+            <div class="bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden">
+                <!-- Video Thumbnail -->
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://img.youtube.com/vi/{{ video.youtube_id }}/maxresdefault.jpg" 
+                         alt="{{ video.title }}" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                    
+                    <!-- Play Overlay -->
+                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                        <div class="bg-white/90 rounded-full p-4">
+                            <i class="fas fa-play text-[#00D4FF] text-3xl ml-1"></i>
+                        </div>
+                    </div>
+
+                    <!-- Featured Badge -->
+                    {% if video.is_featured %}
+                    <div class="absolute top-3 right-3">
+                        <span class="bg-[#00D4FF] text-[#0F172A] px-3 py-1 rounded-full text-xs font-bold">
+                            <i class="fas fa-star mr-1"></i> Featured
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Stats -->
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                        <div class="flex items-center space-x-4 text-white text-sm">
+                            <span><i class="fas fa-eye mr-1"></i> {{ video.view_count }}</span>
+                            <span><i class="fas fa-heart mr-1"></i> {{ video.like_count }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Info -->
+                <div class="p-4">
+                    <h3 class="text-lg font-bold text-[#0F172A] mb-2 line-clamp-2">
+                        {{ video.title }}
+                    </h3>
+                    <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                        {{ video.description }}
+                    </p>
+                    
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-blue-100 text-[#00D4FF] px-2 py-1 rounded text-xs font-semibold">
+                            <i class="fas fa-map-marker-alt mr-1"></i> {{ video.location_tag }}
+                        </span>
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">
+                            <i class="fas fa-snowboarding mr-1"></i> {{ video.style_tag }}
+                        </span>
+                        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-semibold">
+                            <i class="fas fa-signal mr-1"></i> {{ video.rider_level }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Load More Button (if needed) -->
+    <div class="text-center">
+        <button class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+            <i class="fas fa-chevron-down mr-2"></i> Load More Videos
+        </button>
+    </div>
+
+    {% else %}
+    <!-- No Videos Found -->
+    <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+        <i class="fas fa-video-slash text-gray-400 text-6xl mb-4"></i>
+        <h3 class="text-2xl font-semibold text-gray-700 mb-2">No Videos Found</h3>
+        <p class="text-gray-600 mb-6">Try adjusting your filters or check back later for new content</p>
+        <a href="{{ url_for('main.gallery') }}" 
+           class="inline-block bg-[#00D4FF] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#00D4FF] transition">
+            Clear Filters
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+

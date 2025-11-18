@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Videos - Admin - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-4xl font-bold text-[#0F172A] mb-2">Manage Videos</h1>
+            <p class="text-xl text-gray-600">Add and manage gallery videos</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{{ url_for('admin.dashboard') }}" class="text-[#00D4FF] hover:text-[#00D4FF]">
+                <i class="fas fa-arrow-left mr-2"></i> Dashboard
+            </a>
+            <a href="{{ url_for('admin.new_video') }}" 
+               class="bg-[#00D4FF] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#00D4FF] transition">
+                <i class="fas fa-plus mr-2"></i> New Video
+            </a>
+        </div>
+    </div>
+
+    <!-- Videos Grid -->
+    {% if videos %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for video in videos %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden {% if not video.is_published %}opacity-60{% endif %}">
+            <!-- Thumbnail -->
+            <div class="relative h-48">
+                <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="w-full h-full object-cover">
+                <div class="absolute top-2 right-2 flex flex-col space-y-2">
+                    {% if video.is_featured %}
+                    <span class="bg-[#00D4FF] text-[#0F172A] px-2 py-1 rounded text-xs font-bold">
+                        <i class="fas fa-star"></i> Featured
+                    </span>
+                    {% endif %}
+                    {% if not video.is_published %}
+                    <span class="bg-gray-600 text-white px-2 py-1 rounded text-xs font-bold">
+                        Draft
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                    <i class="fas fa-eye mr-1"></i> {{ video.view_count }}
+                    <i class="fas fa-heart ml-2 mr-1"></i> {{ video.like_count }}
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-4">
+                <h3 class="text-lg font-bold text-[#0F172A] mb-2 line-clamp-2">{{ video.title }}</h3>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ video.description }}</p>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="bg-blue-100 text-[#00D4FF] px-2 py-1 rounded text-xs font-semibold">
+                        {{ video.location_tag }}
+                    </span>
+                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">
+                        {{ video.style_tag }}
+                    </span>
+                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-semibold">
+                        {{ video.rider_level }}
+                    </span>
+                </div>
+
+                <!-- Meta -->
+                <div class="text-xs text-gray-500 mb-4">
+                    <div>Vimeo ID: {{ video.vimeo_id }}</div>
+                    <div>Order: {{ video.display_order }}</div>
+                    <div>Added: {{ video.created_at|datetime('%b %d, %Y') }}</div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex space-x-2">
+                    <a href="{{ url_for('main.video_detail', video_id=video.id) }}" target="_blank"
+                       class="flex-1 text-center bg-gray-200 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-300 transition text-sm">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <a href="{{ url_for('admin.edit_video', video_id=video.id) }}" 
+                       class="flex-1 text-center bg-[#00D4FF] text-white px-3 py-2 rounded-lg hover:bg-[#00D4FF] transition text-sm">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <form method="POST" action="{{ url_for('admin.delete_video', video_id=video.id) }}" 
+                          onsubmit="return confirm('Delete this video?');" class="flex-1">
+                        <button type="submit" 
+                                class="w-full bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition text-sm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- No Videos -->
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+        <i class="fas fa-video-slash text-gray-400 text-6xl mb-4"></i>
+        <h3 class="text-2xl font-semibold text-gray-700 mb-2">No Videos Yet</h3>
+        <p class="text-gray-600 mb-6">Add your first video to showcase your work</p>
+        <a href="{{ url_for('admin.new_video') }}" 
+           class="inline-block bg-[#00D4FF] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#00D4FF] transition">
+            <i class="fas fa-plus mr-2"></i> Add First Video
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+{% endblock %}
+

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}{{ package.name }} - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{{ url_for('main.packages') }}" class="text-[#00D4FF] hover:text-[#00D4FF]">
+            <i class="fas fa-arrow-left mr-2"></i> Back to All Packages
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Package Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-8">
+                <h1 class="text-4xl font-bold mb-4">{{ package.name }}</h1>
+                <p class="text-xl text-blue-100 mb-6">{{ package.description }}</p>
+                <div class="flex items-center space-x-6">
+                    <div>
+                        <span class="text-5xl font-bold">${{ "%.2f"|format(package.price) }}</span>
+                    </div>
+                    <div class="text-blue-100">
+                        <div><i class="fas fa-clock mr-2"></i> {{ package.duration }} hour session</div>
+                        <div><i class="fas fa-users mr-2"></i> Up to {{ package.max_riders }} riders</div>
+                        <div><i class="fas fa-video mr-2"></i> {{ package.video_count }} edited video(s)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What's Included -->
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-[#0F172A] mb-6">
+                    <i class="fas fa-check-circle text-green-500 mr-2"></i> What's Included
+                </h2>
+                <ul class="space-y-4">
+                    {% for feature in package.features.split(',') %}
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-500 mr-3 mt-1 flex-shrink-0"></i>
+                        <div>
+                            <span class="text-[#0F172A] font-semibold">{{ feature.strip() }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- How It Works -->
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-[#0F172A] mb-6">
+                    <i class="fas fa-play-circle text-[#00D4FF] mr-2"></i> How It Works
+                </h2>
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="bg-[#00D4FF] text-white w-10 h-10 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">
+                            1
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-[#0F172A] mb-1">Book Your Session</h3>
+                            <p class="text-gray-600">Choose your date, location, and pay securely online</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="bg-[#00D4FF] text-white w-10 h-10 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">
+                            2
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-[#0F172A] mb-1">Meet & Film</h3>
+                            <p class="text-gray-600">Our team meets you at the resort and follows you down the slopes</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="bg-[#00D4FF] text-white w-10 h-10 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">
+                            3
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-[#0F172A] mb-1">Professional Editing</h3>
+                            <p class="text-gray-600">We edit your footage with music, effects, and transitions</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="bg-[#00D4FF] text-white w-10 h-10 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">
+                            4
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-[#0F172A] mb-1">Receive Your Videos</h3>
+                            <p class="text-gray-600">Get your edited videos within 48-72 hours via email</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Videos -->
+            {% if sample_videos %}
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-[#0F172A] mb-6">
+                    <i class="fas fa-film text-[#00D4FF] mr-2"></i> Sample Videos
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% for video in sample_videos %}
+                    <a href="{{ url_for('main.video_detail', video_id=video.id) }}" 
+                       class="group">
+                        <div class="relative rounded-lg overflow-hidden">
+                            <img src="{{ video.thumbnail_url }}" 
+                                 alt="{{ video.title }}" 
+                                 class="w-full h-40 object-cover group-hover:scale-110 transition">
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                <i class="fas fa-play-circle text-white text-4xl"></i>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-sm font-semibold text-[#0F172A] truncate">{{ video.title }}</p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Book Now Card -->
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-20">
+                <div class="text-center mb-6">
+                    <div class="text-4xl font-bold text-[#0F172A] mb-2">
+                        ${{ "%.2f"|format(package.price) }}
+                    </div>
+                    <div class="text-gray-600">per session</div>
+                </div>
+
+                <a href="{{ url_for('booking.new_booking', package_id=package.id) }}" 
+                   class="block w-full text-center bg-[#00D4FF] text-white px-6 py-4 rounded-lg font-bold text-lg hover:bg-[#00D4FF] transition mb-4">
+                    <i class="fas fa-calendar-check mr-2"></i> Book Now
+                </a>
+
+                <button onclick="document.getElementById('chat-toggle').click()" 
+                        class="block w-full text-center bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+                    <i class="fas fa-robot mr-2"></i> Ask AI About This Package
+                </button>
+
+                <!-- Quick Facts -->
+                <div class="mt-6 pt-6 border-t border-gray-200 space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Duration</span>
+                        <span class="font-semibold text-[#0F172A]">{{ package.duration }} hours</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Videos</span>
+                        <span class="font-semibold text-[#0F172A]">{{ package.video_count }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Max Riders</span>
+                        <span class="font-semibold text-[#0F172A]">{{ package.max_riders }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Drone</span>
+                        <span class="font-semibold text-[#0F172A]">
+                            {% if package.includes_drone %}
+                            <i class="fas fa-check text-green-500"></i> Yes
+                            {% else %}
+                            <i class="fas fa-times text-gray-400"></i> No
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Delivery</span>
+                        <span class="font-semibold text-[#0F172A]">48-72 hours</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guarantee -->
+            <div class="bg-green-50 border-2 border-green-200 rounded-lg p-6">
+                <h3 class="font-bold text-green-900 mb-3">
+                    <i class="fas fa-shield-alt mr-2"></i> Our Guarantee
+                </h3>
+                <ul class="space-y-2 text-sm text-green-800">
+                    <li><i class="fas fa-check mr-2"></i> Professional quality</li>
+                    <li><i class="fas fa-check mr-2"></i> On-time delivery</li>
+                    <li><i class="fas fa-check mr-2"></i> Free revisions</li>
+                    <li><i class="fas fa-check mr-2"></i> 24hr cancellation</li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center">
+                <i class="fas fa-question-circle text-[#00D4FF] text-3xl mb-3"></i>
+                <h3 class="font-bold text-[#0F172A] mb-2">Questions?</h3>
+                <p class="text-sm text-gray-600 mb-4">We're here to help!</p>
+                <a href="{{ url_for('main.contact') }}" 
+                   class="text-[#00D4FF] hover:text-[#00D4FF] text-sm font-semibold">
+                    Contact Us <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

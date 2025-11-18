@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Social Media Management - Admin - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-4xl font-bold text-[#0F172A] mb-2">Social Media Management</h1>
+            <p class="text-xl text-gray-600">Automate your social media posting</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="text-[#00D4FF] hover:text-[#00D4FF]">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Coming Soon -->
+    <div class="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-lg shadow-xl p-12 text-center">
+        <i class="fas fa-rocket text-6xl mb-6 opacity-80"></i>
+        <h2 class="text-3xl font-bold mb-4">Social Media Automation Coming Soon!</h2>
+        <p class="text-xl text-blue-100 mb-8">
+            Automated posting to Instagram, TikTok, Facebook, and LinkedIn will be available soon.
+        </p>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
+            <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <i class="fab fa-instagram text-4xl mb-2"></i>
+                <p class="font-semibold">Instagram</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <i class="fab fa-tiktok text-4xl mb-2"></i>
+                <p class="font-semibold">TikTok</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <i class="fab fa-facebook text-4xl mb-2"></i>
+                <p class="font-semibold">Facebook</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <i class="fab fa-linkedin text-4xl mb-2"></i>
+                <p class="font-semibold">LinkedIn</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Preview -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-calendar-plus text-[#00D4FF] text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-[#0F172A] mb-2">Schedule Posts</h3>
+            <p class="text-gray-600">Plan and schedule your content in advance across all platforms</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-robot text-green-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-[#0F172A] mb-2">AI Captions</h3>
+            <p class="text-gray-600">Let AI generate engaging captions for your videos automatically</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-chart-line text-[#8B5CF6] text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-[#0F172A] mb-2">Analytics</h3>
+            <p class="text-gray-600">Track engagement and performance across all your social channels</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

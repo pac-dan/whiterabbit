@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block meta_description %}Professional snowboard video production - We capture your epic moments on the slopes and create stunning highlight reels{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}snowboard video, snowboarding footage, action sports videography, slope video production, snowboard cinematography, momentum clips{% endblock %}">
+    <meta name="author" content="Momentum Clips">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ request.url }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="{% block og_title %}{% block title %}Momentum Clips - Professional Slope Footage & Editing{% endblock %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Professional snowboard video production - We capture your epic moments on the slopes{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='images/og-image.jpg', _external=True) }}{% endblock %}">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:title" content="{% block twitter_title %}{% block title_tag %}Momentum Clips - Professional Slope Footage & Editing{% endblock %}{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}Professional snowboard video production{% endblock %}">
+    <meta property="twitter:image" content="{% block twitter_image %}{{ url_for('static', filename='images/og-image.jpg', _external=True) }}{% endblock %}">
+    
+    <title>{% block page_title %}Momentum Clips - Professional Slope Footage & Editing{% endblock %}</title>
+
+    <!-- Favicon -->
+    {% if url_for('static', filename='images/favicon.ico') %}
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    {% endif %}
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS - MUST load after Tailwind -->
+    <link rel="stylesheet" href="/static/css/style.css?v=enhanced12345">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navigation - Cyberpunk Upgraded -->
+    <nav class="navbar fixed w-full z-50" id="mainNav">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+            <div class="flex justify-between items-center h-full">
+                <div class="flex items-center">
+                    <!-- Logo with Pulsing Polygon -->
+                    <a href="{{ url_for('main.index') }}" class="flex items-center">
+                        <span class="logo-polygon"></span>
+                        <span class="text-2xl font-bold text-white" style="letter-spacing: 0.1em; font-family: 'Orbitron', sans-serif;">MOMENTUMCLIPS</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-2">
+                    <a href="{{ url_for('main.index') }}" class="nav-link font-semibold">HOME</a>
+                    <a href="{{ url_for('main.packages') }}" class="nav-link font-semibold">PACKAGES</a>
+                    <a href="{{ url_for('main.gallery') }}" class="nav-link font-semibold">GALLERY</a>
+                    <a href="{{ url_for('main.testimonials') }}" class="nav-link font-semibold">TESTIMONIALS</a>
+                    <a href="{{ url_for('main.contact') }}" class="nav-link font-semibold">CONTACT</a>
+
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin.dashboard') }}" class="nav-link font-semibold">
+                                <i class="fas fa-cog"></i> ADMIN
+                            </a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.profile') }}" class="nav-link font-semibold">
+                            <i class="fas fa-user"></i> PROFILE
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="nav-link font-semibold">LOGOUT</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="nav-link font-semibold">LOGIN</a>
+                        <a href="{{ url_for('booking.new_booking') }}" class="btn-book-cyber">
+                            BOOK NOW
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-cyan-400 hover:text-cyan-300 focus:outline-none">
+                        <i class="fas fa-bars text-2xl hamburger-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="{{ url_for('main.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 rounded">Home</a>
+                <a href="{{ url_for('main.packages') }}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 rounded">Packages</a>
+                <a href="{{ url_for('main.gallery') }}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 rounded">Gallery</a>
+                <a href="{{ url_for('main.testimonials') }}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 rounded">Testimonials</a>
+                <a href="{{ url_for('main.contact') }}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 rounded">Contact</a>
+
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 rounded">Admin</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.profile') }}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 rounded">Profile</a>
+                    <a href="{{ url_for('auth.logout') }}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 rounded">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="block px-3 py-2 text-gray-700 hover:bg-blue-50 rounded">Login</a>
+                    <a href="{{ url_for('booking.new_booking') }}" class="block px-3 py-2 bg-[#00D4FF] text-white text-center rounded">Book Now</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="fixed top-20 right-4 z-50 space-y-2" id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="bg-white border-l-4 {% if category == 'success' %}border-green-500{% elif category == 'danger' or category == 'error' %}border-red-500{% elif category == 'warning' %}border-yellow-500{% else %}border-blue-500{% endif %} p-4 shadow-lg rounded-r-lg max-w-md animate-slide-in">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas {% if category == 'success' %}fa-check-circle text-green-500{% elif category == 'danger' or category == 'error' %}fa-exclamation-circle text-red-500{% elif category == 'warning' %}fa-exclamation-triangle text-yellow-500{% else %}fa-info-circle text-blue-500{% endif %} mr-3"></i>
+                                <p class="text-[#0F172A]">{{ message }}</p>
+                            </div>
+                            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="pt-16 min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#0F172A] text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- About -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Momentum Clips</h3>
+                    <p class="text-gray-400">Professional snowboard video production. We capture your epic moments on the slopes.</p>
+                    <div class="mt-4 flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-tiktok text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin text-xl"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="{{ url_for('main.index') }}" class="hover:text-white transition">Home</a></li>
+                        <li><a href="{{ url_for('main.packages') }}" class="hover:text-white transition">Packages</a></li>
+                        <li><a href="{{ url_for('main.gallery') }}" class="hover:text-white transition">Gallery</a></li>
+                        <li><a href="{{ url_for('main.about') }}" class="hover:text-white transition">About Us</a></li>
+                        <li><a href="{{ url_for('main.faq') }}" class="hover:text-white transition">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><i class="fas fa-envelope mr-2"></i> {{ support_email }}</li>
+                        <li><i class="fas fa-phone mr-2"></i> 0873684392</li>
+                        <li><i class="fas fa-map-marker-alt mr-2"></i> Bansko, Bulgaria</li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Stay Updated</h3>
+                    <p class="text-gray-400 mb-4">Get the latest videos and deals</p>
+                    <form class="flex">
+                        <input type="email" placeholder="Your email" class="flex-1 px-4 py-2 rounded-l-lg text-[#0F172A] focus:outline-none">
+                        <button class="bg-[#00D4FF] px-4 py-2 rounded-r-lg hover:bg-[#00D4FF] transition">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Momentum Clips. All rights reserved. | <a href="#" class="hover:text-white transition">Privacy Policy</a> | <a href="#" class="hover:text-white transition">Terms of Service</a></p>
+                <p class="mt-2 text-sm font-medium">Powered by <span style="color: #8B5CF6;">Claude AI</span> <i class="fas fa-robot" style="color: #00D4FF;"></i></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Socket.IO Client -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/navbar.js"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- RETELL AI CHAT WIDGET -->
+    {% if RETELL_PUBLIC_KEY and RETELL_AGENT_ID %}
+    <script
+        id="retell-widget"
+        src="https://dashboard.retellai.com/retell-widget.js"
+        type="module"
+        data-public-key="{{ RETELL_PUBLIC_KEY }}"
+        data-agent-id="{{ RETELL_AGENT_ID }}"
+        data-title="Chat with Momentum Clips AI"
+        data-color="#00D4FF"
+        data-bot-name="Momentum AI"
+        data-popup-message="Hi! Need help booking your snowboard video session?"
+        data-show-ai-popup="true"
+        data-show-ai-popup-time="5"
+        data-auto-open="false"
+    ></script>
+    {% endif %}
+</body>
+</html>

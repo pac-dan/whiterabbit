@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ - Momentum Clips{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-5xl font-bold mb-6">Frequently Asked Questions</h1>
+        <p class="text-2xl text-blue-100">Everything you need to know about our services</p>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Search -->
+        <div class="mb-12">
+            <input type="text" id="faq-search" placeholder="Search FAQs..." 
+                   class="w-full px-6 py-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+
+        <!-- FAQ Accordion -->
+        <div class="space-y-4">
+            <!-- Booking Questions -->
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>How do I book a session?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">Simply click the "Book Now" button, select your preferred package, choose a date and location, and complete the payment. You'll receive instant confirmation!</p>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>How far in advance should I book?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">We recommend booking at least 24 hours in advance. However, you can book up to 90 days ahead for peak season dates.</p>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>Can I cancel or reschedule?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">Yes! You can cancel or reschedule up to 24 hours before your session for a full refund.</p>
+                </div>
+            </div>
+
+            <!-- Filming Questions -->
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>What equipment do you use?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">We use professional 4K cameras, drones, GoPros, and stabilization equipment to capture the best angles and quality footage.</p>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>How many runs will you film?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">As many as your package allows! We'll follow you for the duration of your booked session, capturing multiple runs and angles.</p>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>Do you provide drone footage?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">Drone footage is included in our Pro and Epic packages! It adds stunning aerial perspectives to your videos.</p>
+                </div>
+            </div>
+
+            <!-- Delivery Questions -->
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>How long until I receive my videos?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">Edited videos are delivered within 48-72 hours. Raw footage is available immediately after your session.</p>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>What format will my videos be in?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">Videos are delivered in MP4 format (1080p or 4K) optimized for social media sharing, plus downloadable high-quality versions.</p>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>Can I request revisions?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">Absolutely! We offer one round of revisions for all packages to ensure you're completely satisfied.</p>
+                </div>
+            </div>
+
+            <!-- Payment Questions -->
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>What payment methods do you accept?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">We accept all major credit cards through our secure Stripe payment system.</p>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>Is my payment information secure?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">Yes! All payments are processed securely through Stripe with SSL encryption. We never store your credit card information.</p>
+                </div>
+            </div>
+
+            <!-- Group Questions -->
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>Can you film groups?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">Yes! Most packages allow for multiple riders. We can capture your entire group's adventure together.</p>
+                </div>
+            </div>
+
+            <div class="border border-gray-200 rounded-lg">
+                <button class="faq-question w-full text-left px-6 py-4 font-semibold text-[#0F172A] hover:bg-gray-50 flex justify-between items-center">
+                    <span>Do you work with all skill levels?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <p class="text-gray-700">Absolutely! From first-timers to pros, we tailor our filming and editing to showcase your unique style and skill level.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Still Have Questions -->
+        <div class="mt-12 bg-blue-50 rounded-lg p-8 text-center">
+            <h3 class="text-2xl font-bold text-[#0F172A] mb-4">Still Have Questions?</h3>
+            <p class="text-gray-600 mb-6">Chat with our AI assistant or contact us directly</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="document.getElementById('chat-toggle').click()" 
+                        class="bg-[#00D4FF] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#00D4FF] transition">
+                    <i class="fas fa-robot mr-2"></i> Chat with AI
+                </button>
+                <a href="{{ url_for('main.contact') }}" 
+                   class="bg-white border-2 border-[#00D4FF] text-[#00D4FF] px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition">
+                    Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// FAQ Accordion
+document.querySelectorAll('.faq-question').forEach(button => {
+    button.addEventListener('click', () => {
+        const answer = button.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        answer.classList.toggle('hidden');
+        icon.classList.toggle('fa-chevron-down');
+        icon.classList.toggle('fa-chevron-up');
+    });
+});
+
+// FAQ Search
+document.getElementById('faq-search').addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    document.querySelectorAll('.border').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+    });
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,206 @@
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask_login import login_user, logout_user, login_required, current_user
+from urllib.parse import urlparse
+from app import db, limiter
+from app.models.user import User
+
+auth_bp = Blueprint('auth', __name__)
+
+
+@auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
+def login():
+    """Login page"""
+    # Redirect if already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        remember = request.form.get('remember', False)
+
+        # Validate inputs
+        if not email or not password:
+            flash('Please provide both email and password.', 'danger')
+            return render_template('auth/login.html')
+
+        # Find user
+        user = User.query.filter_by(email=email.lower().strip()).first()
+
+        # Check credentials
+        if user and user.check_password(password):
+            if not user.is_active:
+                flash('Your account has been deactivated. Please contact support.', 'warning')
+                return render_template('auth/login.html')
+
+            # Log user in
+            login_user(user, remember=remember)
+            user.update_last_login()
+
+            flash(f'Welcome back, {user.name}!', 'success')
+
+            # Redirect to next page or homepage
+            next_page = request.args.get('next')
+            if not next_page or urlparse(next_page).netloc != '':
+                next_page = url_for('main.index')
+
+            return redirect(next_page)
+        else:
+            flash('Invalid email or password.', 'danger')
+
+    return render_template('auth/login.html')
+
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
+def register():
+    """Registration page"""
+    # Redirect if already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        experience_level = request.form.get('experience_level')
+
+        # Validate inputs
+        if not all([name, email, password, confirm_password]):
+            flash('Please fill in all required fields.', 'danger')
+            return render_template('auth/register.html')
+
+        if password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('auth/register.html')
+
+        if len(password) < 8:
+            flash('Password must be at least 8 characters long.', 'danger')
+            return render_template('auth/register.html')
+
+        # Check if user already exists
+        existing_user = User.query.filter_by(email=email.lower().strip()).first()
+        if existing_user:
+            flash('An account with this email already exists.', 'warning')
+            return render_template('auth/register.html')
+
+        # Create new user
+        user = User(
+            name=name,
+            email=email.lower().strip(),
+            phone=phone,
+            experience_level=experience_level
+        )
+        user.set_password(password)
+
+        db.session.add(user)
+        db.session.commit()
+
+        # Log the user in
+        login_user(user)
+        user.update_last_login()
+
+        flash(f'Welcome to SnowboardMedia, {user.name}! Your account has been created successfully.', 'success')
+        return redirect(url_for('main.index'))
+
+    return render_template('auth/register.html')
+
+
+@auth_bp.route('/logout')
+@login_required
+def logout():
+    """Logout"""
+    logout_user()
+    flash('You have been logged out successfully.', 'info')
+    return redirect(url_for('main.index'))
+
+
+@auth_bp.route('/profile')
+@login_required
+def profile():
+    """User profile page"""
+    # Get user's bookings
+    from app.models.booking import Booking
+    upcoming_bookings = Booking.get_upcoming_bookings(user_id=current_user.id)
+    past_bookings = Booking.query.filter_by(user_id=current_user.id)\
+        .filter(Booking.status == 'completed')\
+        .order_by(Booking.booking_date.desc())\
+        .limit(10)\
+        .all()
+
+    return render_template(
+        'auth/profile.html',
+        user=current_user,
+        upcoming_bookings=upcoming_bookings,
+        past_bookings=past_bookings
+    )
+
+
+@auth_bp.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    """Edit user profile"""
+    if request.method == 'POST':
+        current_user.name = request.form.get('name', current_user.name)
+        current_user.phone = request.form.get('phone', current_user.phone)
+        current_user.experience_level = request.form.get('experience_level', current_user.experience_level)
+        current_user.bio = request.form.get('bio', current_user.bio)
+
+        # Handle password change
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_new_password = request.form.get('confirm_new_password')
+
+        if current_password and new_password:
+            if not current_user.check_password(current_password):
+                flash('Current password is incorrect.', 'danger')
+                return render_template('auth/edit_profile.html')
+
+            if new_password != confirm_new_password:
+                flash('New passwords do not match.', 'danger')
+                return render_template('auth/edit_profile.html')
+
+            if len(new_password) < 8:
+                flash('New password must be at least 8 characters long.', 'danger')
+                return render_template('auth/edit_profile.html')
+
+            current_user.set_password(new_password)
+            flash('Password updated successfully.', 'success')
+
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('auth.profile'))
+
+    return render_template('auth/edit_profile.html')
+
+
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+@limiter.limit("3 per hour")
+def forgot_password():
+    """Forgot password page"""
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        user = User.query.filter_by(email=email.lower().strip()).first()
+
+        # Always show success message for security
+        flash('If an account with that email exists, a password reset link has been sent.', 'info')
+
+        # TODO: Implement actual password reset email functionality
+        # For now, just show the message
+
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/forgot_password.html')
+
+
+@auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
+def reset_password(token):
+    """Reset password with token"""
+    # TODO: Implement token verification and password reset
+    flash('Password reset functionality will be implemented soon.', 'info')
+    return redirect(url_for('auth.login'))

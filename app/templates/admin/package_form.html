@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}{% if package %}Edit{% else %}New{% endif %} Package - Admin - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{{ url_for('admin.packages') }}" class="text-[#00D4FF] hover:text-[#00D4FF]">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Packages
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-[#0F172A] mb-2">
+            {% if package %}Edit Package{% else %}Create New Package{% endif %}
+        </h1>
+        <p class="text-xl text-gray-600">
+            {% if package %}Update package details{% else %}Add a new service package{% endif %}
+        </p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="bg-white rounded-lg shadow-md p-8">
+        <div class="space-y-6">
+            <!-- Basic Information -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Basic Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Package Name *
+                        </label>
+                        <input type="text" id="name" name="name" 
+                               value="{{ package.name if package else '' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               required>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                            Description *
+                        </label>
+                        <textarea id="description" name="description" rows="3"
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  required>{{ package.description if package else '' }}</textarea>
+                    </div>
+
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
+                            Price ($) *
+                        </label>
+                        <input type="number" id="price" name="price" step="0.01" min="0"
+                               value="{{ package.price if package else '' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               required>
+                    </div>
+
+                    <div>
+                        <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">
+                            Duration (hours) *
+                        </label>
+                        <input type="number" id="duration" name="duration" min="1" max="24"
+                               value="{{ package.duration if package else '' }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Features & Details</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="features" class="block text-sm font-medium text-gray-700 mb-2">
+                            Features (comma-separated) *
+                        </label>
+                        <textarea id="features" name="features" rows="4"
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="e.g., 2-hour session, 1 edited video, 10+ raw clips, Music & effects"
+                                  required>{{ package.features if package else '' }}</textarea>
+                        <p class="text-sm text-gray-500 mt-1">Separate each feature with a comma</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="video_count" class="block text-sm font-medium text-gray-700 mb-2">
+                                Number of Videos
+                            </label>
+                            <input type="number" id="video_count" name="video_count" min="1"
+                                   value="{{ package.video_count if package else 1 }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label for="max_riders" class="block text-sm font-medium text-gray-700 mb-2">
+                                Max Riders
+                            </label>
+                            <input type="number" id="max_riders" name="max_riders" min="1"
+                                   value="{{ package.max_riders if package else 1 }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label for="display_order" class="block text-sm font-medium text-gray-700 mb-2">
+                                Display Order
+                            </label>
+                            <input type="number" id="display_order" name="display_order" min="0"
+                                   value="{{ package.display_order if package else 0 }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div>
+                <h2 class="text-xl font-bold text-[#0F172A] mb-4">Options</h2>
+                <div class="space-y-3">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="includes_drone" value="true"
+                               {% if package and package.includes_drone %}checked{% endif %}
+                               class="w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-3 text-gray-700">
+                            <i class="fas fa-helicopter text-[#00D4FF] mr-2"></i>
+                            Includes drone footage
+                        </span>
+                    </label>
+
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="is_active" value="true"
+                               {% if not package or package.is_active %}checked{% endif %}
+                               class="w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-blue-500">
+                        <span class="ml-3 text-gray-700">
+                            <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                            Active (visible to customers)
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex space-x-4 pt-6 border-t">
+                <button type="submit" 
+                        class="flex-1 bg-[#00D4FF] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#00D4FF] transition">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if package %}Update Package{% else %}Create Package{% endif %}
+                </button>
+                <a href="{{ url_for('admin.packages') }}" 
+                   class="flex-1 text-center bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-300 transition">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

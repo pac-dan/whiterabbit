@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="max-w-lg w-full text-center">
+        <div class="mb-8">
+            <i class="fas fa-snowboarding text-[#00D4FF] text-8xl mb-6"></i>
+            <h1 class="text-9xl font-bold text-[#0F172A] mb-4">404</h1>
+            <h2 class="text-3xl font-bold text-[#0F172A] mb-4">Oops! Lost on the Mountain</h2>
+            <p class="text-xl text-gray-600 mb-8">
+                Looks like you took a wrong turn! The page you're looking for doesn't exist.
+            </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('main.index') }}" 
+               class="bg-[#00D4FF] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#00D4FF] transition">
+                <i class="fas fa-home mr-2"></i> Go Home
+            </a>
+            <a href="{{ url_for('main.packages') }}" 
+               class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+                <i class="fas fa-box mr-2"></i> View Packages
+            </a>
+        </div>
+
+        <div class="mt-8">
+            <button onclick="document.getElementById('chat-toggle').click()" 
+                    class="text-[#00D4FF] hover:text-[#00D4FF]">
+                <i class="fas fa-robot mr-2"></i> Or chat with our AI assistant
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
