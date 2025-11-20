@@ -71,18 +71,18 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="flex space-x-2">
+                <div class="grid grid-cols-2 gap-2">
                     <a href="{{ url_for('admin.edit_package', package_id=package.id) }}" 
-                       class="flex-1 text-center bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00D4FF] transition">
-                        <i class="fas fa-edit"></i> Edit
+                       class="text-center bg-[#00D4FF] text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-500 transition text-sm">
+                        <i class="fas fa-edit mr-1"></i> Edit
                     </a>
                     <form method="POST" action="{{ url_for('admin.delete_package', package_id=package.id) }}" 
-                          onsubmit="return confirm('Are you sure? This cannot be undone.');" class="flex-1">
+                          onsubmit="return confirm('Are you sure? This cannot be undone.');">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button type="submit" 
-                                class="w-full bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition"
+                                class="w-full bg-red-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-red-700 transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 {% if package.booking_count > 0 %}disabled title="Cannot delete package with bookings"{% endif %}>
-                            <i class="fas fa-trash"></i> DELETE
+                            <i class="fas fa-trash mr-1"></i> Delete
                         </button>
                     </form>
                 </div>
