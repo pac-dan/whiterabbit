@@ -67,9 +67,9 @@
 
                 <!-- Meta -->
                 <div class="text-xs text-gray-500 mb-4">
-                    <div>Vimeo ID: {{ video.vimeo_id }}</div>
+                    <div>YouTube ID: {{ video.youtube_id }}</div>
                     <div>Order: {{ video.display_order }}</div>
-                    <div>Added: {{ video.created_at|datetime('%b %d, %Y') }}</div>
+                    <div>Added: {{ video.created_at.strftime('%b %d, %Y') if video.created_at else 'N/A' }}</div>
                 </div>
 
                 <!-- Actions -->
