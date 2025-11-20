@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app, make_response
 from flask_login import login_required, current_user
 from app import db, limiter, csrf
 from app.models.booking import Booking, BookingStatus
 from app.models.package import Package
 from datetime import datetime, timedelta
-import stripe
+from sqlalchemy.exc import IntegrityError
 import os
 
 booking_bp = Blueprint('booking', __name__)
@@ -115,6 +115,11 @@ def create_booking():
         flash('Booking created! Please proceed to payment.', 'success')
         return redirect(url_for('booking.payment', booking_id=booking.id))
 
+    except IntegrityError as e:
+        db.session.rollback()
+        current_app.logger.warning(f'Double-booking attempt prevented: package_id={package_id}, date={booking_date_str}')
+        flash('This time slot was just booked by someone else. Please choose a different time.', 'warning')
+        return redirect(url_for('booking.new_booking', package_id=package_id))
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f'Booking creation error: {str(e)}')
@@ -140,6 +145,8 @@ def view_booking(booking_id):
 @login_required
 def payment(booking_id):
     """Payment page for booking"""
+    import stripe  # Import here to avoid module-level issues
+    
     booking = Booking.query.get_or_404(booking_id)
 
     # Ensure user owns this booking
@@ -163,11 +170,16 @@ def payment(booking_id):
     # Initialize Stripe
     stripe.api_key = stripe_secret
 
-    return render_template(
+    # Render template with no-cache headers to prevent browser caching
+    response = make_response(render_template(
         'booking/payment.html',
         booking=booking,
         stripe_publishable_key=stripe_publishable
-    )
+    ))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, public, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 
 @booking_bp.route('/<int:booking_id>/cancel', methods=['POST'])
@@ -190,6 +202,7 @@ def cancel_booking(booking_id):
     refund_processed = False
     if booking.stripe_payment_intent_id and booking.status == BookingStatus.CONFIRMED.value:
         try:
+            import stripe  # Import here to avoid module-level issues
             # Initialize Stripe
             stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
             
@@ -228,6 +241,7 @@ def cancel_booking(booking_id):
 # API endpoints
 
 @booking_bp.route('/api/check-availability', methods=['POST'])
+@csrf.exempt
 @login_required
 def check_availability():
     """Check if a booking slot is available"""
@@ -255,106 +269,136 @@ def check_availability():
     })
 
 
-@booking_bp.route('/api/create-payment-intent', methods=['POST'])
+@booking_bp.route('/create-checkout-session/<int:booking_id>', methods=['POST'])
+@csrf.exempt
 @login_required
 @limiter.limit("20 per hour")
-def create_payment_intent():
-    """Create a Stripe payment intent for booking"""
-    data = request.get_json()
+def create_checkout_session(booking_id):
+    """Create a Stripe Checkout Session for booking"""
+    import stripe  # Import here to avoid module-level issues
     
-    # Get booking_id and convert to int
-    booking_id_raw = data.get('booking_id')
-    booking_id = int(booking_id_raw) if booking_id_raw else None
-
-    if not booking_id:
-        return jsonify({'success': False, 'message': 'Missing booking ID'}), 400
-
     booking = Booking.query.get_or_404(booking_id)
 
     # Ensure user owns this booking
     if booking.user_id != current_user.id:
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        flash('You do not have permission to access this booking.', 'danger')
+        return redirect(url_for('booking.index'))
 
     # Check if already paid
     if booking.status != BookingStatus.PENDING.value:
-        return jsonify({'success': False, 'message': 'Booking already processed'}), 400
+        flash('This booking has already been processed.', 'info')
+        return redirect(url_for('booking.view_booking', booking_id=booking.id))
 
     try:
         # Initialize Stripe
         stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
         
-        # Debug: Check if Stripe key exists
         if not stripe_key:
-            return jsonify({
-                'success': False, 
-                'message': 'Stripe not configured. Please add STRIPE_SECRET_KEY to your .env file'
-            }), 500
+            flash('Payment system is not configured. Please contact support.', 'danger')
+            return redirect(url_for('booking.index'))
         
         if not (stripe_key.startswith('sk_test_') or stripe_key.startswith('sk_live_')):
-            return jsonify({
-                'success': False, 
-                'message': f'Invalid Stripe key format. Key should start with sk_test_ or sk_live_'
-            }), 500
+            flash('Payment system configuration error. Please contact support.', 'danger')
+            return redirect(url_for('booking.index'))
         
         stripe.api_key = stripe_key
 
-        # Create payment intent
-        intent = stripe.PaymentIntent.create(
-            amount=int(float(booking.amount) * 100),  # Convert to cents
-            currency=booking.currency.lower() if booking.currency else 'usd',
+        # Create Checkout Session
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': booking.currency.lower() if booking.currency else 'usd',
+                    'product_data': {
+                        'name': f'{booking.package.name} - Momentum Clips',
+                        'description': booking.package.description[:500] if booking.package.description else None,
+                    },
+                    'unit_amount': int(float(booking.amount) * 100),  # Convert to cents
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=url_for('booking.payment_success', booking_id=booking.id, _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=url_for('booking.payment_cancel', booking_id=booking.id, _external=True),
+            client_reference_id=str(booking.id),
             metadata={
-                'booking_id': booking.id,
-                'user_id': booking.user_id,
+                'booking_id': str(booking.id),
+                'user_id': str(booking.user_id),
                 'package_name': booking.package.name if booking.package else 'Unknown'
             },
-            description=f'SnowboardMedia - {booking.package.name}'
         )
 
-        return jsonify({
-            'success': True,
-            'client_secret': intent.client_secret,
-            'payment_intent_id': intent.id
-        })
+        # Redirect to Stripe Checkout
+        return redirect(session.url, code=303)
 
     except stripe.error.StripeError as e:
         current_app.logger.error(f'Stripe error: {str(e)}')
-        return jsonify({'success': False, 'message': f'Stripe error: {str(e)}'}), 500
+        flash(f'Payment error: {str(e)}', 'danger')
+        return redirect(url_for('booking.payment', booking_id=booking.id))
     except Exception as e:
-        current_app.logger.error(f'Unexpected error creating payment intent: {str(e)}')
-        import traceback
-        traceback.print_exc()
-        return jsonify({'success': False, 'message': f'Server error: {str(e)}'}), 500
+        current_app.logger.exception('Unexpected error creating checkout session')
+        flash('An error occurred. Please try again.', 'danger')
+        return redirect(url_for('booking.payment', booking_id=booking.id))
 
 
-@booking_bp.route('/api/confirm-payment', methods=['POST'])
+@booking_bp.route('/payment/success/<int:booking_id>')
 @login_required
-@limiter.limit("20 per hour")
-def confirm_payment():
-    """Confirm payment completion"""
-    data = request.get_json()
+def payment_success(booking_id):
+    """Payment success callback"""
+    import stripe  # Import here to avoid module-level issues
     
-    # Get booking_id and convert to int
-    booking_id_raw = data.get('booking_id')
-    booking_id = int(booking_id_raw) if booking_id_raw else None
-    payment_intent_id = data.get('payment_intent_id')
-
-    if not booking_id or not payment_intent_id:
-        return jsonify({'success': False, 'message': 'Missing parameters'}), 400
-
     booking = Booking.query.get_or_404(booking_id)
+    
+    # Ensure user owns this booking
+    if booking.user_id != current_user.id and not current_user.is_admin:
+        flash('You do not have permission to view this booking.', 'danger')
+        return redirect(url_for('booking.index'))
+    
+    # Get session_id from query params to verify with Stripe
+    session_id = request.args.get('session_id')
+    
+    if session_id:
+        try:
+            stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+            session = stripe.checkout.Session.retrieve(session_id)
+            
+            # Verify the session belongs to this booking
+            if session.client_reference_id == str(booking.id):
+                # Confirm payment if not already confirmed
+                if booking.status == BookingStatus.PENDING.value:
+                    booking.confirm_payment(
+                        payment_intent_id=session.payment_intent,
+                        charge_id=session.payment_intent
+                    )
+                    
+                    # Send confirmation email
+                    try:
+                        from app.services.email_service import EmailService
+                        email_service = EmailService()
+                        email_service.send_booking_confirmation(booking)
+                        current_app.logger.info(f'Confirmation email sent for booking {booking.id}')
+                    except Exception as e:
+                        current_app.logger.error(f'Failed to send confirmation email for booking {booking.id}: {str(e)}')
+        except Exception as e:
+            current_app.logger.error(f'Error retrieving checkout session: {str(e)}')
+    
+    flash('Payment successful! Your booking is confirmed.', 'success')
+    return redirect(url_for('booking.view_booking', booking_id=booking.id))
 
+
+@booking_bp.route('/payment/cancel/<int:booking_id>')
+@login_required
+def payment_cancel(booking_id):
+    """Payment cancel callback"""
+    booking = Booking.query.get_or_404(booking_id)
+    
     # Ensure user owns this booking
     if booking.user_id != current_user.id:
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
-
-    # Confirm payment
-    booking.confirm_payment(payment_intent_id)
-
-    return jsonify({
-        'success': True,
-        'message': 'Payment confirmed successfully',
-        'booking': booking.to_dict()
-    })
+        flash('You do not have permission to view this booking.', 'danger')
+        return redirect(url_for('booking.index'))
+    
+    flash('Payment was cancelled. You can try again when ready.', 'info')
+    return redirect(url_for('booking.payment', booking_id=booking.id))
 
 
 @booking_bp.route('/webhook/stripe', methods=['POST'])
@@ -362,6 +406,8 @@ def confirm_payment():
 @limiter.exempt
 def stripe_webhook():
     """Handle Stripe webhook events"""
+    import stripe  # Import here to avoid module-level issues
+    
     payload = request.get_data(as_text=True)
     sig_header = request.headers.get('Stripe-Signature')
     
@@ -385,27 +431,34 @@ def stripe_webhook():
         return jsonify({'error': 'Invalid signature'}), 400
     
     # Handle the event
-    if event['type'] == 'payment_intent.succeeded':
-        payment_intent = event['data']['object']
-        booking_id = payment_intent.get('metadata', {}).get('booking_id')
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        booking_id = session.get('client_reference_id') or session.get('metadata', {}).get('booking_id')
         
         if booking_id:
             booking = Booking.query.get(int(booking_id))
             if booking and booking.status == BookingStatus.PENDING.value:
                 booking.confirm_payment(
-                    payment_intent_id=payment_intent['id'],
-                    charge_id=payment_intent.get('charges', {}).get('data', [{}])[0].get('id')
+                    payment_intent_id=session.get('payment_intent'),
+                    charge_id=session.get('payment_intent')
                 )
-                current_app.logger.info(f'Booking {booking_id} confirmed via webhook')
+                current_app.logger.info(f'Booking {booking_id} confirmed via webhook (Checkout Session)')
                 
-                # TODO: Send confirmation email to customer
+                # Send confirmation email to customer
+                try:
+                    from app.services.email_service import EmailService
+                    email_service = EmailService()
+                    email_service.send_booking_confirmation(booking)
+                    current_app.logger.info(f'Confirmation email sent for booking {booking_id}')
+                except Exception as e:
+                    current_app.logger.error(f'Failed to send confirmation email for booking {booking_id}: {str(e)}')
                 
-    elif event['type'] == 'payment_intent.payment_failed':
-        payment_intent = event['data']['object']
-        booking_id = payment_intent.get('metadata', {}).get('booking_id')
-        current_app.logger.warning(f'Payment failed for booking {booking_id}')
+    elif event['type'] == 'checkout.session.expired':
+        session = event['data']['object']
+        booking_id = session.get('client_reference_id') or session.get('metadata', {}).get('booking_id')
+        current_app.logger.warning(f'Checkout session expired for booking {booking_id}')
         
-        # TODO: Notify customer of payment failure
+        # TODO: Notify customer of session expiration
     
     return jsonify({'status': 'success'}), 200
 

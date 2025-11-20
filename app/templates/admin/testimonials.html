@@ -25,7 +25,7 @@
     {% if testimonials %}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {% for testimonial in testimonials %}
-        <div class="bg-white rounded-lg shadow-md p-6 {% if not testimonial.is_published %}opacity-60{% endif %}">
+        <div class="bg-white rounded-lg shadow-md p-6 flex flex-col h-full {% if not testimonial.is_published %}opacity-60{% endif %}">
             <!-- Header -->
             <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center space-x-3">
@@ -70,7 +70,7 @@
             <p class="text-gray-700 italic mb-4">"{{ testimonial.testimonial_text }}"</p>
 
             <!-- Project Type -->
-            <div class="text-sm text-gray-600 mb-4">
+            <div class="text-sm text-gray-600 mb-4 flex-grow">
                 <i class="fas fa-tag mr-2"></i> {{ testimonial.project_type }}
             </div>
 
@@ -80,7 +80,7 @@
             </div>
 
             <!-- Actions -->
-            <div class="grid grid-cols-2 gap-3 pt-4 border-t">
+            <div class="grid grid-cols-2 gap-3 pt-4 border-t mt-auto">
                 <a href="{{ url_for('admin.edit_testimonial', testimonial_id=testimonial.id) }}" 
                    class="flex items-center justify-center bg-[#00D4FF] text-white px-4 py-2.5 rounded-md font-medium hover:bg-[#00BFDD] transition-all duration-200 text-xs">
                     <i class="fas fa-edit mr-1.5"></i>

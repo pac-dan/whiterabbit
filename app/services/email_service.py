@@ -1,4 +1,4 @@
-from flask import current_app, render_template
+from flask import current_app, render_template, url_for
 from flask_mail import Mail, Message
 import os
 
@@ -12,7 +12,7 @@ class EmailService:
     def __init__(self):
         """Initialize email service"""
         self.sender = current_app.config.get('MAIL_DEFAULT_SENDER')
-        self.app_name = current_app.config.get('APP_NAME', 'SnowboardMedia')
+        self.app_name = current_app.config.get('APP_NAME', 'Momentum Clips')
 
     def send_email(self, to, subject, template=None, body=None, **kwargs):
         """
@@ -142,7 +142,7 @@ class EmailService:
         try:
             return self.send_email(
                 to=user.email,
-                subject='Welcome to SnowboardMedia!',
+                subject='Welcome to Momentum Clips!',
                 template='welcome',
                 user=user
             )
@@ -162,7 +162,11 @@ class EmailService:
             True if sent successfully
         """
         try:
-            reset_url = f"{current_app.config.get('BASE_URL', '')}/auth/reset-password/{reset_token}"
+            try:
+                reset_url = url_for('auth.reset_password', token=reset_token, _external=True)
+            except RuntimeError:
+                base_url = current_app.config.get('BASE_URL', '').rstrip('/')
+                reset_url = f"{base_url}/auth/reset-password/{reset_token}" if base_url else f"/auth/reset-password/{reset_token}"
 
             return self.send_email(
                 to=user.email,

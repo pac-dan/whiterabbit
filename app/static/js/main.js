@@ -1,5 +1,5 @@
 /**
- * Main JavaScript for SnowboardMedia
+ * Main JavaScript for Momentum Clips
  * General site functionality and utilities
  */
 

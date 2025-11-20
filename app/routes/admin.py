@@ -7,6 +7,11 @@ from app.models.booking import Booking, BookingStatus
 from app.models.package import Package
 from app.models.video import Video
 from app.models.testimonial import Testimonial
+from app.utils.validators import (
+    validate_required, validate_price, validate_integer,
+    validate_youtube_id, validate_url, validate_rating,
+    validate_text_length, sanitize_string
+)
 from datetime import datetime, timedelta
 from sqlalchemy import func
 
@@ -150,15 +155,51 @@ def packages():
 def new_package():
     """Create a new package"""
     if request.method == 'POST':
+        # Validate required fields
+        name = sanitize_string(request.form.get('name', ''))
+        price = request.form.get('price')
+        duration = request.form.get('duration')
+        
+        if not validate_required(name, 'Package name'):
+            return render_template('admin/package_form.html', package=None)
+        
+        if not validate_text_length(name, 'Package name', min_length=3, max_length=100):
+            return render_template('admin/package_form.html', package=None)
+        
+        if not validate_required(price, 'Price'):
+            return render_template('admin/package_form.html', package=None)
+        
+        if not validate_price(price):
+            return render_template('admin/package_form.html', package=None)
+        
+        if not validate_required(duration, 'Duration'):
+            return render_template('admin/package_form.html', package=None)
+        
+        if not validate_integer(duration, 'Duration', min_value=1, max_value=480):
+            return render_template('admin/package_form.html', package=None)
+        
+        # Validate optional numeric fields
+        max_riders = request.form.get('max_riders', 1)
+        if not validate_integer(max_riders, 'Max riders', min_value=1, max_value=20):
+            return render_template('admin/package_form.html', package=None)
+        
+        video_count = request.form.get('video_count', 1)
+        if not validate_integer(video_count, 'Video count', min_value=1, max_value=50):
+            return render_template('admin/package_form.html', package=None)
+        
+        description = sanitize_string(request.form.get('description', ''))
+        if description and not validate_text_length(description, 'Description', max_length=2000):
+            return render_template('admin/package_form.html', package=None)
+        
         package = Package(
-            name=request.form.get('name'),
-            description=request.form.get('description'),
-            price=request.form.get('price', type=float),
-            duration=request.form.get('duration', type=int),
-            features=request.form.get('features'),
-            max_riders=request.form.get('max_riders', 1, type=int),
+            name=name,
+            description=description,
+            price=float(price),
+            duration=int(duration),
+            features=sanitize_string(request.form.get('features', '')),
+            max_riders=int(max_riders),
             includes_drone=request.form.get('includes_drone', False, type=bool),
-            video_count=request.form.get('video_count', 1, type=int),
+            video_count=int(video_count),
             is_active=request.form.get('is_active', True, type=bool),
             display_order=request.form.get('display_order', 0, type=int)
         )
@@ -235,23 +276,54 @@ def videos():
 def new_video():
     """Add a new video"""
     if request.method == 'POST':
+        # Validate required fields
+        title = sanitize_string(request.form.get('title', ''))
+        youtube_id = sanitize_string(request.form.get('youtube_id', ''))
+        
+        if not validate_required(title, 'Title'):
+            return render_template('admin/video_form.html', video=None)
+        
+        if not validate_text_length(title, 'Title', min_length=3, max_length=200):
+            return render_template('admin/video_form.html', video=None)
+        
+        if not validate_required(youtube_id, 'YouTube ID'):
+            return render_template('admin/video_form.html', video=None)
+        
+        if not validate_youtube_id(youtube_id):
+            return render_template('admin/video_form.html', video=None)
+        
+        # Validate optional fields
+        thumbnail_url = sanitize_string(request.form.get('thumbnail_url', ''))
+        if thumbnail_url and not validate_url(thumbnail_url, 'Thumbnail URL'):
+            return render_template('admin/video_form.html', video=None)
+        
+        description = sanitize_string(request.form.get('description', ''))
+        if description and not validate_text_length(description, 'Description', max_length=1000):
+            return render_template('admin/video_form.html', video=None)
+        
         video = Video(
-            title=request.form.get('title'),
-            description=request.form.get('description'),
-            youtube_id=request.form.get('youtube_id'),
-            thumbnail_url=request.form.get('thumbnail_url'),
-            location_tag=request.form.get('location_tag'),
-            style_tag=request.form.get('style_tag'),
-            rider_level=request.form.get('rider_level'),
+            title=title,
+            description=description,
+            youtube_id=youtube_id,
+            thumbnail_url=thumbnail_url,
+            location_tag=sanitize_string(request.form.get('location_tag', '')),
+            style_tag=sanitize_string(request.form.get('style_tag', '')),
+            rider_level=sanitize_string(request.form.get('rider_level', '')),
             is_featured=request.form.get('is_featured', False, type=bool),
             is_published=request.form.get('is_published', True, type=bool),
             display_order=request.form.get('display_order', 0, type=int)
         )
 
         if request.form.get('is_comparison'):
+            before_id = sanitize_string(request.form.get('before_youtube_id', ''))
+            after_id = sanitize_string(request.form.get('after_youtube_id', ''))
+            
+            if not validate_youtube_id(before_id) or not validate_youtube_id(after_id):
+                return render_template('admin/video_form.html', video=None)
+            
             video.is_comparison = True
-            video.before_youtube_id = request.form.get('before_youtube_id')
-            video.after_youtube_id = request.form.get('after_youtube_id')
+            video.before_youtube_id = before_id
+            video.after_youtube_id = after_id
 
         db.session.add(video)
         db.session.commit()
@@ -325,13 +397,41 @@ def testimonials():
 def new_testimonial():
     """Add a new testimonial"""
     if request.method == 'POST':
+        # Validate required fields
+        client_name = sanitize_string(request.form.get('client_name', ''))
+        testimonial_text = sanitize_string(request.form.get('testimonial_text', ''))
+        rating = request.form.get('rating')
+        
+        if not validate_required(client_name, 'Client name'):
+            return render_template('admin/testimonial_form.html', testimonial=None)
+        
+        if not validate_text_length(client_name, 'Client name', min_length=2, max_length=100):
+            return render_template('admin/testimonial_form.html', testimonial=None)
+        
+        if not validate_required(testimonial_text, 'Testimonial text'):
+            return render_template('admin/testimonial_form.html', testimonial=None)
+        
+        if not validate_text_length(testimonial_text, 'Testimonial text', min_length=10, max_length=1000):
+            return render_template('admin/testimonial_form.html', testimonial=None)
+        
+        if not validate_required(rating, 'Rating'):
+            return render_template('admin/testimonial_form.html', testimonial=None)
+        
+        if not validate_rating(rating):
+            return render_template('admin/testimonial_form.html', testimonial=None)
+        
+        # Validate optional fields
+        client_photo_url = sanitize_string(request.form.get('client_photo_url', ''))
+        if client_photo_url and not validate_url(client_photo_url, 'Client photo URL'):
+            return render_template('admin/testimonial_form.html', testimonial=None)
+        
         testimonial = Testimonial(
-            client_name=request.form.get('client_name'),
-            client_photo_url=request.form.get('client_photo_url'),
-            client_location=request.form.get('client_location'),
-            testimonial_text=request.form.get('testimonial_text'),
-            rating=request.form.get('rating', type=int),
-            project_type=request.form.get('project_type'),
+            client_name=client_name,
+            client_photo_url=client_photo_url,
+            client_location=sanitize_string(request.form.get('client_location', '')),
+            testimonial_text=testimonial_text,
+            rating=int(rating),
+            project_type=sanitize_string(request.form.get('project_type', '')),
             is_featured=request.form.get('is_featured', False, type=bool),
             is_published=request.form.get('is_published', True, type=bool),
             verified_purchase=request.form.get('verified_purchase', False, type=bool)

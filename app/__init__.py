@@ -12,6 +12,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from config import get_config
 import redis
+from app.services.email_service import mail
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -40,6 +41,10 @@ def create_app(config_name=None):
         app.config.from_object(config_dict[config_name])
     else:
         app.config.from_object(get_config())
+    
+    # Disable template caching for development
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
     # Initialize extensions with app
     db.init_app(app)
@@ -47,6 +52,7 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     bcrypt.init_app(app)
     csrf.init_app(app)  # Initialize CSRF protection
+    mail.init_app(app)
     CORS(app, origins=app.config['CORS_ORIGINS'])
     
     # CSRF Protection - now properly initialized
@@ -231,6 +237,19 @@ def create_app(config_name=None):
     with app.app_context():
         db.create_all()
 
+    # Context processor for global template variables
+    @app.context_processor
+    def inject_globals():
+        """Inject global variables into all templates"""
+        return {
+            'SOCIAL_INSTAGRAM': app.config.get('SOCIAL_INSTAGRAM', 'https://instagram.com/momentumclips'),
+            'SOCIAL_TIKTOK': app.config.get('SOCIAL_TIKTOK', 'https://tiktok.com/@momentumclips'),
+            'SOCIAL_FACEBOOK': app.config.get('SOCIAL_FACEBOOK', 'https://facebook.com/momentumclips'),
+            'SOCIAL_LINKEDIN': app.config.get('SOCIAL_LINKEDIN', 'https://linkedin.com/company/momentumclips'),
+            'SOCIAL_TWITTER': app.config.get('SOCIAL_TWITTER', 'https://twitter.com/momentumclips'),
+            'SOCIAL_YOUTUBE': app.config.get('SOCIAL_YOUTUBE', 'https://youtube.com/@momentumclips'),
+        }
+    
     # Register custom template filters
     @app.template_filter('datetime')
     def format_datetime(value, format='%B %d, %Y at %I:%M %p'):

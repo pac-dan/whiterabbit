@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from app.models.package import Package
 from app.models.video import Video
 from app.models.testimonial import Testimonial
-from app import db
+from app import db, limiter
 
 main_bp = Blueprint('main', __name__)
 
@@ -179,6 +179,7 @@ def api_testimonials():
 
 
 @main_bp.route('/api/video/<int:video_id>/like', methods=['POST'])
+@limiter.limit("10 per minute")
 def like_video(video_id):
     """API endpoint to like a video"""
     video = Video.query.get_or_404(video_id)

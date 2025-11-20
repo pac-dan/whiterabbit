@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from urllib.parse import urlparse
 from app import db, limiter
 from app.models.user import User
+from app.services.email_service import EmailService
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -103,7 +104,7 @@ def register():
         login_user(user)
         user.update_last_login()
 
-        flash(f'Welcome to SnowboardMedia, {user.name}! Your account has been created successfully.', 'success')
+        flash(f'Welcome to Momentum Clips, {user.name}! Your account has been created successfully.', 'success')
         return redirect(url_for('main.index'))
 
     return render_template('auth/register.html')
@@ -182,15 +183,20 @@ def edit_profile():
 def forgot_password():
     """Forgot password page"""
     if request.method == 'POST':
-        email = request.form.get('email')
+        email = request.form.get('email', '').lower().strip()
 
-        user = User.query.filter_by(email=email.lower().strip()).first()
+        user = User.query.filter_by(email=email).first()
 
         # Always show success message for security
         flash('If an account with that email exists, a password reset link has been sent.', 'info')
 
-        # TODO: Implement actual password reset email functionality
-        # For now, just show the message
+        if user:
+            try:
+                email_service = EmailService()
+                reset_token = user.generate_reset_token()
+                email_service.send_password_reset(user, reset_token)
+            except Exception:
+                current_app.logger.exception('Failed to send password reset email')
 
         return redirect(url_for('auth.login'))
 
@@ -201,6 +207,32 @@ def forgot_password():
 @limiter.limit("5 per hour")
 def reset_password(token):
     """Reset password with token"""
-    # TODO: Implement token verification and password reset
-    flash('Password reset functionality will be implemented soon.', 'info')
-    return redirect(url_for('auth.login'))
+    user = User.verify_reset_token(token)
+
+    if not user:
+        flash('This password reset link is invalid or has expired. Please request a new one.', 'danger')
+        return redirect(url_for('auth.forgot_password'))
+
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not password or not confirm_password:
+            flash('Please enter and confirm your new password.', 'danger')
+            return render_template('auth/reset_password.html', token=token)
+
+        if password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('auth/reset_password.html', token=token)
+
+        if len(password) < 8:
+            flash('Password must be at least 8 characters long.', 'danger')
+            return render_template('auth/reset_password.html', token=token)
+
+        user.set_password(password)
+        db.session.commit()
+
+        flash('Your password has been reset successfully. You can now log in.', 'success')
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/reset_password.html', token=token)

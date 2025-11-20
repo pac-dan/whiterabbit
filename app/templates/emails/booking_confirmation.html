@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - Momentum Clips</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%); padding: 40px 20px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">
+                                🏂 MOMENTUM CLIPS
+                            </h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; font-size: 16px;">
+                                Booking Confirmed!
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <h2 style="margin: 0 0 20px 0; color: #333333; font-size: 24px;">
+                                🎉 You're All Set, {{ user.name }}!
+                            </h2>
+                            
+                            <p style="margin: 0 0 20px 0; color: #666666; font-size: 16px; line-height: 1.6;">
+                                Your booking has been confirmed and payment has been received. We're excited to capture your epic moments on the slopes!
+                            </p>
+                            
+                            <!-- Booking Details Card -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0; background-color: #f8f9fa; border-radius: 8px; overflow: hidden;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <h3 style="margin: 0 0 15px 0; color: #0F172A; font-size: 18px; border-bottom: 2px solid #00D4FF; padding-bottom: 10px;">
+                                            Booking Details
+                                        </h3>
+                                        
+                                        <table width="100%" cellpadding="8" cellspacing="0">
+                                            <tr>
+                                                <td style="color: #666666; font-size: 14px; padding: 8px 0;">
+                                                    <strong>Booking ID:</strong>
+                                                </td>
+                                                <td style="color: #0F172A; font-size: 14px; text-align: right; padding: 8px 0;">
+                                                    #{{ booking.id }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="color: #666666; font-size: 14px; padding: 8px 0;">
+                                                    <strong>Package:</strong>
+                                                </td>
+                                                <td style="color: #0F172A; font-size: 14px; text-align: right; padding: 8px 0;">
+                                                    {{ package.name }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="color: #666666; font-size: 14px; padding: 8px 0;">
+                                                    <strong>Date & Time:</strong>
+                                                </td>
+                                                <td style="color: #0F172A; font-size: 14px; text-align: right; padding: 8px 0;">
+                                                    {{ booking.booking_date.strftime('%B %d, %Y at %I:%M %p') }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="color: #666666; font-size: 14px; padding: 8px 0;">
+                                                    <strong>Location:</strong>
+                                                </td>
+                                                <td style="color: #0F172A; font-size: 14px; text-align: right; padding: 8px 0;">
+                                                    {{ booking.location }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="color: #666666; font-size: 14px; padding: 8px 0;">
+                                                    <strong>Number of Riders:</strong>
+                                                </td>
+                                                <td style="color: #0F172A; font-size: 14px; text-align: right; padding: 8px 0;">
+                                                    {{ booking.number_of_riders }}
+                                                </td>
+                                            </tr>
+                                            <tr style="border-top: 2px solid #e9ecef;">
+                                                <td style="color: #0F172A; font-size: 16px; font-weight: bold; padding: 15px 0 8px 0;">
+                                                    Total Paid:
+                                                </td>
+                                                <td style="color: #00D4FF; font-size: 18px; font-weight: bold; text-align: right; padding: 15px 0 8px 0;">
+                                                    ${{ "%.2f"|format(booking.amount) }}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- What's Included -->
+                            <div style="margin: 30px 0; padding: 20px; background-color: #e0f2fe; border-left: 4px solid #00D4FF; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #0F172A; font-size: 16px;">
+                                    📦 What's Included:
+                                </h3>
+                                <p style="margin: 0; color: #0F172A; font-size: 14px; line-height: 1.6; white-space: pre-line;">{{ package.description }}</p>
+                            </div>
+                            
+                            <!-- Preparation Tips -->
+                            <div style="margin: 30px 0;">
+                                <h3 style="margin: 0 0 15px 0; color: #0F172A; font-size: 18px;">
+                                    🎬 Before Your Session:
+                                </h3>
+                                <ul style="margin: 0; padding-left: 20px; color: #666666; font-size: 14px; line-height: 1.8;">
+                                    <li>Arrive 15 minutes early to meet your videographer</li>
+                                    <li>Wear bright, contrasting colors for better footage</li>
+                                    <li>Charge your devices and bring extra batteries</li>
+                                    <li>Warm up and get ready to shred!</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- CTA Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ url_for('booking.view_booking', booking_id=booking.id, _external=True) }}" style="display: inline-block; padding: 15px 40px; background-color: #00D4FF; color: #0F172A; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold;">
+                                            View Booking Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e9ecef;">
+                            
+                            <!-- Need Help Section -->
+                            <div style="text-align: center;">
+                                <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">
+                                    <strong>Need to make changes?</strong>
+                                </p>
+                                <p style="margin: 0; color: #999999; font-size: 13px; line-height: 1.6;">
+                                    Contact us at least 48 hours before your session if you need to reschedule.
+                                    <br>
+                                    <a href="mailto:{{ current_app.config.get('SUPPORT_EMAIL', 'support@momentumclips.com') }}" style="color: #00D4FF; text-decoration: none;">
+                                        {{ current_app.config.get('SUPPORT_EMAIL', 'support@momentumclips.com') }}
+                                    </a>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+                            <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">
+                                <strong>Momentum Clips</strong>
+                            </p>
+                            <p style="margin: 0; color: #999999; font-size: 12px;">
+                                Professional Slope Footage & Editing
+                            </p>
+                            <p style="margin: 10px 0 0 0; color: #999999; font-size: 12px;">
+                                © 2024 Momentum Clips. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+

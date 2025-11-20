@@ -1,6 +1,8 @@
 from app import db, bcrypt
 from flask_login import UserMixin
+from flask import current_app
 from datetime import datetime
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 
 class User(UserMixin, db.Model):
@@ -73,3 +75,40 @@ class User(UserMixin, db.Model):
         from app.models.booking import Booking
         completed_bookings = self.bookings.filter(Booking.status == 'completed').all()
         return sum(booking.package.price for booking in completed_bookings if booking.package)
+
+    def generate_reset_token(self, expires_in=3600):
+        """
+        Generate password reset token valid for 1 hour
+        
+        Args:
+            expires_in: Token expiration time in seconds (default: 3600 = 1 hour)
+            
+        Returns:
+            Secure token string
+        """
+        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        return serializer.dumps({'user_id': self.id}, salt='password-reset-salt')
+
+    @staticmethod
+    def verify_reset_token(token, expires_in=3600):
+        """
+        Verify password reset token and return user
+        
+        Args:
+            token: Token to verify
+            expires_in: Maximum token age in seconds (default: 3600 = 1 hour)
+            
+        Returns:
+            User object if token is valid, None otherwise
+        """
+        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        try:
+            data = serializer.loads(token, salt='password-reset-salt', max_age=expires_in)
+        except (BadSignature, SignatureExpired):
+            return None
+
+        user_id = data.get('user_id')
+        if not user_id:
+            return None
+
+        return User.query.get(user_id)
