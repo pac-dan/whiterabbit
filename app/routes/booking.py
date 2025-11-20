@@ -186,12 +186,42 @@ def cancel_booking(booking_id):
         flash('This booking cannot be cancelled at this time.', 'warning')
         return redirect(url_for('booking.view_booking', booking_id=booking.id))
 
-    # Cancel booking
-    booking.cancel()
+    # Process refund if payment was made
+    refund_processed = False
+    if booking.stripe_payment_intent_id and booking.status == BookingStatus.CONFIRMED.value:
+        try:
+            # Initialize Stripe
+            stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+            
+            if stripe.api_key:
+                # Create refund
+                refund = stripe.Refund.create(
+                    payment_intent=booking.stripe_payment_intent_id,
+                    reason='requested_by_customer'
+                )
+                
+                if refund.status == 'succeeded':
+                    booking.status = BookingStatus.REFUNDED.value
+                    refund_processed = True
+                    current_app.logger.info(f'Refund processed for booking {booking.id}')
+                else:
+                    current_app.logger.warning(f'Refund pending for booking {booking.id}')
+                    
+        except stripe.error.StripeError as e:
+            current_app.logger.error(f'Stripe refund error for booking {booking.id}: {str(e)}')
+            flash(f'Booking cancelled but refund processing failed: {str(e)}. Please contact support.', 'warning')
+            booking.cancel()
+            return redirect(url_for('booking.index'))
+    
+    # Cancel booking if no payment or refund not needed
+    if not refund_processed:
+        booking.cancel()
 
-    # TODO: Process refund via Stripe if payment was made
-
-    flash('Your booking has been cancelled successfully.', 'success')
+    flash_message = 'Your booking has been cancelled successfully.'
+    if refund_processed:
+        flash_message += ' A refund has been processed to your original payment method.'
+    
+    flash(flash_message, 'success')
     return redirect(url_for('booking.index'))
 
 
@@ -325,6 +355,58 @@ def confirm_payment():
         'message': 'Payment confirmed successfully',
         'booking': booking.to_dict()
     })
+
+
+@booking_bp.route('/webhook/stripe', methods=['POST'])
+@limiter.exempt
+def stripe_webhook():
+    """Handle Stripe webhook events"""
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get('Stripe-Signature')
+    
+    webhook_secret = current_app.config.get('STRIPE_WEBHOOK_SECRET')
+    
+    if not webhook_secret:
+        current_app.logger.warning('Stripe webhook called but STRIPE_WEBHOOK_SECRET not configured')
+        return jsonify({'error': 'Webhook not configured'}), 400
+    
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, webhook_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        current_app.logger.error(f'Invalid webhook payload: {str(e)}')
+        return jsonify({'error': 'Invalid payload'}), 400
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        current_app.logger.error(f'Invalid webhook signature: {str(e)}')
+        return jsonify({'error': 'Invalid signature'}), 400
+    
+    # Handle the event
+    if event['type'] == 'payment_intent.succeeded':
+        payment_intent = event['data']['object']
+        booking_id = payment_intent.get('metadata', {}).get('booking_id')
+        
+        if booking_id:
+            booking = Booking.query.get(int(booking_id))
+            if booking and booking.status == BookingStatus.PENDING.value:
+                booking.confirm_payment(
+                    payment_intent_id=payment_intent['id'],
+                    charge_id=payment_intent.get('charges', {}).get('data', [{}])[0].get('id')
+                )
+                current_app.logger.info(f'Booking {booking_id} confirmed via webhook')
+                
+                # TODO: Send confirmation email to customer
+                
+    elif event['type'] == 'payment_intent.payment_failed':
+        payment_intent = event['data']['object']
+        booking_id = payment_intent.get('metadata', {}).get('booking_id')
+        current_app.logger.warning(f'Payment failed for booking {booking_id}')
+        
+        # TODO: Notify customer of payment failure
+    
+    return jsonify({'status': 'success'}), 200
 
 
 @booking_bp.route('/api/available-dates', methods=['GET'])

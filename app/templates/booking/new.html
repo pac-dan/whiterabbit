@@ -10,7 +10,9 @@
         <p class="text-xl text-gray-600">Fill out the details below to reserve your spot</p>
     </div>
 
-    <form method="POST" action="{{ url_for('booking.create_booking') }}" class="space-y-8">
+    <form method="POST" action="{{ url_for('booking.create_booking') }}" id="booking-form" class="space-y-8">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        
         <!-- Package Selection -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-2xl font-bold text-[#0F172A] mb-6">
