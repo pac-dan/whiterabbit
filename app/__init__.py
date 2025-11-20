@@ -9,6 +9,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_compress import Compress
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 from config import get_config
 import redis
 
@@ -19,6 +20,7 @@ login_manager = LoginManager()
 bcrypt = Bcrypt()
 socketio = SocketIO()
 compress = Compress()
+csrf = CSRFProtect()
 talisman = None  # Will be initialized conditionally in create_app
 
 # Rate limiter will be initialized in create_app with proper storage
@@ -44,9 +46,10 @@ def create_app(config_name=None):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
+    csrf.init_app(app)  # Initialize CSRF protection
     CORS(app, origins=app.config['CORS_ORIGINS'])
     
-    # CSRF Protection - enabled by default from config
+    # CSRF Protection - now properly initialized
     # Note: Individual routes can be exempted using @csrf.exempt decorator
     
     # Initialize rate limiter with Redis storage for production

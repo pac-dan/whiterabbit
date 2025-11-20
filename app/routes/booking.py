@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
 from flask_login import login_required, current_user
-from app import db, limiter
+from app import db, limiter, csrf
 from app.models.booking import Booking, BookingStatus
 from app.models.package import Package
 from datetime import datetime, timedelta
@@ -358,6 +358,7 @@ def confirm_payment():
 
 
 @booking_bp.route('/webhook/stripe', methods=['POST'])
+@csrf.exempt
 @limiter.exempt
 def stripe_webhook():
     """Handle Stripe webhook events"""
