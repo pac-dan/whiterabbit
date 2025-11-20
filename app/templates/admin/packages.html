@@ -78,10 +78,11 @@
                     </a>
                     <form method="POST" action="{{ url_for('admin.delete_package', package_id=package.id) }}" 
                           onsubmit="return confirm('Are you sure? This cannot be undone.');" class="flex-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button type="submit" 
                                 class="w-full bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition"
                                 {% if package.booking_count > 0 %}disabled title="Cannot delete package with bookings"{% endif %}>
-                            <i class="fas fa-trash"></i> Delete
+                            <i class="fas fa-trash"></i> DELETE
                         </button>
                     </form>
                 </div>

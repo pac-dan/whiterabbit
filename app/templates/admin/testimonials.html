@@ -87,9 +87,10 @@
                 </a>
                 <form method="POST" action="{{ url_for('admin.delete_testimonial', testimonial_id=testimonial.id) }}" 
                       onsubmit="return confirm('Delete this testimonial?');" class="flex-1">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <button type="submit" 
                             class="w-full bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition">
-                        <i class="fas fa-trash"></i> Delete
+                        <i class="fas fa-trash"></i> DELETE
                     </button>
                 </form>
             </div>
