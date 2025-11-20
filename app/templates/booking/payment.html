@@ -156,8 +156,13 @@
 {% block extra_js %}
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    // Initialize Stripe
-    const stripe = Stripe('{{ stripe_publishable_key }}');
+    // Initialize Stripe (check if not already declared)
+    if (typeof stripe === 'undefined') {
+        var stripe = Stripe('{{ stripe_publishable_key }}');
+    } else if (!stripe) {
+        // If stripe exists but is null, initialize it
+        stripe = Stripe('{{ stripe_publishable_key }}');
+    }
     const elements = stripe.elements();
     
     // Create card element

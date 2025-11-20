@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from app.models.package import Package
 from app.models.video import Video
 from app.models.testimonial import Testimonial
+from app import db
 
 main_bp = Blueprint('main', __name__)
 
@@ -187,3 +188,44 @@ def like_video(video_id):
         'success': True,
         'like_count': video.like_count
     })
+
+
+@main_bp.route('/health')
+def health_check():
+    """
+    Health check endpoint for monitoring and load balancers
+    Returns JSON with status of critical services
+    """
+    from app import db, redis_client
+    import sys
+    
+    health_status = {
+        'status': 'healthy',
+        'services': {},
+        'version': '1.0.0',
+        'python_version': f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    }
+    
+    # Check database connectivity
+    try:
+        db.session.execute(db.text('SELECT 1'))
+        health_status['services']['database'] = 'ok'
+    except Exception as e:
+        health_status['services']['database'] = f'error: {str(e)}'
+        health_status['status'] = 'unhealthy'
+    
+    # Check Redis connectivity (if configured)
+    if redis_client:
+        try:
+            redis_client.ping()
+            health_status['services']['redis'] = 'ok'
+        except Exception as e:
+            health_status['services']['redis'] = f'error: {str(e)}'
+            # Redis is optional, so don't mark as unhealthy
+    else:
+        health_status['services']['redis'] = 'not configured'
+    
+    # Return appropriate status code
+    status_code = 200 if health_status['status'] == 'healthy' else 503
+    
+    return jsonify(health_status), status_code

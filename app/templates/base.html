@@ -27,10 +27,8 @@
     
     <title>{% block page_title %}Momentum Clips - Professional Slope Footage & Editing{% endblock %}</title>
 
-    <!-- Favicon -->
-    {% if url_for('static', filename='images/favicon.ico') %}
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
-    {% endif %}
+    <!-- Favicon (SVG inline to avoid 404) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🏂%3C/text%3E%3C/svg%3E">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -210,10 +208,12 @@
     <!-- Socket.IO Client -->
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
-    <!-- Custom JavaScript -->
-    <script src="/static/js/main.js"></script>
-    <script src="/static/js/navbar.js"></script>
+    <!-- Core JavaScript -->
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
 
+    <!-- Page-specific Scripts -->
     {% block extra_js %}{% endblock %}
 
     <!-- RETELL AI CHAT WIDGET -->
@@ -229,9 +229,60 @@
         data-bot-name="Momentum AI"
         data-popup-message="Hi! Need help booking your snowboard video session?"
         data-show-ai-popup="true"
-        data-show-ai-popup-time="5"
+        data-show-ai-popup-time="60"
         data-auto-open="false"
     ></script>
+    
+    <!-- Custom Chatbot Widget Styling -->
+    <style>
+        /* Customize Retell AI Widget */
+        #retell-widget-bubble {
+            bottom: 24px !important;
+            right: 24px !important;
+            width: 60px !important;
+            height: 60px !important;
+            background: linear-gradient(135deg, #00D4FF, #8B5CF6) !important;
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        #retell-widget-bubble:hover {
+            transform: scale(1.1) !important;
+            box-shadow: 0 12px 32px rgba(0, 212, 255, 0.6) !important;
+        }
+        
+        /* Widget popup message styling */
+        [data-retell-widget] + div[style*="position: fixed"] {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98)) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 2px solid rgba(0, 212, 255, 0.3) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Chat window styling */
+        .retell-chat-window {
+            border-radius: 20px !important;
+            overflow: hidden !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        /* Smooth animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        [data-retell-widget] {
+            animation: slideIn 0.4s ease-out !important;
+        }
+    </style>
     {% endif %}
 </body>
 </html>

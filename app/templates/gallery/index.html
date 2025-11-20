@@ -115,7 +115,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {% for video in videos %}
         <div class="group cursor-pointer transform hover:-translate-y-1 transition duration-300" 
-             onclick="window.location='{{ url_for('main.video_detail', video_id=video.id) }}'">
+             data-video-id="{{ video.id }}">
             <div class="bg-white rounded-lg shadow-md hover:shadow-xl overflow-hidden">
                 <!-- Video Thumbnail -->
                 <div class="relative h-64 overflow-hidden">
@@ -195,6 +195,10 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
 {% endblock %}
 
 {% block extra_css %}

@@ -159,12 +159,16 @@
                class="bg-[#00D4FF] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#00D4FF] transition">
                 View FAQ
             </a>
-            <button onclick="document.getElementById('claude-chat-bubble').click()" 
+            <button onclick="toggleChat()" 
                     class="bg-white border-2 border-[#00D4FF] text-[#00D4FF] px-8 py-3 rounded-lg font-bold hover:bg-[#00D4FF] hover:text-white transition">
                 <i class="fas fa-robot mr-2"></i> CHAT WITH AI
             </button>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
 {% endblock %}
 

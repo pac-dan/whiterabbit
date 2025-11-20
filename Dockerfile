@@ -32,4 +32,4 @@ RUN mkdir -p app/static/uploads && chmod 755 app/static/uploads
 EXPOSE 5000
 
 # Run with gunicorn and eventlet worker
-CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--bind", "0.0.0.0:5000", "wsgi:app"]

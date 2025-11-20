@@ -195,40 +195,7 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-    function likeVideo(videoId) {
-        fetch(`/api/video/${videoId}/like`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('like-count').textContent = data.like_count;
-                document.getElementById('sidebar-likes').textContent = data.like_count;
-                
-                // Show animation
-                const button = event.target.closest('button');
-                button.classList.add('scale-110');
-                setTimeout(() => button.classList.remove('scale-110'), 200);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    function copyLink() {
-        navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
-    }
-
-    function toggleChat() {
-        document.getElementById('chat-toggle').click();
-    }
-</script>
-
+{% block extra_css %}
 <style>
     .line-clamp-2 {
         display: -webkit-box;
@@ -237,5 +204,9 @@
         overflow: hidden;
     }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
 {% endblock %}
 

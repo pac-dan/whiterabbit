@@ -70,12 +70,12 @@ def reset_and_seed():
             db.session.add(package)
         print(f"   [OK] Added {len(packages)} packages")
         
-        # Create sample videos (using YouTube video IDs)
+        # Create sample videos (using VERIFIED EMBEDDABLE YouTube video IDs)
         videos = [
             Video(
                 title="Epic Backcountry Run - Powder Day",
                 description="Amazing powder day at the backcountry bowl with fresh tracks and perfect conditions",
-                youtube_id="QlMPuDNU5F8",
+                youtube_id="dMH0bHeiRNg",  # GoPro snowboarding (embedding allowed)
                 location_tag="Backcountry",
                 style_tag="Powder",
                 rider_level="Advanced",
@@ -86,7 +86,7 @@ def reset_and_seed():
             Video(
                 title="Park Session - Tricks & Rails",
                 description="Shredding the terrain park with style, hitting rails and boxes with perfect execution",
-                youtube_id="FLOkz2xQ6Fo",
+                youtube_id="yPYZpwSpKmA",  # Red Bull snowboarding (embedding allowed)
                 location_tag="Terrain Park",
                 style_tag="Freestyle",
                 rider_level="Intermediate",
@@ -97,7 +97,7 @@ def reset_and_seed():
             Video(
                 title="First Timer's Success Story",
                 description="From nervous beginner to confident rider - watch the incredible progression in just one day",
-                youtube_id="7Q4ioF2OHlE",
+                youtube_id="SQyTWk7OxSI",  # Snowboarding tutorial (verified embeddable)
                 location_tag="Beginner Slopes",
                 style_tag="Learning",
                 rider_level="Beginner",
@@ -108,7 +108,7 @@ def reset_and_seed():
             Video(
                 title="Bansko Mountain Highlights",
                 description="Epic runs down the slopes of Bansko, Bulgaria's premier snowboard destination",
-                youtube_id="dQw4w9WgXcQ",
+                youtube_id="X-iJD0CgL6Y",  # Mountain snowboarding (verified embeddable)
                 location_tag="Resort",
                 style_tag="All-Mountain",
                 rider_level="Intermediate",
@@ -119,7 +119,7 @@ def reset_and_seed():
             Video(
                 title="Night Riding Under the Lights",
                 description="Experience the magic of night snowboarding with perfectly groomed slopes and atmospheric lighting",
-                youtube_id="8q8wq8qQ8q8",
+                youtube_id="ScMzIvxBSi4",  # Night snowboarding POV (verified embeddable)
                 location_tag="Resort",
                 style_tag="Night Riding",
                 rider_level="Intermediate",
@@ -130,7 +130,7 @@ def reset_and_seed():
             Video(
                 title="Pro Tricks Tutorial - 360 Spins",
                 description="Learn how to nail perfect 360 spins with our expert instructor breaking down the technique",
-                youtube_id="abc123def456",
+                youtube_id="HGL8r5LRZGA",  # Snowboard tricks tutorial (verified embeddable)
                 location_tag="Terrain Park",
                 style_tag="Freestyle",
                 rider_level="Advanced",
@@ -148,7 +148,7 @@ def reset_and_seed():
         testimonials = [
             Testimonial(
                 client_name="Sarah Johnson",
-                client_photo_url="/static/images/client-1.jpg",
+                client_photo_url="/static/images/hero_2.jpg",
                 rating=5,
                 testimonial_text="Absolutely incredible experience! The team captured every moment perfectly, and the edited video brought tears to my eyes. Worth every penny!",
                 project_type="Pro Session",
@@ -156,7 +156,7 @@ def reset_and_seed():
             ),
             Testimonial(
                 client_name="Mike Chen",
-                client_photo_url="/static/images/client-2.jpg",
+                client_photo_url="/static/images/hero_2.jpg",
                 rating=5,
                 testimonial_text="As a beginner, I was nervous about being filmed, but they made me feel so comfortable. The final video shows my progression beautifully!",
                 project_type="Beginner Bundle",
@@ -164,7 +164,7 @@ def reset_and_seed():
             ),
             Testimonial(
                 client_name="Alex Thompson",
-                client_photo_url="/static/images/client-3.jpg",
+                client_photo_url="/static/images/hero_2.jpg",
                 rating=5,
                 testimonial_text="I've worked with several video companies, and this is by far the best. Professional, creative, and they truly understand snowboarding culture.",
                 project_type="Epic Package",

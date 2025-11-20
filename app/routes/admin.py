@@ -238,7 +238,7 @@ def new_video():
         video = Video(
             title=request.form.get('title'),
             description=request.form.get('description'),
-            vimeo_id=request.form.get('vimeo_id'),
+            youtube_id=request.form.get('youtube_id'),
             thumbnail_url=request.form.get('thumbnail_url'),
             location_tag=request.form.get('location_tag'),
             style_tag=request.form.get('style_tag'),
@@ -250,8 +250,8 @@ def new_video():
 
         if request.form.get('is_comparison'):
             video.is_comparison = True
-            video.before_vimeo_id = request.form.get('before_vimeo_id')
-            video.after_vimeo_id = request.form.get('after_vimeo_id')
+            video.before_youtube_id = request.form.get('before_youtube_id')
+            video.after_youtube_id = request.form.get('after_youtube_id')
 
         db.session.add(video)
         db.session.commit()
@@ -272,7 +272,7 @@ def edit_video(video_id):
     if request.method == 'POST':
         video.title = request.form.get('title', video.title)
         video.description = request.form.get('description', video.description)
-        video.vimeo_id = request.form.get('vimeo_id', video.vimeo_id)
+        video.youtube_id = request.form.get('youtube_id', video.youtube_id)
         video.thumbnail_url = request.form.get('thumbnail_url', video.thumbnail_url)
         video.location_tag = request.form.get('location_tag', video.location_tag)
         video.style_tag = request.form.get('style_tag', video.style_tag)
@@ -280,6 +280,12 @@ def edit_video(video_id):
         video.is_featured = request.form.get('is_featured', video.is_featured, type=bool)
         video.is_published = request.form.get('is_published', video.is_published, type=bool)
         video.display_order = request.form.get('display_order', video.display_order, type=int)
+        
+        # Handle before/after comparison
+        video.is_comparison = bool(request.form.get('is_comparison'))
+        if video.is_comparison:
+            video.before_youtube_id = request.form.get('before_youtube_id')
+            video.after_youtube_id = request.form.get('after_youtube_id')
 
         db.session.commit()
 

@@ -165,17 +165,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // Set minimum date to 24 hours from now
-    const now = new Date();
-    now.setHours(now.getHours() + 24);
-    const minDate = now.toISOString().slice(0, 16);
-    document.getElementById('booking_date').min = minDate;
-
-    // Set maximum date to 90 days from now
-    const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 90);
-    document.getElementById('booking_date').max = maxDate.toISOString().slice(0, 16);
-</script>
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
 {% endblock %}
 

@@ -16,11 +16,15 @@ def validate_production_secrets():
     required_secrets = {
         'SECRET_KEY': os.getenv('SECRET_KEY'),
         'DATABASE_URL': os.getenv('DATABASE_URL'),
-        'STRIPE_SECRET_KEY': os.getenv('STRIPE_SECRET_KEY'),
-        'STRIPE_PUBLISHABLE_KEY': os.getenv('STRIPE_PUBLISHABLE_KEY'),
         'ANTHROPIC_API_KEY': os.getenv('ANTHROPIC_API_KEY'),
         'MAIL_USERNAME': os.getenv('MAIL_USERNAME'),
         'MAIL_PASSWORD': os.getenv('MAIL_PASSWORD'),
+    }
+    
+    # Optional secrets (log warnings but don't block)
+    optional_secrets = {
+        'STRIPE_SECRET_KEY': os.getenv('STRIPE_SECRET_KEY'),
+        'STRIPE_PUBLISHABLE_KEY': os.getenv('STRIPE_PUBLISHABLE_KEY'),
     }
     
     # Check for missing or placeholder values
@@ -49,7 +53,20 @@ def validate_production_secrets():
         ])
         raise ValueError(error_msg)
     
-    print("[OK] All production secrets validated successfully")
+    # Check optional secrets and warn if missing
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    warnings = []
+    for key, value in optional_secrets.items():
+        if not value or any(placeholder in value for placeholder in placeholder_keywords):
+            warnings.append(f"{key} is not configured - related features will be disabled")
+    
+    if warnings:
+        for warning in warnings:
+            logger.warning(warning)
+    
+    logger.info("All required production secrets validated successfully")
 
 
 class Config:

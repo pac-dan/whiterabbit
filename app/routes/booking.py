@@ -152,13 +152,21 @@ def payment(booking_id):
         flash('This booking has already been processed.', 'info')
         return redirect(url_for('booking.view_booking', booking_id=booking.id))
 
+    # Check Stripe configuration
+    stripe_secret = current_app.config.get('STRIPE_SECRET_KEY')
+    stripe_publishable = current_app.config.get('STRIPE_PUBLISHABLE_KEY')
+    
+    if not stripe_secret or not stripe_publishable:
+        flash('Payment system is not configured. Please contact support.', 'danger')
+        return redirect(url_for('booking.index'))
+
     # Initialize Stripe
-    stripe.api_key = current_app.config['STRIPE_SECRET_KEY']
+    stripe.api_key = stripe_secret
 
     return render_template(
         'booking/payment.html',
         booking=booking,
-        stripe_publishable_key=current_app.config['STRIPE_PUBLISHABLE_KEY']
+        stripe_publishable_key=stripe_publishable
     )
 
 
@@ -195,7 +203,10 @@ def check_availability():
     """Check if a booking slot is available"""
     data = request.get_json()
     booking_date_str = data.get('booking_date')
-    package_id = data.get('package_id', type=int)
+    
+    # Get package_id and convert to int
+    package_id_raw = data.get('package_id')
+    package_id = int(package_id_raw) if package_id_raw else None
 
     if not booking_date_str or not package_id:
         return jsonify({'success': False, 'message': 'Missing parameters'}), 400
@@ -220,7 +231,10 @@ def check_availability():
 def create_payment_intent():
     """Create a Stripe payment intent for booking"""
     data = request.get_json()
-    booking_id = data.get('booking_id', type=int)
+    
+    # Get booking_id and convert to int
+    booking_id_raw = data.get('booking_id')
+    booking_id = int(booking_id_raw) if booking_id_raw else None
 
     if not booking_id:
         return jsonify({'success': False, 'message': 'Missing booking ID'}), 400
@@ -237,16 +251,31 @@ def create_payment_intent():
 
     try:
         # Initialize Stripe
-        stripe.api_key = current_app.config['STRIPE_SECRET_KEY']
+        stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
+        
+        # Debug: Check if Stripe key exists
+        if not stripe_key:
+            return jsonify({
+                'success': False, 
+                'message': 'Stripe not configured. Please add STRIPE_SECRET_KEY to your .env file'
+            }), 500
+        
+        if not (stripe_key.startswith('sk_test_') or stripe_key.startswith('sk_live_')):
+            return jsonify({
+                'success': False, 
+                'message': f'Invalid Stripe key format. Key should start with sk_test_ or sk_live_'
+            }), 500
+        
+        stripe.api_key = stripe_key
 
         # Create payment intent
         intent = stripe.PaymentIntent.create(
             amount=int(float(booking.amount) * 100),  # Convert to cents
-            currency=booking.currency.lower(),
+            currency=booking.currency.lower() if booking.currency else 'usd',
             metadata={
                 'booking_id': booking.id,
                 'user_id': booking.user_id,
-                'package_name': booking.package.name
+                'package_name': booking.package.name if booking.package else 'Unknown'
             },
             description=f'SnowboardMedia - {booking.package.name}'
         )
@@ -259,7 +288,12 @@ def create_payment_intent():
 
     except stripe.error.StripeError as e:
         current_app.logger.error(f'Stripe error: {str(e)}')
-        return jsonify({'success': False, 'message': str(e)}), 500
+        return jsonify({'success': False, 'message': f'Stripe error: {str(e)}'}), 500
+    except Exception as e:
+        current_app.logger.error(f'Unexpected error creating payment intent: {str(e)}')
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': f'Server error: {str(e)}'}), 500
 
 
 @booking_bp.route('/api/confirm-payment', methods=['POST'])
@@ -268,7 +302,10 @@ def create_payment_intent():
 def confirm_payment():
     """Confirm payment completion"""
     data = request.get_json()
-    booking_id = data.get('booking_id', type=int)
+    
+    # Get booking_id and convert to int
+    booking_id_raw = data.get('booking_id')
+    booking_id = int(booking_id_raw) if booking_id_raw else None
     payment_intent_id = data.get('payment_intent_id')
 
     if not booking_id or not payment_intent_id:

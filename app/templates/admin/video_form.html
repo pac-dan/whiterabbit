@@ -49,25 +49,26 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="vimeo_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                Vimeo Video ID *
+                            <label for="youtube_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                YouTube Video ID *
                             </label>
-                            <input type="text" id="vimeo_id" name="vimeo_id" 
-                                   value="{{ video.vimeo_id if video else '' }}"
+                            <input type="text" id="youtube_id" name="youtube_id" 
+                                   value="{{ video.youtube_id if video else '' }}"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="e.g., 123456789"
+                                   placeholder="e.g., dMH0bHeiRNg"
                                    required>
-                            <p class="text-sm text-gray-500 mt-1">Get from Vimeo video URL</p>
+                            <p class="text-sm text-gray-500 mt-1">11-character ID from YouTube URL (after v=)</p>
                         </div>
 
                         <div>
                             <label for="thumbnail_url" class="block text-sm font-medium text-gray-700 mb-2">
-                                Thumbnail URL
+                                Thumbnail URL (Optional)
                             </label>
                             <input type="url" id="thumbnail_url" name="thumbnail_url" 
                                    value="{{ video.thumbnail_url if video else '' }}"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="/static/images/thumb.jpg">
+                                   placeholder="Auto-generated from YouTube if left blank">
+                            <p class="text-sm text-gray-500 mt-1">Leave blank to use YouTube's thumbnail</p>
                         </div>
                     </div>
                 </div>
@@ -133,23 +134,23 @@
 
                     <div id="comparison-fields" class="pl-8 space-y-4" style="display: {% if video and video.is_comparison %}block{% else %}none{% endif %};">
                         <div>
-                            <label for="before_vimeo_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                Before Vimeo ID
+                            <label for="before_youtube_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                Before YouTube ID
                             </label>
-                            <input type="text" id="before_vimeo_id" name="before_vimeo_id" 
-                                   value="{{ video.before_vimeo_id if video else '' }}"
+                            <input type="text" id="before_youtube_id" name="before_youtube_id" 
+                                   value="{{ video.before_youtube_id if video else '' }}"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="Raw footage Vimeo ID">
+                                   placeholder="Raw footage YouTube ID">
                         </div>
 
                         <div>
-                            <label for="after_vimeo_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                After Vimeo ID
+                            <label for="after_youtube_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                After YouTube ID
                             </label>
-                            <input type="text" id="after_vimeo_id" name="after_vimeo_id" 
-                                   value="{{ video.after_vimeo_id if video else '' }}"
+                            <input type="text" id="after_youtube_id" name="after_youtube_id" 
+                                   value="{{ video.after_youtube_id if video else '' }}"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="Edited footage Vimeo ID">
+                                   placeholder="Edited footage YouTube ID">
                         </div>
                     </div>
                 </div>
@@ -206,11 +207,15 @@
         </div>
     </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 <script>
+// Page-specific: Toggle comparison fields
 function toggleComparison(checkbox) {
     const fields = document.getElementById('comparison-fields');
-    fields.style.display = checkbox.checked ? 'block' : 'none';
+    if (fields) fields.style.display = checkbox.checked ? 'block' : 'none';
 }
 </script>
 {% endblock %}

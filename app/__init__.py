@@ -8,21 +8,21 @@ from flask_talisman import Talisman
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_compress import Compress
+from flask_migrate import Migrate
 from config import get_config
 import redis
 
 # Initialize extensions
 db = SQLAlchemy()
+migrate = Migrate()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
 socketio = SocketIO()
 compress = Compress()
 talisman = None  # Will be initialized conditionally in create_app
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://"
-)
+
+# Rate limiter will be initialized in create_app with proper storage
+limiter = None
 
 # Redis connection
 redis_client = None
@@ -41,6 +41,7 @@ def create_app(config_name=None):
 
     # Initialize extensions with app
     db.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
     CORS(app, origins=app.config['CORS_ORIGINS'])
@@ -48,8 +49,32 @@ def create_app(config_name=None):
     # CSRF Protection - enabled by default from config
     # Note: Individual routes can be exempted using @csrf.exempt decorator
     
-    # Initialize rate limiter
-    limiter.init_app(app)
+    # Initialize rate limiter with Redis storage for production
+    global limiter
+    try:
+        # Try to use Redis for rate limiting (required for multi-worker production)
+        from flask_limiter import Limiter
+        from flask_limiter.util import get_remote_address
+        redis_test = redis.from_url(app.config['REDIS_URL'])
+        redis_test.ping()
+        
+        limiter = Limiter(
+            get_remote_address,
+            app=app,
+            default_limits=["200 per day", "50 per hour"],
+            storage_uri=app.config['REDIS_URL']
+        )
+        app.logger.info("[OK] Rate limiter using Redis storage (production-ready)")
+    except Exception as e:
+        # Fall back to memory storage for development
+        from flask_limiter import Limiter
+        from flask_limiter.util import get_remote_address
+        limiter = Limiter(
+            get_remote_address,
+            app=app,
+            default_limits=["200 per day", "50 per hour"]
+        )
+        app.logger.warning(f"[WARN] Rate limiter using memory storage - not suitable for production ({str(e)})")
     
     # Initialize compression for better performance & SEO
     compress.init_app(app)
@@ -123,7 +148,7 @@ def create_app(config_name=None):
                 'camera': "'none'"
             }
         )
-        print("[SECURITY] Flask-Talisman enabled: HTTPS enforcement & security headers active")
+        app.logger.info("Flask-Talisman enabled: HTTPS enforcement & security headers active")
 
     # Initialize SocketIO
     # For development, use threading mode (works without Redis)
@@ -140,11 +165,11 @@ def create_app(config_name=None):
         redis_test.ping()
         socketio_options['message_queue'] = app.config['REDIS_URL']
         socketio_options['async_mode'] = 'eventlet'
-        print("[OK] Redis connected - using eventlet with message queue")
+        app.logger.info("Redis connected - using eventlet with message queue")
     except Exception as e:
         # Fall back to threading mode for development
         socketio_options['async_mode'] = 'threading'
-        print(f"[INFO] Running in development mode (threading) - Redis not available")
+        app.logger.info("Running in development mode (threading) - Redis not available")
     
     socketio.init_app(app, **socketio_options)
 
@@ -155,7 +180,7 @@ def create_app(config_name=None):
         redis_client.ping()
     except Exception:
         redis_client = None
-        print("[WARN] Redis not available - session storage will use default")
+        app.logger.warning("Redis not available - session storage will use default")
 
     # Configure Flask-Login
     login_manager.login_view = 'auth.login'
@@ -174,14 +199,12 @@ def create_app(config_name=None):
     from app.routes.auth import auth_bp
     from app.routes.booking import booking_bp
     from app.routes.admin import admin_bp
-    from app.routes.chat import chat_bp
     from app.routes.sitemap import seo_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(booking_bp, url_prefix='/booking')
     app.register_blueprint(admin_bp, url_prefix='/admin')
-    app.register_blueprint(chat_bp, url_prefix='/chat')
     app.register_blueprint(seo_bp)
 
     # Register error handlers
