@@ -5,21 +5,22 @@
 {% block content %}
 
 <!-- EPIC HERO SECTION -->
-<section class="relative text-white overflow-hidden h-screen flex items-center justify-center" style="background: url('{{ url_for('static', filename='images/hero_2.jpg') }}') center/cover no-repeat;">
+<section class="relative text-white overflow-hidden min-h-screen sm:h-screen flex items-center justify-center" style="background: url('{{ url_for('static', filename='images/hero_2.jpg') }}') center/cover no-repeat;">
     <!-- Darker gradient at bottom for text readability -->
     <div class="absolute inset-0 bg-gradient-to-b from-[#0F172A]/20 via-[#0F172A]/30 to-[#0F172A]/60 z-0"></div>
     
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full text-center">
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full text-center py-20 sm:py-0">
         <div class="max-w-4xl mx-auto">
-            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight hero-title heading" style="text-shadow: 0 4px 30px rgba(0, 0, 0, 0.9);">
-                PROFESSIONAL SNOWBOARD<br>
-                <span class="cyan-accent glow-text" style="color: #00D4FF;">VIDEO PRODUCTION</span>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 sm:mb-8 leading-tight hero-title heading" style="text-shadow: 0 4px 30px rgba(0, 0, 0, 0.9);">
+                PROFESSIONAL SNOWBOARD<br class="hidden sm:block">
+                <span class="sm:inline block mt-2 sm:mt-0">SNOWBOARD</span>
+                <span class="cyan-accent glow-text block mt-2" style="color: #00D4FF;">VIDEO PRODUCTION</span>
             </h1>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ url_for('booking.new_booking') }}" class="btn-primary btn-book-now text-center inline-block">
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
+                <a href="{{ url_for('booking.new_booking') }}" class="btn-primary btn-book-now text-center inline-block text-sm sm:text-base">
                     BOOK YOUR SESSION
                 </a>
-                <a href="{{ url_for('main.gallery') }}" class="btn-secondary text-center inline-block">
+                <a href="{{ url_for('main.gallery') }}" class="btn-secondary text-center inline-block text-sm sm:text-base">
                     WATCH OUR WORK
                 </a>
             </div>
@@ -28,77 +29,77 @@
 </section>
 
 <!-- Features Section -->
-<section class="py-16" style="background-color: #F8FAFC;">
+<section class="py-12 sm:py-16" style="background-color: #F8FAFC;">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-5xl font-bold heading mb-4" style="color: #0F172A;">WHY CHOOSE MOMENTUM CLIPS?</h2>
-            <p class="text-xl text-gray-600 font-medium">PROFESSIONAL QUALITY, <span class="cyan-accent">DELIVERED FAST</span></p>
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold heading mb-3 sm:mb-4" style="color: #0F172A;">WHY CHOOSE MOMENTUM CLIPS?</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-600 font-medium px-4">PROFESSIONAL QUALITY, <span class="cyan-accent">DELIVERED FAST</span></p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="text-center glass-card p-6 scroll-fade-in" data-delay="0" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px);">
-                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, #00D4FF, #8B5CF6); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);">
-                    <i class="fas fa-video text-white text-3xl"></i>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            <div class="text-center glass-card p-5 sm:p-6 scroll-fade-in" data-delay="0" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px);">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style="background: linear-gradient(135deg, #00D4FF, #8B5CF6); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);">
+                    <i class="fas fa-video text-white text-2xl sm:text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2 heading" style="color: #0F172A;">PROFESSIONAL FILMING</h3>
-                <p class="text-gray-600 font-medium">4K cameras, drones, and GoPros for every angle</p>
+                <h3 class="text-lg sm:text-xl font-bold mb-2 heading" style="color: #0F172A;">PROFESSIONAL FILMING</h3>
+                <p class="text-sm sm:text-base text-gray-600 font-medium">4K cameras, drones, and GoPros for every angle</p>
             </div>
 
-            <div class="text-center glass-card p-6 scroll-fade-in" data-delay="100" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px);">
-                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, #8B5CF6, #00D4FF); box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);">
-                    <i class="fas fa-cut text-white text-3xl"></i>
+            <div class="text-center glass-card p-5 sm:p-6 scroll-fade-in" data-delay="100" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px);">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style="background: linear-gradient(135deg, #8B5CF6, #00D4FF); box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);">
+                    <i class="fas fa-cut text-white text-2xl sm:text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2 heading" style="color: #0F172A;">EXPERT EDITING</h3>
-                <p class="text-gray-600 font-medium">Cinematic edits with music and effects</p>
+                <h3 class="text-lg sm:text-xl font-bold mb-2 heading" style="color: #0F172A;">EXPERT EDITING</h3>
+                <p class="text-sm sm:text-base text-gray-600 font-medium">Cinematic edits with music and effects</p>
             </div>
 
-            <div class="text-center glass-card p-6 scroll-fade-in" data-delay="200" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px);">
-                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, #8B5CF6, #00D4FF); box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);">
-                    <i class="fas fa-robot text-white text-3xl"></i>
+            <div class="text-center glass-card p-5 sm:p-6 scroll-fade-in" data-delay="200" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px);">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style="background: linear-gradient(135deg, #8B5CF6, #00D4FF); box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);">
+                    <i class="fas fa-robot text-white text-2xl sm:text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2 heading" style="color: #0F172A;">AI-POWERED</h3>
-                <p class="text-gray-600 font-medium">Claude AI assistant for instant support</p>
+                <h3 class="text-lg sm:text-xl font-bold mb-2 heading" style="color: #0F172A;">AI-POWERED</h3>
+                <p class="text-sm sm:text-base text-gray-600 font-medium">Claude AI assistant for instant support</p>
             </div>
 
-            <div class="text-center glass-card p-6 scroll-fade-in" data-delay="300" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px);">
-                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, #00D4FF, #8B5CF6); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);">
-                    <i class="fas fa-bolt text-white text-3xl"></i>
+            <div class="text-center glass-card p-5 sm:p-6 scroll-fade-in" data-delay="300" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px);">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4" style="background: linear-gradient(135deg, #00D4FF, #8B5CF6); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);">
+                    <i class="fas fa-bolt text-white text-2xl sm:text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2 heading" style="color: #0F172A;">FAST DELIVERY</h3>
-                <p class="text-gray-600 font-medium">Videos delivered within 48-72 hours</p>
+                <h3 class="text-lg sm:text-xl font-bold mb-2 heading" style="color: #0F172A;">FAST DELIVERY</h3>
+                <p class="text-sm sm:text-base text-gray-600 font-medium">Videos delivered within 48-72 hours</p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Packages Section -->
-<section class="py-16 bg-gray-50">
+<section class="py-12 sm:py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-4xl font-bold text-[#0F172A] mb-4">Choose Your Package</h2>
-            <p class="text-xl text-gray-600">From beginner to pro, we've got you covered</p>
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-[#0F172A] mb-3 sm:mb-4">Choose Your Package</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-600 px-4">From beginner to pro, we've got you covered</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {% for package in packages %}
             <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 flex flex-col h-full">
-                <div class="p-8 flex flex-col flex-1">
-                    <h3 class="text-2xl font-bold text-[#0F172A] mb-2">{{ package.name }}</h3>
-                    <div class="text-4xl font-bold text-[#00D4FF] mb-4">
+                <div class="p-5 sm:p-8 flex flex-col flex-1">
+                    <h3 class="text-xl sm:text-2xl font-bold text-[#0F172A] mb-2">{{ package.name }}</h3>
+                    <div class="text-3xl sm:text-4xl font-bold text-[#00D4FF] mb-3 sm:mb-4">
                         {{ package.price|currency }}
                     </div>
-                    <p class="text-gray-600 mb-6">{{ package.description }}</p>
+                    <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">{{ package.description }}</p>
 
-                    <ul class="space-y-3 mb-8 flex-1">
+                    <ul class="space-y-2 sm:space-y-3 mb-6 sm:mb-8 flex-1">
                         {% for feature in package.features.split(',') %}
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
-                            <span>{{ feature.strip() }}</span>
+                            <i class="fas fa-check text-green-500 mr-2 sm:mr-3 mt-1 text-sm sm:text-base flex-shrink-0"></i>
+                            <span class="text-sm sm:text-base">{{ feature.strip() }}</span>
                         </li>
                         {% endfor %}
                     </ul>
 
-                    <a href="{{ url_for('booking.new_booking', package_id=package.id) }}" class="block w-full bg-[#00D4FF] text-white text-center px-6 py-3 rounded-lg font-semibold hover:bg-[#00D4FF] transition mt-auto">
+                    <a href="{{ url_for('booking.new_booking', package_id=package.id) }}" class="block w-full bg-[#00D4FF] text-white text-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base hover:bg-[#00B8E6] transition mt-auto">
                         Book Now
                     </a>
                 </div>
@@ -106,8 +107,8 @@
             {% endfor %}
         </div>
 
-        <div class="text-center mt-8">
-            <a href="{{ url_for('main.packages') }}" class="text-[#00D4FF] hover:text-[#00D4FF] font-semibold">
+        <div class="text-center mt-8 sm:mt-12">
+            <a href="{{ url_for('main.packages') }}" class="text-[#00D4FF] hover:text-[#00B8E6] font-bold text-base sm:text-lg">
                 View All Packages <i class="fas fa-arrow-right ml-2"></i>
             </a>
         </div>
@@ -115,11 +116,11 @@
 </section>
 
 <!-- Video Gallery Preview -->
-<section class="py-16 bg-white">
+<section class="py-12 sm:py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-4xl font-bold text-[#0F172A] mb-4">Featured Videos</h2>
-            <p class="text-xl text-gray-600">Check out our best work</p>
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-[#0F172A] mb-3 sm:mb-4">Featured Videos</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-600 px-4">Check out our best work</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -151,14 +152,14 @@
 </section>
 
 <!-- Testimonials Section -->
-<section class="py-16 hero-gradient">
+<section class="py-12 sm:py-16 hero-gradient">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-            <h2 class="text-4xl font-bold heading text-white mb-4">WHAT OUR CLIENTS SAY</h2>
-            <p class="text-xl text-gray-300 font-medium">Real stories from real riders</p>
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold heading text-white mb-3 sm:mb-4">WHAT OUR CLIENTS SAY</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-300 font-medium px-4">Real stories from real riders</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {% for testimonial in testimonials %}
             <div class="glass-card p-6" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 2px solid rgba(0, 212, 255, 0.2);">
                 <div class="flex items-center mb-4">

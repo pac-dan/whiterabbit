@@ -75,11 +75,17 @@ h1, h2, h3, h4, h5, h6, .heading {
     background: var(--primary-cyan);
     color: white;
     font-weight: 700;
-    padding: 1rem 2rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 0.75rem;
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+}
+
+@media (min-width: 640px) {
+    .btn-primary {
+        padding: 1rem 2rem;
+    }
 }
 
 .btn-primary:hover {
@@ -97,10 +103,16 @@ h1, h2, h3, h4, h5, h6, .heading {
     border: 2px solid var(--primary-cyan);
     color: var(--primary-cyan);
     font-weight: 700;
-    padding: 1rem 2rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 0.75rem;
     transition: all 0.3s ease;
     text-transform: uppercase;
+}
+
+@media (min-width: 640px) {
+    .btn-secondary {
+        padding: 1rem 2rem;
+    }
 }
 
 .btn-secondary:hover {
@@ -771,4 +783,99 @@ button[type="submit"]:hover, input[type="submit"]:hover {
     background: var(--secondary-purple);
     transform: translateY(-2px);
     box-shadow: var(--purple-glow);
+}
+
+/* ========================================
+   MOBILE RESPONSIVE STYLES
+======================================== */
+
+/* Mobile-first typography adjustments */
+@media (max-width: 640px) {
+    h1, h2, h3, h4, h5, h6, .heading {
+        letter-spacing: 0.02em; /* Reduce letter spacing on mobile */
+    }
+    
+    /* Hero section specific */
+    .hero-title {
+        line-height: 1.2;
+    }
+    
+    /* Touch-friendly buttons */
+    button, .btn-primary, .btn-secondary, a.btn-primary, a.btn-secondary {
+        min-height: 44px; /* iOS recommended touch target */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Better mobile padding */
+    .glass-card {
+        padding: 1.25rem !important;
+    }
+    
+    /* Mobile navigation improvements */
+    #mobile-menu a {
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Form inputs touch-friendly */
+    input, textarea, select {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        min-height: 44px;
+    }
+    
+    /* Package cards mobile */
+    .package-card {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2 {
+        font-size: 2rem;
+    }
+}
+
+/* Improve logo polygon on mobile */
+@media (max-width: 640px) {
+    .logo-polygon {
+        width: 12px !important;
+        height: 12px !important;
+        margin-right: 8px !important;
+    }
+}
+
+/* Fix navbar height on mobile */
+@media (max-width: 768px) {
+    nav {
+        height: 64px;
+    }
+    
+    nav .max-w-7xl {
+        height: 64px;
+    }
+}
+
+/* Prevent text overflow on mobile */
+@media (max-width: 640px) {
+    * {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+}
+
+/* Mobile-friendly animations (reduce motion) */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

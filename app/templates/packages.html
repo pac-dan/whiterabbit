@@ -4,23 +4,23 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="relative hero-gradient text-white py-20">
+<section class="relative hero-gradient text-white py-12 sm:py-16 lg:py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-5xl font-bold mb-6 heading">CHOOSE YOUR PACKAGE</h1>
-        <p class="text-2xl text-gray-300 font-medium">Professional video production for every skill level</p>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 heading">CHOOSE YOUR PACKAGE</h1>
+        <p class="text-base sm:text-lg lg:text-2xl text-gray-300 font-medium px-4">Professional video production for every skill level</p>
     </div>
 </section>
 
 <!-- Packages Grid -->
-<section class="py-16 bg-gray-50">
+<section class="py-12 sm:py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {% if packages %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {% for package in packages %}
             <div class="bg-white rounded-lg shadow-xl overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-1 flex flex-col
                         {% if package.name == 'Pro Session' %}ring-4 ring-[#00D4FF]{% endif %}">
                 <!-- Package Header -->
-                <div class="{% if package.name == 'Pro Session' %}hero-gradient{% else %}bg-[#0F172A]{% endif %} text-white p-6">
+                <div class="{% if package.name == 'Pro Session' %}hero-gradient{% else %}bg-[#0F172A]{% endif %} text-white p-5 sm:p-6">
                     {% if package.name == 'Pro Session' %}
                     <div class="text-center mb-2">
                         <span class="bg-[#00D4FF] text-[#0F172A] px-3 py-1 rounded-full text-xs font-bold uppercase pulse-chat">
@@ -28,29 +28,29 @@
                         </span>
                     </div>
                     {% endif %}
-                    <h2 class="text-3xl font-bold text-center mb-2 heading">{{ package.name }}</h2>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-center mb-2 heading">{{ package.name }}</h2>
                     <div class="text-center">
-                        <span class="text-5xl font-bold">${{ "%.0f"|format(package.price) }}</span>
-                        <span class="text-gray-300 font-medium">/ {{ package.duration }}hrs</span>
+                        <span class="text-4xl sm:text-5xl font-bold">${{ "%.0f"|format(package.price) }}</span>
+                        <span class="text-sm sm:text-base text-gray-300 font-medium">/ {{ package.duration }}hrs</span>
                     </div>
                 </div>
 
                 <!-- Package Body -->
-                <div class="p-8 flex flex-col flex-1">
-                    <p class="text-gray-600 text-center mb-6">{{ package.description }}</p>
+                <div class="p-5 sm:p-8 flex flex-col flex-1">
+                    <p class="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">{{ package.description }}</p>
 
                     <!-- Features List -->
-                    <ul class="space-y-3 mb-6 flex-1">
+                    <ul class="space-y-2 sm:space-y-3 mb-4 sm:mb-6 flex-1">
                         {% for feature in package.features.split(',') %}
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mr-3 mt-1 flex-shrink-0"></i>
-                            <span class="text-gray-700">{{ feature.strip() }}</span>
+                            <i class="fas fa-check text-green-500 mr-2 sm:mr-3 mt-1 flex-shrink-0 text-sm sm:text-base"></i>
+                            <span class="text-sm sm:text-base text-gray-700">{{ feature.strip() }}</span>
                         </li>
                         {% endfor %}
                     </ul>
 
                     <!-- Additional Details -->
-                    <div class="space-y-2 mb-6 text-sm text-gray-600">
+                    <div class="space-y-2 mb-4 sm:mb-6 text-xs sm:text-sm text-gray-600">
                         <div class="flex items-center">
                             <i class="fas fa-video w-5 text-[#00D4FF]"></i>
                             <span class="ml-2">{{ package.video_count }} edited video(s)</span>
@@ -69,14 +69,14 @@
 
                     <!-- Book Button -->
                     <a href="{{ url_for('booking.new_booking', package_id=package.id) }}" 
-                       class="block w-full text-center {% if package.name == 'Pro Session' %}bg-[#00D4FF] hover:bg-[#00D4FF]{% else %}bg-[#0F172A] hover:bg-[#0F172A]{% endif %} text-white px-6 py-4 rounded-lg font-bold text-lg transition mt-auto">
+                       class="block w-full text-center {% if package.name == 'Pro Session' %}bg-[#00D4FF] hover:bg-[#00B8E6]{% else %}bg-[#0F172A] hover:bg-[#1E293B]{% endif %} text-white px-5 sm:px-6 py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg transition mt-auto">
                         Book {{ package.name }}
                     </a>
 
                     <!-- View Details Link -->
-                    <div class="text-center mt-4">
+                    <div class="text-center mt-3 sm:mt-4">
                         <a href="{{ url_for('main.package_detail', package_id=package.id) }}" 
-                           class="text-[#00D4FF] hover:text-[#00D4FF] text-sm">
+                           class="text-[#00D4FF] hover:text-[#00B8E6] text-xs sm:text-sm">
                             View Full Details <i class="fas fa-arrow-right ml-1"></i>
                         </a>
                     </div>
