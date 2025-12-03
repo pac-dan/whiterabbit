@@ -33,9 +33,16 @@ redis_client = None
 
 def create_app(config_name=None):
     """Application factory pattern"""
+    import logging
+    import sys
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
+    logger.info("[1/10] Creating Flask app...")
     app = Flask(__name__)
 
     # Load configuration
+    logger.info("[2/10] Loading configuration...")
     if config_name:
         from config import config_dict
         app.config.from_object(config_dict[config_name])
@@ -47,35 +54,59 @@ def create_app(config_name=None):
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
     # Initialize extensions with app
+    logger.info("[3/10] Initializing database...")
     db.init_app(app)
+    logger.info("[3/10] Initializing migrations...")
     migrate.init_app(app, db)
+    logger.info("[3/10] Initializing login manager...")
     login_manager.init_app(app)
+    logger.info("[3/10] Initializing bcrypt...")
     bcrypt.init_app(app)
+    logger.info("[3/10] Initializing CSRF...")
     csrf.init_app(app)  # Initialize CSRF protection
+    logger.info("[3/10] Initializing mail...")
     mail.init_app(app)
+    logger.info("[3/10] Initializing CORS...")
     CORS(app, origins=app.config['CORS_ORIGINS'])
     
     # CSRF Protection - now properly initialized
     # Note: Individual routes can be exempted using @csrf.exempt decorator
     
     # Initialize rate limiter with Redis storage for production
+    logger.info("[4/10] Initializing rate limiter...")
     global limiter
-    try:
-        # Try to use Redis for rate limiting (required for multi-worker production)
-        from flask_limiter import Limiter
-        from flask_limiter.util import get_remote_address
-        redis_test = redis.from_url(app.config['REDIS_URL'], socket_connect_timeout=5)
-        redis_test.ping()
-        
-        limiter = Limiter(
-            get_remote_address,
-            app=app,
-            default_limits=["200 per day", "50 per hour"],
-            storage_uri=app.config['REDIS_URL']
-        )
-        app.logger.info("[OK] Rate limiter using Redis storage (production-ready)")
-    except Exception as e:
-        # Fall back to memory storage for development
+    
+    # Only try Redis if explicitly configured (not the default localhost)
+    redis_url = app.config.get('REDIS_URL', '')
+    use_redis = redis_url and not redis_url.startswith('redis://localhost')
+    
+    if use_redis:
+        try:
+            # Try to use Redis for rate limiting (required for multi-worker production)
+            from flask_limiter import Limiter
+            from flask_limiter.util import get_remote_address
+            redis_test = redis.from_url(redis_url, socket_connect_timeout=3)
+            redis_test.ping()
+            
+            limiter = Limiter(
+                get_remote_address,
+                app=app,
+                default_limits=["200 per day", "50 per hour"],
+                storage_uri=redis_url
+            )
+            app.logger.info("[OK] Rate limiter using Redis storage (production-ready)")
+        except Exception as e:
+            # Fall back to memory storage
+            from flask_limiter import Limiter
+            from flask_limiter.util import get_remote_address
+            limiter = Limiter(
+                get_remote_address,
+                app=app,
+                default_limits=["200 per day", "50 per hour"]
+            )
+            app.logger.warning(f"[WARN] Rate limiter Redis failed, using memory ({str(e)[:80]})")
+    else:
+        # Use memory storage directly
         from flask_limiter import Limiter
         from flask_limiter.util import get_remote_address
         limiter = Limiter(
@@ -83,7 +114,7 @@ def create_app(config_name=None):
             app=app,
             default_limits=["200 per day", "50 per hour"]
         )
-        app.logger.warning(f"[WARN] Rate limiter using memory storage ({str(e)[:100]})")
+        app.logger.info("[OK] Rate limiter using memory storage (development mode)")
     
     # Initialize compression for better performance & SEO
     compress.init_app(app)
@@ -162,6 +193,7 @@ def create_app(config_name=None):
     # Initialize SocketIO
     # For development, use threading mode (works without Redis)
     # For production, use eventlet with Redis message queue
+    logger.info("[5/10] Initializing SocketIO...")
     socketio_options = {
         'cors_allowed_origins': app.config['CORS_ORIGINS'],
         'logger': app.config.get('SOCKETIO_LOGGER', False),
@@ -169,30 +201,40 @@ def create_app(config_name=None):
     }
     
     # Try to use Redis message queue if available (for production)
-    try:
-        redis_test = redis.from_url(app.config['REDIS_URL'], socket_connect_timeout=5)
-        redis_test.ping()
-        socketio_options['message_queue'] = app.config['REDIS_URL']
-        socketio_options['async_mode'] = 'eventlet'
-        app.logger.info("[OK] SocketIO using Redis message queue with eventlet")
-    except Exception as e:
-        # Fall back to threading mode for development
+    if use_redis:
+        try:
+            redis_test = redis.from_url(redis_url, socket_connect_timeout=3)
+            redis_test.ping()
+            socketio_options['message_queue'] = redis_url
+            socketio_options['async_mode'] = 'eventlet'
+            app.logger.info("[OK] SocketIO using Redis message queue with eventlet")
+        except Exception as e:
+            # Fall back to threading mode for development
+            socketio_options['async_mode'] = 'threading'
+            app.logger.warning(f"[WARN] SocketIO Redis failed, using threading ({str(e)[:80]})")
+    else:
+        # Use threading mode directly
         socketio_options['async_mode'] = 'threading'
-        app.logger.warning(f"[WARN] SocketIO using threading mode - Redis unavailable ({str(e)[:100]})")
+        app.logger.info("[OK] SocketIO using threading mode (development)")
     
     socketio.init_app(app, **socketio_options)
 
     # Initialize Redis client if available
     global redis_client
-    try:
-        redis_client = redis.from_url(app.config['REDIS_URL'], socket_connect_timeout=5)
-        redis_client.ping()
-        app.logger.info("[OK] Redis client connected successfully")
-    except Exception as e:
+    if use_redis:
+        try:
+            redis_client = redis.from_url(redis_url, socket_connect_timeout=3)
+            redis_client.ping()
+            app.logger.info("[OK] Redis client connected successfully")
+        except Exception as e:
+            redis_client = None
+            app.logger.warning(f"[WARN] Redis client failed ({str(e)[:80]})")
+    else:
         redis_client = None
-        app.logger.warning(f"[WARN] Redis client not available - using default storage ({str(e)[:100]})")
+        app.logger.info("[OK] Redis client skipped (not configured)")
 
     # Configure Flask-Login
+    logger.info("[6/10] Configuring Flask-Login...")
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
@@ -205,6 +247,7 @@ def create_app(config_name=None):
         return User.query.get(int(user_id))
 
     # Register blueprints
+    logger.info("[7/10] Registering blueprints...")
     from app.routes.main import main_bp
     from app.routes.auth import auth_bp
     from app.routes.booking import booking_bp
@@ -218,6 +261,7 @@ def create_app(config_name=None):
     app.register_blueprint(seo_bp)
 
     # Register error handlers
+    logger.info("[8/10] Registering error handlers...")
     @app.errorhandler(404)
     def not_found_error(error):
         from flask import render_template
@@ -235,8 +279,10 @@ def create_app(config_name=None):
         return render_template('errors/403.html'), 403
 
     # Create database tables
+    logger.info("[9/10] Creating database tables...")
     with app.app_context():
         db.create_all()
+    logger.info("[9/10] Database tables created successfully")
 
     # Context processor for global template variables
     @app.context_processor
@@ -267,6 +313,7 @@ def create_app(config_name=None):
         return f"${value:,.2f}"
 
     # Context processors
+    logger.info("[10/10] Setting up template context processors...")
     @app.context_processor
     def utility_processor():
         """Make utility functions available in templates"""
@@ -275,4 +322,5 @@ def create_app(config_name=None):
             'support_email': app.config['SUPPORT_EMAIL']
         }
 
+    logger.info("✅ Application created successfully!")
     return app
