@@ -23,6 +23,7 @@
 
     <!-- Form -->
     <form method="POST" class="bg-white rounded-lg shadow-md p-8">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="space-y-6">
             <!-- Client Information -->
             <div>
