@@ -64,7 +64,7 @@ def create_app(config_name=None):
         # Try to use Redis for rate limiting (required for multi-worker production)
         from flask_limiter import Limiter
         from flask_limiter.util import get_remote_address
-        redis_test = redis.from_url(app.config['REDIS_URL'])
+        redis_test = redis.from_url(app.config['REDIS_URL'], socket_connect_timeout=5)
         redis_test.ping()
         
         limiter = Limiter(
@@ -83,7 +83,7 @@ def create_app(config_name=None):
             app=app,
             default_limits=["200 per day", "50 per hour"]
         )
-        app.logger.warning(f"[WARN] Rate limiter using memory storage - not suitable for production ({str(e)})")
+        app.logger.warning(f"[WARN] Rate limiter using memory storage ({str(e)[:100]})")
     
     # Initialize compression for better performance & SEO
     compress.init_app(app)
@@ -170,26 +170,27 @@ def create_app(config_name=None):
     
     # Try to use Redis message queue if available (for production)
     try:
-        redis_test = redis.from_url(app.config['REDIS_URL'])
+        redis_test = redis.from_url(app.config['REDIS_URL'], socket_connect_timeout=5)
         redis_test.ping()
         socketio_options['message_queue'] = app.config['REDIS_URL']
         socketio_options['async_mode'] = 'eventlet'
-        app.logger.info("Redis connected - using eventlet with message queue")
+        app.logger.info("[OK] SocketIO using Redis message queue with eventlet")
     except Exception as e:
         # Fall back to threading mode for development
         socketio_options['async_mode'] = 'threading'
-        app.logger.info("Running in development mode (threading) - Redis not available")
+        app.logger.warning(f"[WARN] SocketIO using threading mode - Redis unavailable ({str(e)[:100]})")
     
     socketio.init_app(app, **socketio_options)
 
     # Initialize Redis client if available
     global redis_client
     try:
-        redis_client = redis.from_url(app.config['REDIS_URL'])
+        redis_client = redis.from_url(app.config['REDIS_URL'], socket_connect_timeout=5)
         redis_client.ping()
-    except Exception:
+        app.logger.info("[OK] Redis client connected successfully")
+    except Exception as e:
         redis_client = None
-        app.logger.warning("Redis not available - session storage will use default")
+        app.logger.warning(f"[WARN] Redis client not available - using default storage ({str(e)[:100]})")
 
     # Configure Flask-Login
     login_manager.login_view = 'auth.login'
