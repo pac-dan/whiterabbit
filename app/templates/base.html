@@ -87,7 +87,7 @@
     <!-- Navigation - Cyberpunk Upgraded -->
     <nav class="navbar fixed w-full z-50" id="mainNav">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-            <div class="flex items-center justify-between h-full">
+            <div class="flex items-center h-full">
                 <!-- Logo - Left -->
                 <div class="flex items-center flex-shrink-0">
                     <a href="{{ url_for('main.index') }}" class="flex items-center">
@@ -96,8 +96,8 @@
                     </a>
                 </div>
 
-                <!-- Desktop Navigation - Centered -->
-                <div class="hidden md:flex items-center space-x-6 absolute left-1/2 transform -translate-x-1/2">
+                <!-- Desktop Navigation - Centered (flex-1 creates equal spacing) -->
+                <div class="hidden md:flex flex-1 items-center justify-center space-x-6">
                     <a href="{{ url_for('main.index') }}" class="nav-link font-semibold">HOME</a>
                     <a href="{{ url_for('main.packages') }}" class="nav-link font-semibold">PACKAGES</a>
                     <a href="{{ url_for('main.gallery') }}" class="nav-link font-semibold">GALLERY</a>
@@ -105,7 +105,7 @@
                 </div>
                 
                 <!-- Book Now Button - Right -->
-                <div class="hidden md:flex items-center">
+                <div class="hidden md:flex items-center flex-shrink-0">
                     <a href="{{ url_for('main.packages') }}" class="btn-book-cyber">
                         BOOK NOW
                     </a>
