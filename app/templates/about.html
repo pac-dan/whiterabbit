@@ -4,64 +4,83 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20">
+<section class="relative hero-gradient text-white py-16 sm:py-20 lg:py-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-5xl font-bold mb-6">About Momentum Clips</h1>
-        <p class="text-2xl text-blue-100">We capture your epic moments on the slopes</p>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 heading">ABOUT MOMENTUM CLIPS</h1>
+        <p class="text-lg sm:text-xl lg:text-2xl text-gray-300 font-medium px-4 max-w-3xl mx-auto">
+            We capture your epic moments on the slopes with professional videography and cutting-edge AI technology
+        </p>
     </div>
 </section>
 
 <!-- Story Section -->
-<section class="py-16 bg-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-[#0F172A] mb-6 text-center">Our Story</h2>
-        <div class="prose prose-lg max-w-none text-gray-700 space-y-4">
-            <p>
-                Founded by passionate snowboarders and videographers, Momentum Clips started with a simple idea: 
-                everyone deserves to have their best moments on the slopes captured professionally.
-            </p>
-            <p>
-                We've spent years perfecting our craft, combining cutting-edge filming technology with expert 
-                editing to create videos that capture the thrill, beauty, and excitement of snowboarding.
-            </p>
-            <p>
-                Whether you're a first-timer or a seasoned pro, we're here to tell your story on the mountain.
-            </p>
+<section class="py-12 sm:py-16 bg-white">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0F172A] mb-8 sm:mb-12 text-center heading">OUR STORY</h2>
+        <div class="glass-card p-6 sm:p-8 lg:p-10" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px); border: 2px solid rgba(0, 212, 255, 0.1);">
+            <div class="space-y-6 text-base sm:text-lg text-gray-700 leading-relaxed">
+                <p class="text-lg sm:text-xl font-semibold text-[#0F172A]">
+                    <span class="text-[#00D4FF]">Founded by passionate snowboarders and videographers</span>, Momentum Clips started with a simple idea: 
+                    everyone deserves to have their best moments on the slopes captured professionally.
+                </p>
+                <p>
+                    We've spent years perfecting our craft, combining <strong class="text-[#0F172A]">cutting-edge filming technology</strong> with expert 
+                    editing powered by <strong class="text-[#8B5CF6]">AI innovation</strong> to create videos that capture the thrill, beauty, and excitement of snowboarding.
+                </p>
+                <p>
+                    Based in the stunning <strong class="text-[#0F172A]">Bansko, Bulgaria</strong>, we're positioned at one of Europe's premier snowboarding destinations. 
+                    Whether you're a first-timer or a seasoned pro, we're here to tell your story on the mountain.
+                </p>
+                <div class="flex flex-wrap gap-4 justify-center pt-4">
+                    <div class="flex items-center gap-2 text-[#00D4FF]">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="font-semibold">4K Quality</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[#00D4FF]">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="font-semibold">48-72hr Delivery</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[#00D4FF]">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="font-semibold">AI-Powered Editing</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- Values Section -->
-<section class="py-16 bg-gray-50">
+<section class="py-12 sm:py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-[#0F172A] mb-12 text-center">What We Believe In</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white rounded-lg shadow-md p-8 text-center">
-                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-heart text-[#00D4FF] text-2xl"></i>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0F172A] mb-8 sm:mb-12 text-center heading">WHAT WE BELIEVE IN</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div class="glass-card p-6 sm:p-8 text-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px); border: 2px solid rgba(0, 212, 255, 0.2);">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, #00D4FF, #00B8E6);">
+                    <i class="fas fa-heart text-white text-2xl sm:text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold text-[#0F172A] mb-3">Passion</h3>
-                <p class="text-gray-600">
+                <h3 class="text-xl sm:text-2xl font-bold text-[#0F172A] mb-3 heading">PASSION</h3>
+                <p class="text-gray-700 font-medium">
                     We love snowboarding as much as you do. That passion shows in every frame we capture.
                 </p>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-8 text-center">
-                <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-star text-green-600 text-2xl"></i>
+            <div class="glass-card p-6 sm:p-8 text-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300" style="background: rgba(139, 92, 246, 0.05); backdrop-filter: blur(12px); border: 2px solid rgba(139, 92, 246, 0.2);">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, #8B5CF6, #7C3AED);">
+                    <i class="fas fa-star text-white text-2xl sm:text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold text-[#0F172A] mb-3">Quality</h3>
-                <p class="text-gray-600">
+                <h3 class="text-xl sm:text-2xl font-bold text-[#0F172A] mb-3 heading">QUALITY</h3>
+                <p class="text-gray-700 font-medium">
                     Professional equipment, expert editing, and attention to detail in every video we create.
                 </p>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md p-8 text-center">
-                <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-users text-[#8B5CF6] text-2xl"></i>
+            <div class="glass-card p-6 sm:p-8 text-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px); border: 2px solid rgba(0, 212, 255, 0.2);">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: linear-gradient(135deg, #00D4FF, #8B5CF6);">
+                    <i class="fas fa-users text-white text-2xl sm:text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold text-[#0F172A] mb-3">Community</h3>
-                <p class="text-gray-600">
+                <h3 class="text-xl sm:text-2xl font-bold text-[#0F172A] mb-3 heading">COMMUNITY</h3>
+                <p class="text-gray-700 font-medium">
                     We're part of the snowboarding community, dedicated to celebrating and preserving your moments.
                 </p>
             </div>
@@ -69,48 +88,54 @@
     </div>
 </section>
 
-<!-- Team Section -->
-<section class="py-16 bg-white">
+<!-- Technology Section -->
+<section class="py-12 sm:py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-[#0F172A] mb-12 text-center">The Technology</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="text-center">
-                <div class="bg-blue-50 rounded-lg p-6 mb-3">
-                    <i class="fas fa-video text-[#00D4FF] text-4xl"></i>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0F172A] mb-8 sm:mb-12 text-center heading">THE TECHNOLOGY</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            <div class="text-center group">
+                <div class="bg-gradient-to-br from-[#00D4FF]/10 to-[#00D4FF]/5 rounded-xl p-6 sm:p-8 mb-3 group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 border-2 border-[#00D4FF]/20">
+                    <i class="fas fa-video text-[#00D4FF] text-4xl sm:text-5xl"></i>
                 </div>
-                <h4 class="font-semibold text-[#0F172A]">4K Cameras</h4>
+                <h4 class="font-bold text-[#0F172A] text-sm sm:text-base">4K Cameras</h4>
             </div>
-            <div class="text-center">
-                <div class="bg-blue-50 rounded-lg p-6 mb-3">
-                    <i class="fas fa-helicopter text-[#00D4FF] text-4xl"></i>
+            <div class="text-center group">
+                <div class="bg-gradient-to-br from-[#8B5CF6]/10 to-[#8B5CF6]/5 rounded-xl p-6 sm:p-8 mb-3 group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 border-2 border-[#8B5CF6]/20">
+                    <i class="fas fa-helicopter text-[#8B5CF6] text-4xl sm:text-5xl"></i>
                 </div>
-                <h4 class="font-semibold text-[#0F172A]">Drone Footage</h4>
+                <h4 class="font-bold text-[#0F172A] text-sm sm:text-base">Drone Footage</h4>
             </div>
-            <div class="text-center">
-                <div class="bg-blue-50 rounded-lg p-6 mb-3">
-                    <i class="fas fa-camera text-[#00D4FF] text-4xl"></i>
+            <div class="text-center group">
+                <div class="bg-gradient-to-br from-[#00D4FF]/10 to-[#00D4FF]/5 rounded-xl p-6 sm:p-8 mb-3 group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 border-2 border-[#00D4FF]/20">
+                    <i class="fas fa-camera text-[#00D4FF] text-4xl sm:text-5xl"></i>
                 </div>
-                <h4 class="font-semibold text-[#0F172A]">GoPro Arrays</h4>
+                <h4 class="font-bold text-[#0F172A] text-sm sm:text-base">GoPro Arrays</h4>
             </div>
-            <div class="text-center">
-                <div class="bg-blue-50 rounded-lg p-6 mb-3">
-                    <i class="fas fa-robot text-[#00D4FF] text-4xl"></i>
+            <div class="text-center group">
+                <div class="bg-gradient-to-br from-[#8B5CF6]/10 to-[#8B5CF6]/5 rounded-xl p-6 sm:p-8 mb-3 group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 border-2 border-[#8B5CF6]/20">
+                    <i class="fas fa-robot text-[#8B5CF6] text-4xl sm:text-5xl"></i>
                 </div>
-                <h4 class="font-semibold text-[#0F172A]">AI Editing</h4>
+                <h4 class="font-bold text-[#0F172A] text-sm sm:text-base">AI Editing</h4>
             </div>
         </div>
     </div>
 </section>
 
 <!-- CTA Section -->
-<section class="py-16 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+<section class="py-12 sm:py-16 hero-gradient text-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-4xl font-bold mb-4">Ready to Create Your Story?</h2>
-        <p class="text-xl mb-8 text-blue-100">Book a session and let's capture your epic moments</p>
-        <a href="{{ url_for('booking.new_booking') }}" 
-           class="inline-block bg-[#00D4FF] text-[#0F172A] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#8B5CF6] transition">
-            Book Your Session
-        </a>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 heading">READY TO CREATE YOUR STORY?</h2>
+        <p class="text-lg sm:text-xl lg:text-2xl mb-8 text-gray-300 font-medium px-4">Book a session and let's capture your epic moments on the slopes</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('main.packages') }}#book-session" 
+               class="inline-block bg-[#00D4FF] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00B8E6] hover:shadow-2xl hover:scale-105 transition-all duration-300 transform">
+                <i class="fas fa-calendar mr-2"></i> Book Your Session
+            </a>
+            <a href="{{ url_for('main.gallery') }}" 
+               class="inline-block bg-white text-[#0F172A] px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 transform">
+                <i class="fas fa-play mr-2"></i> View Our Work
+            </a>
+        </div>
     </div>
 </section>
 {% endblock %}
