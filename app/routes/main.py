@@ -1,8 +1,11 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
 from app.models.package import Package
 from app.models.video import Video
 from app.models.testimonial import Testimonial
-from app import db, limiter
+from app.models.newsletter import Newsletter
+from app import db, limiter, csrf
+from sqlalchemy.exc import IntegrityError
+import re
 
 main_bp = Blueprint('main', __name__)
 
@@ -189,6 +192,63 @@ def like_video(video_id):
         'success': True,
         'like_count': video.like_count
     })
+
+
+@main_bp.route('/newsletter/subscribe', methods=['POST'])
+@limiter.limit("5 per hour")
+def newsletter_subscribe():
+    """Subscribe to newsletter"""
+    email = request.form.get('email', '').strip().lower()
+    
+    # Validate email
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not email or not re.match(email_regex, email):
+        flash('Please enter a valid email address.', 'danger')
+        return redirect(request.referrer or url_for('main.index'))
+    
+    try:
+        # Check if already subscribed
+        existing = Newsletter.query.filter_by(email=email).first()
+        if existing:
+            if existing.is_active:
+                flash('You are already subscribed to our newsletter!', 'info')
+            else:
+                # Reactivate subscription
+                existing.is_active = True
+                db.session.commit()
+                flash('Welcome back! Your subscription has been reactivated.', 'success')
+        else:
+            # Create new subscription
+            subscriber = Newsletter(email=email)
+            db.session.add(subscriber)
+            db.session.commit()
+            
+            # Send welcome email
+            try:
+                from app.services.email_service import EmailService
+                email_service = EmailService()
+                email_service.send_email(
+                    to=email,
+                    subject='Welcome to Momentum Clips!',
+                    template='newsletter_welcome',
+                    email=email
+                )
+            except Exception as e:
+                current_app.logger.error(f'Newsletter welcome email error: {str(e)}')
+            
+            flash('Thanks for subscribing! Check your email for a welcome message.', 'success')
+        
+        return redirect(request.referrer or url_for('main.index'))
+        
+    except IntegrityError:
+        db.session.rollback()
+        flash('You are already subscribed!', 'info')
+        return redirect(request.referrer or url_for('main.index'))
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Newsletter subscription error: {str(e)}')
+        flash('An error occurred. Please try again later.', 'danger')
+        return redirect(request.referrer or url_for('main.index'))
 
 
 @main_bp.route('/health')

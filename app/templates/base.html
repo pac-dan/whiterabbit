@@ -25,6 +25,42 @@
     <meta property="twitter:description" content="{% block twitter_description %}Professional snowboard video production{% endblock %}">
     <meta property="twitter:image" content="{% block twitter_image %}{{ url_for('static', filename='images/og-image.jpg', _external=True) }}{% endblock %}">
     
+    <!-- JSON-LD Structured Data for Local Business -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Momentum Clips",
+        "image": "{{ url_for('static', filename='images/hero_2.jpg', _external=True) }}",
+        "description": "Professional snowboard video production services in Bansko, Bulgaria. We capture your epic moments on the slopes with 4K cameras, drones, and expert editing.",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Bansko",
+            "addressCountry": "Bulgaria"
+        },
+        "telephone": "+353873684392",
+        "priceRange": "$$",
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "41.8367",
+            "longitude": "23.4870"
+        },
+        "url": "{{ request.url_root }}",
+        "sameAs": [
+            "{{ SOCIAL_INSTAGRAM }}",
+            "{{ SOCIAL_FACEBOOK }}",
+            "{{ SOCIAL_TIKTOK }}",
+            "{{ SOCIAL_LINKEDIN }}"
+        ],
+        "openingHours": "Mo-Su",
+        "areaServed": {
+            "@type": "Place",
+            "name": "Bansko, Bulgaria"
+        },
+        "serviceType": ["Video Production", "Snowboard Photography", "Action Sports Videography", "Drone Filming"]
+    }
+    </script>
+    
     <title>{% block page_title %}Momentum Clips - Professional Slope Footage & Editing{% endblock %}</title>
 
     <!-- Favicon (SVG inline to avoid 404) -->
@@ -66,24 +102,9 @@
                     <a href="{{ url_for('main.packages') }}" class="nav-link font-semibold">PACKAGES</a>
                     <a href="{{ url_for('main.gallery') }}" class="nav-link font-semibold">GALLERY</a>
                     <a href="{{ url_for('main.testimonials') }}" class="nav-link font-semibold">TESTIMONIALS</a>
-                    <a href="{{ url_for('main.contact') }}" class="nav-link font-semibold">CONTACT</a>
-
-                    {% if current_user.is_authenticated %}
-                        {% if current_user.is_admin %}
-                            <a href="{{ url_for('admin.dashboard') }}" class="nav-link font-semibold">
-                                <i class="fas fa-cog"></i> ADMIN
-                            </a>
-                        {% endif %}
-                        <a href="{{ url_for('auth.profile') }}" class="nav-link font-semibold">
-                            <i class="fas fa-user"></i> PROFILE
-                        </a>
-                        <a href="{{ url_for('auth.logout') }}" class="nav-link font-semibold">LOGOUT</a>
-                    {% else %}
-                        <a href="{{ url_for('auth.login') }}" class="nav-link font-semibold">LOGIN</a>
-                        <a href="{{ url_for('booking.new_booking') }}" class="btn-book-cyber">
-                            BOOK NOW
-                        </a>
-                    {% endif %}
+                    <a href="{{ url_for('main.packages') }}" class="btn-book-cyber">
+                        BOOK NOW
+                    </a>
                 </div>
 
                 <!-- Mobile menu button -->
@@ -102,18 +123,7 @@
                 <a href="{{ url_for('main.packages') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">PACKAGES</a>
                 <a href="{{ url_for('main.gallery') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">GALLERY</a>
                 <a href="{{ url_for('main.testimonials') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">TESTIMONIALS</a>
-                <a href="{{ url_for('main.contact') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">CONTACT</a>
-
-                {% if current_user.is_authenticated %}
-                    {% if current_user.is_admin %}
-                        <a href="{{ url_for('admin.dashboard') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition"><i class="fas fa-cog mr-2"></i>ADMIN</a>
-                    {% endif %}
-                    <a href="{{ url_for('auth.profile') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition"><i class="fas fa-user mr-2"></i>PROFILE</a>
-                    <a href="{{ url_for('auth.logout') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">LOGOUT</a>
-                {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">LOGIN</a>
-                    <a href="{{ url_for('booking.new_booking') }}" class="block px-4 py-3 bg-[#00D4FF] text-white text-center rounded-lg font-bold text-base hover:bg-[#00B8E6] transition">BOOK NOW</a>
-                {% endif %}
+                <a href="{{ url_for('main.packages') }}" class="block px-4 py-3 bg-[#00D4FF] text-white text-center rounded-lg font-bold text-base hover:bg-[#00B8E6] transition">BOOK NOW</a>
             </div>
         </div>
     </nav>
@@ -177,8 +187,9 @@
                     <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact</h3>
                     <ul class="space-y-2 text-sm sm:text-base text-gray-400">
                         <li class="flex items-start"><i class="fas fa-envelope mr-2 mt-1 flex-shrink-0"></i> <span class="break-all">{{ support_email }}</span></li>
-                        <li><i class="fas fa-phone mr-2"></i> 0873684392</li>
+                        <li><i class="fas fa-phone mr-2"></i> +353 873 684 392</li>
                         <li><i class="fas fa-map-marker-alt mr-2"></i> Bansko, Bulgaria</li>
+                        <li><i class="fas fa-clock mr-2"></i> Flexible hours - Book anytime!</li>
                     </ul>
                 </div>
 
@@ -186,8 +197,9 @@
                 <div>
                     <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Stay Updated</h3>
                     <p class="text-sm sm:text-base text-gray-400 mb-3 sm:mb-4">Get the latest videos and deals</p>
-                    <form class="flex">
-                        <input type="email" placeholder="Your email" class="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-l-lg text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#00D4FF]">
+                    <form method="POST" action="{{ url_for('main.newsletter_subscribe') }}" class="flex">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="email" name="email" placeholder="Your email" required class="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-l-lg text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#00D4FF]">
                         <button type="submit" class="bg-[#00D4FF] px-3 sm:px-4 py-2 rounded-r-lg hover:bg-[#00B8E6] transition">
                             <i class="fas fa-arrow-right"></i>
                         </button>
@@ -197,7 +209,7 @@
 
             <div class="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400">
                 <p class="text-xs sm:text-sm">&copy; 2025 Momentum Clips. All rights reserved. | <a href="#" class="hover:text-white transition">Privacy Policy</a> | <a href="#" class="hover:text-white transition">Terms of Service</a></p>
-                <p class="mt-2 text-xs sm:text-sm font-medium">Powered by <span style="color: #8B5CF6;">Claude AI</span> <i class="fas fa-robot" style="color: #00D4FF;"></i></p>
+                <p class="mt-2 text-xs sm:text-sm font-medium">Powered by <span style="color: #8B5CF6;">Momentum Digital</span> <i class="fas fa-robot" style="color: #00D4FF;"></i></p>
             </div>
         </div>
     </footer>
@@ -224,11 +236,11 @@
         type="module"
         data-public-key="{{ RETELL_PUBLIC_KEY }}"
         data-agent-id="{{ RETELL_AGENT_ID }}"
-        data-title="Chat with Momentum Clips AI"
+        data-title="Chat with AI"
         data-color="#00D4FF"
         data-bot-name="Momentum AI"
-        data-popup-message="Hi! Need help booking your snowboard video session?"
-        data-show-ai-popup="true"
+        data-popup-message="Chat with AI"
+        data-show-ai-popup="false"
         data-show-ai-popup-time="60"
         data-auto-open="false"
     ></script>

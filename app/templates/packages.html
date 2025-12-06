@@ -68,8 +68,8 @@
                     </div>
 
                     <!-- Book Button -->
-                    <a href="{{ url_for('booking.new_booking', package_id=package.id) }}" 
-                       class="block w-full text-center {% if package.name == 'Pro Session' %}bg-[#00D4FF] hover:bg-[#00B8E6]{% else %}bg-[#0F172A] hover:bg-[#1E293B]{% endif %} text-white px-5 sm:px-6 py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg transition mt-auto">
+                    <a href="#book-session" 
+                       class="block w-full text-center {% if package.name == 'Pro Session' %}bg-[#00D4FF] hover:bg-[#00B8E6]{% else %}bg-[#0F172A] hover:bg-[#1E293B]{% endif %} text-white px-5 sm:px-6 py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg transition mt-auto smooth-scroll">
                         Book {{ package.name }}
                     </a>
 
@@ -145,6 +145,31 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+</section>
+
+<!-- Calendly Booking Section -->
+<section class="py-16 bg-white" id="book-session">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl sm:text-4xl font-bold text-[#0F172A] mb-4 heading">BOOK YOUR SESSION</h2>
+            <p class="text-lg sm:text-xl text-gray-600 font-medium">Select your preferred date and time</p>
+        </div>
+        
+        <!-- Calendly inline widget begin -->
+        <div class="calendly-inline-widget rounded-lg overflow-hidden shadow-xl border-4 border-[#00D4FF]/20" 
+             data-url="https://calendly.com/mail-kevinjh/30min" 
+             style="min-width:320px;height:700px;">
+        </div>
+        <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+        <!-- Calendly inline widget end -->
+        
+        <div class="mt-8 text-center">
+            <p class="text-sm text-gray-600">
+                <i class="fas fa-info-circle text-[#00D4FF] mr-2"></i>
+                After booking your session, you'll receive payment instructions via email
+            </p>
         </div>
     </div>
 </section>

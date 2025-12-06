@@ -16,7 +16,7 @@
                 <span class="cyan-accent glow-text block mt-2" style="color: #00D4FF;">VIDEO PRODUCTION</span>
             </h1>
             <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
-                <a href="{{ url_for('booking.new_booking') }}" class="btn-primary btn-book-now text-center inline-block text-sm sm:text-base">
+                <a href="{{ url_for('main.packages') }}#book-session" class="btn-primary btn-book-now text-center inline-block text-sm sm:text-base">
                     BOOK YOUR SESSION
                 </a>
                 <a href="{{ url_for('main.gallery') }}" class="btn-secondary text-center inline-block text-sm sm:text-base">
@@ -189,8 +189,93 @@
     </div>
 </section>
 
+<!-- FAQ Section -->
+<section class="py-12 sm:py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold heading mb-3 sm:mb-4" style="color: #0F172A;">FREQUENTLY ASKED QUESTIONS</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-600 font-medium px-4">Get quick answers to common questions</p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- FAQ 1 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">How long does it take to get my video?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>Your professionally edited video will be delivered within 48-72 hours after your session. We work quickly without compromising quality!</p>
+                </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">What's included in each package?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>Each package includes professional filming with 4K cameras and GoPros, professional editing, music, effects, and delivery in multiple formats perfect for social media. Higher tiers include drone footage and more edited videos.</p>
+                </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">Do I need to bring my own camera equipment?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>No! We provide all professional filming equipment including 4K cameras, GoPros, stabilizers, and drones (for select packages). You just bring your snowboard and enthusiasm!</p>
+                </div>
+            </div>
+
+            <!-- FAQ 4 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">Can I choose the music for my video?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>Absolutely! You can either choose from our extensive library of licensed music, or request specific tracks. We'll work with you to match the perfect soundtrack to your riding style.</p>
+                </div>
+            </div>
+
+            <!-- FAQ 5 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">What if the weather is bad on my booking day?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>We offer free rescheduling for weather-related cancellations! Safety comes first, and we want you to have the best possible conditions for an amazing video.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <a href="{{ url_for('main.faq') }}" class="text-[#00D4FF] hover:text-[#00B8E6] font-semibold text-lg">
+                View All FAQs <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+<script>
+function toggleFAQ(button) {
+    const content = button.nextElementSibling;
+    const icon = button.querySelector('i');
+    
+    // Toggle content
+    content.classList.toggle('hidden');
+    
+    // Rotate icon
+    icon.classList.toggle('rotate-180');
+}
+</script>
 {% endblock %}

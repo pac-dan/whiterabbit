@@ -151,7 +151,7 @@ Generate only the caption, no additional text."""
 
         try:
             response = self.client.messages.create(
-                model='claude-haiku-4-5-20250829',  # Use Haiku for faster, cheaper content generation
+                model='claude-sonnet-4-5-20250929',  # Use Sonnet 4 for most powerful AI
                 max_tokens=300,
                 messages=[{
                     'role': 'user',
@@ -201,7 +201,7 @@ Respond in JSON format:
 
         try:
             response = self.client.messages.create(
-                model='claude-haiku-4-5-20250829',
+                model='claude-sonnet-4-5-20250929',
                 max_tokens=150,
                 messages=[{
                     'role': 'user',
@@ -249,7 +249,7 @@ Create a short, enthusiastic confirmation message (2-3 sentences) that makes the
 
         try:
             response = self.client.messages.create(
-                model='claude-haiku-4-5-20250829',
+                model='claude-sonnet-4-5-20250929',
                 max_tokens=200,
                 messages=[{
                     'role': 'user',
