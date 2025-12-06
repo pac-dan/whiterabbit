@@ -87,21 +87,25 @@
     <!-- Navigation - Cyberpunk Upgraded -->
     <nav class="navbar fixed w-full z-50" id="mainNav">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-            <div class="flex justify-between items-center h-full">
-                <div class="flex items-center">
-                    <!-- Logo with Pulsing Polygon -->
+            <div class="flex items-center justify-between h-full">
+                <!-- Logo - Left -->
+                <div class="flex items-center flex-shrink-0">
                     <a href="{{ url_for('main.index') }}" class="flex items-center">
                         <span class="logo-polygon"></span>
                         <span class="text-lg sm:text-xl lg:text-2xl font-bold text-white" style="letter-spacing: 0.1em; font-family: 'Orbitron', sans-serif;">MOMENTUMCLIPS</span>
                     </a>
                 </div>
 
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-2">
+                <!-- Desktop Navigation - Centered -->
+                <div class="hidden md:flex items-center space-x-6 absolute left-1/2 transform -translate-x-1/2">
                     <a href="{{ url_for('main.index') }}" class="nav-link font-semibold">HOME</a>
                     <a href="{{ url_for('main.packages') }}" class="nav-link font-semibold">PACKAGES</a>
                     <a href="{{ url_for('main.gallery') }}" class="nav-link font-semibold">GALLERY</a>
                     <a href="{{ url_for('main.testimonials') }}" class="nav-link font-semibold">TESTIMONIALS</a>
+                </div>
+                
+                <!-- Book Now Button - Right -->
+                <div class="hidden md:flex items-center">
                     <a href="{{ url_for('main.packages') }}" class="btn-book-cyber">
                         BOOK NOW
                     </a>
