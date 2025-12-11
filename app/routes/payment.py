@@ -40,16 +40,16 @@ def checkout(package):
     
     stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
     if not stripe_key:
-        flash('Payment system is not configured. Please contact support.', 'danger')
+        current_app.logger.error('STRIPE_SECRET_KEY not configured')
+        flash('Payment system is being configured. Please try again later or contact support.', 'warning')
         return redirect(url_for('main.packages'))
     
     stripe.api_key = stripe_key
     pkg = PACKAGES[package]
     
     try:
-        # Create Stripe Checkout Session with all payment methods enabled
+        # Create Stripe Checkout Session
         checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
             line_items=[{
                 'price_data': {
                     'currency': 'eur',
@@ -68,14 +68,6 @@ def checkout(package):
                 'package': package,
                 'package_name': pkg['name']
             },
-            # Enable additional payment methods
-            payment_method_options={
-                'card': {
-                    'setup_future_usage': None
-                }
-            },
-            # Allow Stripe to show available payment methods based on customer's device
-            automatic_tax={'enabled': False},
         )
         
         return redirect(checkout_session.url, code=303)
@@ -83,6 +75,10 @@ def checkout(package):
     except stripe.error.StripeError as e:
         current_app.logger.error(f'Stripe Checkout Error: {str(e)}')
         flash('Unable to process payment. Please try again.', 'danger')
+        return redirect(url_for('main.packages'))
+    except Exception as e:
+        current_app.logger.error(f'Payment Error: {str(e)}')
+        flash('An error occurred. Please try again.', 'danger')
         return redirect(url_for('main.packages'))
 
 
