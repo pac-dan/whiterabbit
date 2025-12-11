@@ -126,8 +126,8 @@
         </div>
 
         <!-- Mobile Navigation - Separate floating card -->
-        <div id="mobile-menu" class="hidden md:hidden mt-3">
-            <div class="navbar-island-mobile px-4 py-4 space-y-1">
+        <div id="mobile-menu" class="hidden md:hidden mt-3 mx-3">
+            <div class="bg-[#0F172A]/98 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-4 space-y-1 shadow-xl">
                 <a href="{{ url_for('main.index') }}" class="block px-4 py-3 text-white hover:bg-white/10 rounded-xl font-medium transition">Home</a>
                 <a href="{{ url_for('main.packages') }}" class="block px-4 py-3 text-white hover:bg-white/10 rounded-xl font-medium transition">Packages</a>
                 <a href="{{ url_for('main.gallery') }}" class="block px-4 py-3 text-white hover:bg-white/10 rounded-xl font-medium transition">Gallery</a>
@@ -164,7 +164,7 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main class="pt-16 min-h-screen">
+    <main class="min-h-screen">
         {% block content %}{% endblock %}
     </main>
 
@@ -253,37 +253,41 @@
         data-title="Chat with AI"
         data-color="#00D4FF"
         data-bot-name="Momentum AI"
-        data-popup-message="Chat with AI"
+        data-popup-message=""
         data-show-ai-popup="false"
-        data-show-ai-popup-time="60"
         data-auto-open="false"
     ></script>
     
     <!-- Custom Chatbot Widget Styling -->
     <style>
-        /* Customize Retell AI Widget */
-        #retell-widget-bubble {
-            bottom: 24px !important;
-            right: 24px !important;
-            width: 60px !important;
-            height: 60px !important;
+        /* Style the Retell widget button to be a pill with text */
+        #retell-widget-bubble,
+        [id*="retell"][id*="bubble"],
+        button[class*="retell"],
+        div[class*="retell-widget"] > button {
+            width: auto !important;
+            min-width: 140px !important;
+            height: 48px !important;
+            border-radius: 24px !important;
+            padding: 0 20px !important;
             background: linear-gradient(135deg, #00D4FF, #8B5CF6) !important;
             box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4) !important;
             transition: all 0.3s ease !important;
         }
         
-        #retell-widget-bubble:hover {
-            transform: scale(1.1) !important;
+        #retell-widget-bubble:hover,
+        [id*="retell"][id*="bubble"]:hover,
+        button[class*="retell"]:hover,
+        div[class*="retell-widget"] > button:hover {
+            transform: scale(1.05) !important;
             box-shadow: 0 12px 32px rgba(0, 212, 255, 0.6) !important;
         }
         
-        /* Widget popup message styling */
-        [data-retell-widget] + div[style*="position: fixed"] {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98)) !important;
-            backdrop-filter: blur(20px) !important;
-            border: 2px solid rgba(0, 212, 255, 0.3) !important;
-            border-radius: 16px !important;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3) !important;
+        /* Hide any popup messages from the widget */
+        [data-retell-widget] + div[style*="position: fixed"],
+        div[class*="retell-popup"],
+        div[class*="popup-message"] {
+            display: none !important;
         }
         
         /* Chat window styling */
@@ -292,23 +296,38 @@
             overflow: hidden !important;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
         }
-        
-        /* Smooth animations */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        [data-retell-widget] {
-            animation: slideIn 0.4s ease-out !important;
-        }
     </style>
+    
+    <!-- Add "Chat with AI" label next to widget -->
+    <div id="chat-ai-label" class="fixed bottom-7 right-6 z-40 pointer-events-none" style="display: none;">
+        <div class="flex items-center gap-2 bg-gradient-to-r from-[#00D4FF] to-[#8B5CF6] text-white font-semibold px-5 py-3 rounded-full shadow-lg">
+            <i class="fas fa-robot"></i>
+            <span class="text-sm">Chat with AI</span>
+        </div>
+    </div>
+    
+    <script>
+        // Wait for Retell widget to load, then add our custom text label
+        setTimeout(function() {
+            const retellBtn = document.querySelector('[id*="retell"][id*="bubble"], button[class*="retell"], div[class*="retell-widget"] button');
+            if (retellBtn) {
+                // Create a wrapper with text
+                const wrapper = document.createElement('div');
+                wrapper.className = 'fixed bottom-6 right-6 z-50 flex items-center gap-2 cursor-pointer';
+                wrapper.style.cssText = 'background: linear-gradient(135deg, #00D4FF, #8B5CF6); padding: 12px 20px; border-radius: 24px; box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4); transition: all 0.3s ease;';
+                wrapper.innerHTML = '<i class="fas fa-robot text-white text-lg"></i><span class="text-white font-semibold text-sm">Chat with AI</span>';
+                wrapper.onclick = function() { retellBtn.click(); };
+                wrapper.onmouseenter = function() { this.style.transform = 'scale(1.05)'; this.style.boxShadow = '0 12px 32px rgba(0, 212, 255, 0.6)'; };
+                wrapper.onmouseleave = function() { this.style.transform = 'scale(1)'; this.style.boxShadow = '0 8px 24px rgba(0, 212, 255, 0.4)'; };
+                
+                // Hide original button
+                retellBtn.style.display = 'none';
+                
+                // Add wrapper to body
+                document.body.appendChild(wrapper);
+            }
+        }, 2000);
+    </script>
     {% endif %}
 </body>
 </html>
