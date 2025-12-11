@@ -154,16 +154,55 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
             <h2 class="text-3xl sm:text-4xl font-bold text-[#0F172A] mb-4 heading">BOOK YOUR SESSION</h2>
-            <p class="text-lg sm:text-xl text-gray-600 font-medium">Select your preferred date and time</p>
+            <p class="text-lg sm:text-xl text-gray-600 font-medium">Choose your package and select a time</p>
         </div>
         
-        <!-- Calendly inline widget begin -->
-        <div class="calendly-inline-widget rounded-lg overflow-hidden shadow-xl border-4 border-[#00D4FF]/20" 
-             data-url="https://calendly.com/mail-kevinjh/2hrs?background_color=0F172A&primary_color=00D4FF" 
-             style="min-width:320px;height:700px;">
+        <!-- Package Selection Tabs -->
+        <div class="flex flex-wrap justify-center gap-3 mb-8">
+            <button onclick="selectPackage('basic')" id="tab-basic"
+                    class="package-tab active px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-[#00D4FF] text-white shadow-lg">
+                <i class="fas fa-snowflake mr-2"></i>Basic Session
+                <span class="block text-xs font-normal opacity-80">2 hrs</span>
+            </button>
+            <button onclick="selectPackage('pro')" id="tab-pro"
+                    class="package-tab px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300">
+                <i class="fas fa-fire mr-2"></i>Pro Session
+                <span class="block text-xs font-normal opacity-80">2.5 hrs</span>
+            </button>
+            <button onclick="selectPackage('expert')" id="tab-expert"
+                    class="package-tab px-6 py-3 rounded-xl font-bold transition-all duration-300 bg-gray-200 text-gray-700 hover:bg-gray-300">
+                <i class="fas fa-crown mr-2"></i>Expert Session
+                <span class="block text-xs font-normal opacity-80">3 hrs</span>
+            </button>
+        </div>
+        
+        <!-- Calendly Widgets Container -->
+        <div class="relative">
+            <!-- Basic Session Widget -->
+            <div id="calendly-basic" class="calendly-container">
+                <div class="calendly-inline-widget rounded-lg overflow-hidden shadow-xl border-4 border-[#00D4FF]/20" 
+                     data-url="https://calendly.com/mail-kevinjh/2hrs?hide_gdpr_banner=1&background_color=0F172A&primary_color=00D4FF" 
+                     style="min-width:320px;height:700px;">
+                </div>
+            </div>
+            
+            <!-- Pro Session Widget -->
+            <div id="calendly-pro" class="calendly-container hidden">
+                <div class="calendly-inline-widget rounded-lg overflow-hidden shadow-xl border-4 border-[#8B5CF6]/20" 
+                     data-url="https://calendly.com/mail-kevinjh/new-meeting?hide_gdpr_banner=1&background_color=0F172A&primary_color=8B5CF6" 
+                     style="min-width:320px;height:700px;">
+                </div>
+            </div>
+            
+            <!-- Expert Session Widget -->
+            <div id="calendly-expert" class="calendly-container hidden">
+                <div class="calendly-inline-widget rounded-lg overflow-hidden shadow-xl border-4 border-[#F59E0B]/20" 
+                     data-url="https://calendly.com/mail-kevinjh/new-meeting-1?hide_gdpr_banner=1&background_color=0F172A&primary_color=F59E0B" 
+                     style="min-width:320px;height:700px;">
+                </div>
+            </div>
         </div>
         <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
-        <!-- Calendly inline widget end -->
         
         <div class="mt-8 text-center">
             <p class="text-sm text-gray-600">
@@ -173,6 +212,38 @@
         </div>
     </div>
 </section>
+
+<script>
+function selectPackage(pkg) {
+    // Hide all calendly containers
+    document.querySelectorAll('.calendly-container').forEach(el => el.classList.add('hidden'));
+    
+    // Reset all tabs
+    document.querySelectorAll('.package-tab').forEach(tab => {
+        tab.classList.remove('bg-[#00D4FF]', 'bg-[#8B5CF6]', 'bg-[#F59E0B]', 'text-white', 'shadow-lg');
+        tab.classList.add('bg-gray-200', 'text-gray-700');
+    });
+    
+    // Show selected calendly and style tab
+    const activeTab = document.getElementById('tab-' + pkg);
+    document.getElementById('calendly-' + pkg).classList.remove('hidden');
+    activeTab.classList.remove('bg-gray-200', 'text-gray-700');
+    activeTab.classList.add('text-white', 'shadow-lg');
+    
+    if (pkg === 'basic') activeTab.classList.add('bg-[#00D4FF]');
+    else if (pkg === 'pro') activeTab.classList.add('bg-[#8B5CF6]');
+    else if (pkg === 'expert') activeTab.classList.add('bg-[#F59E0B]');
+}
+
+// Auto-select package if coming from homepage
+document.addEventListener('DOMContentLoaded', function() {
+    const selectedPackage = localStorage.getItem('selectedPackage');
+    if (selectedPackage) {
+        selectPackage(selectedPackage);
+        localStorage.removeItem('selectedPackage');
+    }
+});
+</script>
 
 <!-- FAQ Section -->
 <section class="py-16 bg-gray-50">
