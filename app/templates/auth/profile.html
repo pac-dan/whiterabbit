@@ -74,7 +74,7 @@
         <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-bold text-[#0F172A]">Upcoming Bookings</h2>
-                <a href="{{ url_for('booking.new_booking') }}" class="bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00D4FF] transition">
+                <a href="{{ url_for('main.packages') }}" class="bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00B8E6] transition">
                     <i class="fas fa-plus mr-2"></i> New Booking
                 </a>
             </div>
@@ -118,7 +118,7 @@
                 <div class="text-center py-12">
                     <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
                     <p class="text-gray-600 mb-4">No upcoming bookings</p>
-                    <a href="{{ url_for('booking.new_booking') }}" class="bg-[#00D4FF] text-white px-6 py-3 rounded-lg hover:bg-[#00D4FF] transition inline-block">
+                    <a href="{{ url_for('main.packages') }}" class="bg-[#00D4FF] text-white px-6 py-3 rounded-lg hover:bg-[#00B8E6] transition inline-block">
                         Book Your First Session
                     </a>
                 </div>
