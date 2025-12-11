@@ -12,62 +12,61 @@
 </section>
 
 <!-- Compare Packages -->
-<section class="py-12 sm:py-16 bg-gray-50">
+<section class="py-12 sm:py-16 hero-gradient">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-10">
-            <h2 class="text-3xl sm:text-4xl font-bold text-[#0F172A] mb-4 heading">COMPARE PACKAGES</h2>
-            <p class="text-lg text-gray-600">Find the perfect package for your session</p>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4 heading">COMPARE PACKAGES</h2>
+            <p class="text-lg text-gray-300">Find the perfect package for your session</p>
         </div>
         
         {% if packages %}
         <!-- Package Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {% for package in packages %}
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 {% if package.name == 'Pro Session' %}ring-2 ring-[#8B5CF6]{% endif %}">
-                <!-- Header -->
-                <div class="{% if package.name == 'Pro Session' %}bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED]{% elif package.name == 'Expert Session' %}bg-gradient-to-r from-[#F59E0B] to-[#D97706]{% else %}bg-gradient-to-r from-[#00D4FF] to-[#00B8E6]{% endif %} text-white p-6 text-center">
-                    {% if package.name == 'Pro Session' %}
-                    <span class="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3">MOST POPULAR</span>
-                    {% endif %}
-                    <h3 class="text-2xl font-bold mb-2">{{ package.name }}</h3>
-                    <div class="text-4xl font-bold">${{ "%.0f"|format(package.price) }}</div>
-                    <p class="text-white/80 text-sm mt-1">{{ package.duration }} hours</p>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border {% if package.name == 'Pro Session' %}border-[#8B5CF6]{% else %}border-white/20{% endif %} hover:border-{% if package.name == 'Pro Session' %}[#8B5CF6]{% elif package.name == 'Expert Session' %}[#F59E0B]{% else %}[#00D4FF]{% endif %}/50 transition-all duration-300 hover:transform hover:scale-105 {% if package.name == 'Pro Session' %}relative{% endif %}">
+                {% if package.name == 'Pro Session' %}
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-[#8B5CF6] text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</span>
                 </div>
-                
-                <!-- Features -->
-                <div class="p-6">
-                    <ul class="space-y-3 mb-6">
-                        <li class="flex items-center text-gray-700">
-                            <i class="fas fa-video text-[#00D4FF] w-5 mr-3"></i>
-                            {{ package.video_count }} edited video(s)
-                        </li>
-                        <li class="flex items-center text-gray-700">
-                            <i class="fas fa-users text-[#00D4FF] w-5 mr-3"></i>
-                            Up to {{ package.max_riders }} rider(s)
-                        </li>
-                        <li class="flex items-center text-gray-700">
-                            {% if package.includes_drone %}
-                            <i class="fas fa-check-circle text-green-500 w-5 mr-3"></i>
-                            Drone footage included
-                            {% else %}
-                            <i class="fas fa-times-circle text-gray-400 w-5 mr-3"></i>
-                            <span class="text-gray-400">No drone footage</span>
-                            {% endif %}
-                        </li>
+                {% endif %}
+                <div class="text-center">
+                    <div class="w-16 h-16 {% if package.name == 'Pro Session' %}bg-[#8B5CF6]/20{% elif package.name == 'Expert Session' %}bg-[#F59E0B]/20{% else %}bg-[#00D4FF]/20{% endif %} rounded-full flex items-center justify-center mx-auto mb-4">
+                        {% if package.name == 'Pro Session' %}
+                        <i class="fas fa-fire text-[#8B5CF6] text-2xl"></i>
+                        {% elif package.name == 'Expert Session' %}
+                        <i class="fas fa-crown text-[#F59E0B] text-2xl"></i>
+                        {% else %}
+                        <i class="fas fa-snowflake text-[#00D4FF] text-2xl"></i>
+                        {% endif %}
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">{{ package.name }}</h3>
+                    <p class="text-gray-400 text-sm mb-4">{{ package.duration }} hours of filming</p>
+                    <p class="text-3xl font-bold {% if package.name == 'Pro Session' %}text-[#8B5CF6]{% elif package.name == 'Expert Session' %}text-[#F59E0B]{% else %}text-[#00D4FF]{% endif %} mb-4">${{ "%.0f"|format(package.price) }}</p>
+                    <ul class="text-sm text-gray-300 space-y-2 mb-6 text-left">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>{{ package.video_count }} edited video(s)</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Up to {{ package.max_riders }} rider(s)</li>
+                        {% if package.includes_drone %}
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Drone footage included</li>
+                        {% endif %}
                     </ul>
-                    
-                    <!-- View Details Button -->
                     <a href="{{ url_for('main.package_detail', package_id=package.id) }}" 
-                       class="block w-full text-center border-2 {% if package.name == 'Pro Session' %}border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]{% elif package.name == 'Expert Session' %}border-[#F59E0B] text-[#F59E0B] hover:bg-[#F59E0B]{% else %}border-[#00D4FF] text-[#00D4FF] hover:bg-[#00D4FF]{% endif %} hover:text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300">
+                       class="block w-full {% if package.name == 'Pro Session' %}bg-[#8B5CF6] hover:bg-[#7C3AED]{% elif package.name == 'Expert Session' %}bg-[#F59E0B] hover:bg-[#D97706]{% else %}bg-[#00D4FF] hover:bg-[#00B8E6]{% endif %} text-white py-3 rounded-xl font-bold transition">
                         View Full Details
                     </a>
                 </div>
             </div>
             {% endfor %}
         </div>
+        
+        <div class="text-center">
+            <p class="text-sm text-gray-400">
+                <i class="fas fa-shield-alt text-[#00D4FF] mr-2"></i>
+                Secure booking · Instant confirmation · Free rescheduling
+            </p>
+        </div>
         {% else %}
         <div class="text-center py-12">
-            <p class="text-gray-600 text-xl">No packages available at this time.</p>
+            <p class="text-gray-300 text-xl">No packages available at this time.</p>
         </div>
         {% endif %}
     </div>
@@ -174,4 +173,3 @@ document.addEventListener('DOMContentLoaded', function() {
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
 {% endblock %}
-
