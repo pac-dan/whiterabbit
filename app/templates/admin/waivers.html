@@ -199,39 +199,6 @@
     </div>
 </div>
 
-<script>
-function copyWaiverLink() {
-    const input = document.getElementById('waiver-link');
-    input.select();
-    document.execCommand('copy');
-    alert('Waiver link copied to clipboard!');
-}
-
-function viewWaiverDetails(id, legalName, email, ip, userAgent, signedAt, version) {
-    document.getElementById('modal-legal-name').textContent = legalName;
-    document.getElementById('modal-email').textContent = email;
-    document.getElementById('modal-ip').textContent = ip;
-    document.getElementById('modal-user-agent').textContent = userAgent;
-    document.getElementById('modal-signed-at').textContent = signedAt;
-    document.getElementById('modal-version').textContent = 'v' + version;
-    
-    const modal = document.getElementById('waiver-modal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-}
-
-function closeWaiverModal() {
-    const modal = document.getElementById('waiver-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
-
-// Close modal on backdrop click
-document.getElementById('waiver-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeWaiverModal();
-    }
-});
-</script>
+<script src="{{ url_for('static', filename='js/admin-waivers.js') }}"></script>
 {% endblock %}
 

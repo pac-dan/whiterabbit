@@ -437,49 +437,6 @@
 {% block extra_js %}
 <!-- Swiper JS -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
 <script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
-<script>
-// Initialize Video Carousel
-const videoSwiper = new Swiper('.videoSwiper', {
-    slidesPerView: 1,
-    spaceBetween: 30,
-    loop: true,
-    autoplay: {
-        delay: 5000,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true,
-    },
-    pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-        dynamicBullets: true,
-    },
-    navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-    },
-    breakpoints: {
-        640: {
-            slidesPerView: 2,
-            spaceBetween: 20,
-        },
-        1024: {
-            slidesPerView: 3,
-            spaceBetween: 30,
-        },
-    },
-});
-
-function toggleFAQ(button) {
-    const content = button.nextElementSibling;
-    const icon = button.querySelector('i');
-    
-    // Toggle content
-    content.classList.toggle('hidden');
-    
-    // Rotate icon
-    icon.classList.toggle('rotate-180');
-}
-</script>
+<script src="{{ url_for('static', filename='js/homepage.js') }}"></script>
 {% endblock %}

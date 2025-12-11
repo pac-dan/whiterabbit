@@ -178,27 +178,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-// FAQ Accordion
-document.querySelectorAll('.faq-question').forEach(button => {
-    button.addEventListener('click', () => {
-        const answer = button.nextElementSibling;
-        const icon = button.querySelector('i');
-        
-        answer.classList.toggle('hidden');
-        icon.classList.toggle('fa-chevron-down');
-        icon.classList.toggle('fa-chevron-up');
-    });
-});
-
-// FAQ Search
-document.getElementById('faq-search').addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    document.querySelectorAll('.border').forEach(item => {
-        const text = item.textContent.toLowerCase();
-        item.style.display = text.includes(searchTerm) ? 'block' : 'none';
-    });
-});
-</script>
+<script src="{{ url_for('static', filename='js/faq.js') }}"></script>
 {% endblock %}
 
