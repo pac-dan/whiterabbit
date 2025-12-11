@@ -71,105 +71,6 @@
     </div>
 </section>
 
-<!-- Packages Section -->
-<section class="py-12 sm:py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8 sm:mb-12">
-            <h2 class="text-3xl sm:text-4xl font-bold text-[#0F172A] mb-3 sm:mb-4">Choose Your Package</h2>
-            <p class="text-base sm:text-lg lg:text-xl text-gray-600 px-4">From beginner to pro, we've got you covered</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {% for package in packages %}
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 flex flex-col h-full">
-                <div class="p-5 sm:p-8 flex flex-col flex-1">
-                    <h3 class="text-xl sm:text-2xl font-bold text-[#0F172A] mb-2">{{ package.name }}</h3>
-                    <div class="text-3xl sm:text-4xl font-bold text-[#00D4FF] mb-3 sm:mb-4">
-                        {{ package.price|currency }}
-                    </div>
-                    <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">{{ package.description }}</p>
-
-                    <ul class="space-y-2 sm:space-y-3 mb-6 sm:mb-8 flex-1">
-                        {% for feature in package.features.split(',') %}
-                        <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mr-2 sm:mr-3 mt-1 text-sm sm:text-base flex-shrink-0"></i>
-                            <span class="text-sm sm:text-base">{{ feature.strip() }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-
-                    <a href="{{ url_for('booking.new_booking', package_id=package.id) }}" class="block w-full bg-[#00D4FF] text-white text-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base hover:bg-[#00B8E6] transition mt-auto">
-                        Book Now
-                    </a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <div class="text-center mt-8 sm:mt-12">
-            <a href="{{ url_for('main.packages') }}" class="text-[#00D4FF] hover:text-[#00B8E6] font-bold text-base sm:text-lg">
-                View All Packages <i class="fas fa-arrow-right ml-2"></i>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Video Gallery Preview with Carousel -->
-<section class="py-12 sm:py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8 sm:mb-12">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0F172A] mb-3 sm:mb-4 heading">FEATURED VIDEOS</h2>
-            <p class="text-base sm:text-lg lg:text-xl text-gray-600 font-medium px-4">Check out our best work</p>
-        </div>
-
-        <!-- Swiper Carousel -->
-        <div class="relative">
-            <div class="swiper videoSwiper">
-                <div class="swiper-wrapper">
-            {% for video in videos %}
-                    <div class="swiper-slide">
-                        <div class="group cursor-pointer" data-video-id="{{ video.id }}" onclick="window.location.href='{{ url_for('main.gallery') }}'">
-                            <div class="relative overflow-hidden rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300">
-                                <img src="https://img.youtube.com/vi/{{ video.youtube_id }}/maxresdefault.jpg" alt="{{ video.title }}" class="w-full h-64 sm:h-72 lg:h-80 object-cover group-hover:scale-110 transition-transform duration-500">
-                                <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <i class="fas fa-play-circle text-white text-6xl sm:text-7xl lg:text-8xl pulse-chat"></i>
-                                </div>
-                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 sm:p-6">
-                                    <div class="flex items-center space-x-2 text-xs sm:text-sm text-white mb-2">
-                                        <span class="bg-[#00D4FF] px-2 py-1 rounded font-semibold">{{ video.location_tag }}</span>
-                                        <span class="bg-green-600 px-2 py-1 rounded font-semibold">{{ video.rider_level }}</span>
-                                    </div>
-                                    <h3 class="text-white font-bold text-lg sm:text-xl">{{ video.title }}</h3>
-                                    {% if video.description %}
-                                    <p class="text-gray-300 text-sm mt-1 line-clamp-2">{{ video.description }}</p>
-                                    {% endif %}
-                                </div>
-                    </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                
-                <!-- Navigation buttons -->
-                <div class="swiper-button-next !text-[#00D4FF] !w-12 !h-12 !bg-white !rounded-full !shadow-xl hover:!bg-[#00D4FF] hover:!text-white !transition-colors"></div>
-                <div class="swiper-button-prev !text-[#00D4FF] !w-12 !h-12 !bg-white !rounded-full !shadow-xl hover:!bg-[#00D4FF] hover:!text-white !transition-colors"></div>
-                
-                <!-- Pagination -->
-                <div class="swiper-pagination !bottom-0"></div>
-            </div>
-        </div>
-
-        <div class="text-center mt-8 sm:mt-12">
-            <a href="{{ url_for('main.gallery') }}" class="inline-block bg-[#00D4FF] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00B8E6] hover:shadow-2xl hover:scale-105 transition-all duration-300 transform">
-                View Full Gallery <i class="fas fa-arrow-right ml-2"></i>
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Swiper CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-
 <!-- Book Your Session - Package Selection -->
 <section class="py-12 sm:py-16 hero-gradient" id="book-session">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -258,6 +159,62 @@
         </div>
     </div>
 </section>
+
+<!-- Video Gallery Preview with Carousel -->
+<section class="py-12 sm:py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0F172A] mb-3 sm:mb-4 heading">FEATURED VIDEOS</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-600 font-medium px-4">Check out our best work</p>
+        </div>
+
+        <!-- Swiper Carousel -->
+        <div class="relative">
+            <div class="swiper videoSwiper">
+                <div class="swiper-wrapper">
+            {% for video in videos %}
+                    <div class="swiper-slide">
+                        <div class="group cursor-pointer" data-video-id="{{ video.id }}" onclick="window.location.href='{{ url_for('main.gallery') }}'">
+                            <div class="relative overflow-hidden rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300">
+                                <img src="https://img.youtube.com/vi/{{ video.youtube_id }}/maxresdefault.jpg" alt="{{ video.title }}" class="w-full h-64 sm:h-72 lg:h-80 object-cover group-hover:scale-110 transition-transform duration-500">
+                                <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <i class="fas fa-play-circle text-white text-6xl sm:text-7xl lg:text-8xl pulse-chat"></i>
+                                </div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 sm:p-6">
+                                    <div class="flex items-center space-x-2 text-xs sm:text-sm text-white mb-2">
+                                        <span class="bg-[#00D4FF] px-2 py-1 rounded font-semibold">{{ video.location_tag }}</span>
+                                        <span class="bg-green-600 px-2 py-1 rounded font-semibold">{{ video.rider_level }}</span>
+                                    </div>
+                                    <h3 class="text-white font-bold text-lg sm:text-xl">{{ video.title }}</h3>
+                                    {% if video.description %}
+                                    <p class="text-gray-300 text-sm mt-1 line-clamp-2">{{ video.description }}</p>
+                                    {% endif %}
+                                </div>
+                    </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Navigation buttons -->
+                <div class="swiper-button-next !text-[#00D4FF] !w-12 !h-12 !bg-white !rounded-full !shadow-xl hover:!bg-[#00D4FF] hover:!text-white !transition-colors"></div>
+                <div class="swiper-button-prev !text-[#00D4FF] !w-12 !h-12 !bg-white !rounded-full !shadow-xl hover:!bg-[#00D4FF] hover:!text-white !transition-colors"></div>
+                
+                <!-- Pagination -->
+                <div class="swiper-pagination !bottom-0"></div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8 sm:mt-12">
+            <a href="{{ url_for('main.gallery') }}" class="inline-block bg-[#00D4FF] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00B8E6] hover:shadow-2xl hover:scale-105 transition-all duration-300 transform">
+                View Full Gallery <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
 <!-- FAQ Section -->
 <section class="py-12 sm:py-16 bg-white">

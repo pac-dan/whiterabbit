@@ -289,12 +289,12 @@ def create_app(config_name=None):
     def inject_globals():
         """Inject global variables into all templates"""
         return {
-            'SOCIAL_INSTAGRAM': app.config.get('SOCIAL_INSTAGRAM', 'https://instagram.com/momentumclips'),
-            'SOCIAL_TIKTOK': app.config.get('SOCIAL_TIKTOK', 'https://tiktok.com/@momentumclips'),
+            'SOCIAL_INSTAGRAM': app.config.get('SOCIAL_INSTAGRAM', 'https://www.instagram.com/momentumclipsbansko/'),
+            'SOCIAL_TIKTOK': app.config.get('SOCIAL_TIKTOK', 'https://www.tiktok.com/@momentumclipsbansko'),
             'SOCIAL_FACEBOOK': app.config.get('SOCIAL_FACEBOOK', 'https://facebook.com/momentumclips'),
             'SOCIAL_LINKEDIN': app.config.get('SOCIAL_LINKEDIN', 'https://linkedin.com/company/momentumclips'),
             'SOCIAL_TWITTER': app.config.get('SOCIAL_TWITTER', 'https://twitter.com/momentumclips'),
-            'SOCIAL_YOUTUBE': app.config.get('SOCIAL_YOUTUBE', 'https://youtube.com/@momentumclips'),
+            'SOCIAL_YOUTUBE': app.config.get('SOCIAL_YOUTUBE', 'https://youtube.com/@momentumclipsbansko'),
         }
     
     # Register custom template filters
