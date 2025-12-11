@@ -84,50 +84,60 @@
 </head>
 <body>
 
-    <!-- Navigation - Cyberpunk Upgraded -->
-    <nav class="navbar fixed w-full z-50" id="mainNav">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-            <div class="flex items-center h-full">
+    <!-- Navigation - Floating Island Style -->
+    <nav class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-5xl" id="mainNav">
+        <div class="navbar-island">
+            <div class="flex items-center justify-between h-full px-5 lg:px-8">
                 <!-- Logo - Left -->
                 <div class="flex items-center flex-shrink-0">
                     <a href="{{ url_for('main.index') }}" class="flex items-center">
                         <span class="logo-polygon"></span>
-                        <span class="text-lg sm:text-xl lg:text-2xl font-bold text-white" style="letter-spacing: 0.1em; font-family: 'Orbitron', sans-serif;">MOMENTUMCLIPS</span>
+                        <span class="text-sm sm:text-base lg:text-lg font-bold text-white tracking-wider" style="font-family: 'Orbitron', sans-serif;">MOMENTUMCLIPS</span>
                     </a>
                 </div>
 
-                <!-- Desktop Navigation - Centered (flex-1 creates equal spacing) -->
-                <div class="hidden md:flex flex-1 items-center justify-center space-x-6">
-                    <a href="{{ url_for('main.index') }}" class="nav-link font-semibold">HOME</a>
-                    <a href="{{ url_for('main.packages') }}" class="nav-link font-semibold">PACKAGES</a>
-                    <a href="{{ url_for('main.gallery') }}" class="nav-link font-semibold">GALLERY</a>
-                    <a href="{{ url_for('main.testimonials') }}" class="nav-link font-semibold">TESTIMONIALS</a>
+                <!-- Desktop Navigation - Center -->
+                <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
+                    <a href="{{ url_for('main.index') }}" class="nav-link-clean">Home</a>
+                    <a href="{{ url_for('main.packages') }}" class="nav-link-clean">Packages</a>
+                    <a href="{{ url_for('main.gallery') }}" class="nav-link-clean">Gallery</a>
+                    <a href="{{ url_for('main.testimonials') }}" class="nav-link-clean">Testimonials</a>
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="nav-link-clean" style="color: #8B5CF6;">
+                        <i class="fas fa-cog mr-1"></i>Admin
+                    </a>
+                    {% endif %}
                 </div>
                 
                 <!-- Book Now Button - Right -->
                 <div class="hidden md:flex items-center flex-shrink-0">
-                    <a href="{{ url_for('main.packages') }}" class="btn-book-cyber">
-                        BOOK NOW
+                    <a href="{{ url_for('main.packages') }}#book-session" class="btn-book-island">
+                        Book Now
                     </a>
                 </div>
 
                 <!-- Mobile menu button -->
                 <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-button" class="text-cyan-400 hover:text-cyan-300 focus:outline-none">
-                        <i class="fas fa-bars text-2xl hamburger-line"></i>
+                    <button id="mobile-menu-button" class="text-white hover:text-[#00D4FF] focus:outline-none transition">
+                        <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Mobile Navigation -->
-        <div id="mobile-menu" class="hidden md:hidden bg-[#1E293B] border-t border-[#00D4FF]/30">
-            <div class="px-4 pt-3 pb-4 space-y-2">
-                <a href="{{ url_for('main.index') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">HOME</a>
-                <a href="{{ url_for('main.packages') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">PACKAGES</a>
-                <a href="{{ url_for('main.gallery') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">GALLERY</a>
-                <a href="{{ url_for('main.testimonials') }}" class="block px-4 py-3 text-white hover:bg-[#00D4FF]/20 rounded-lg font-semibold text-base transition">TESTIMONIALS</a>
-                <a href="{{ url_for('main.packages') }}" class="block px-4 py-3 bg-[#00D4FF] text-white text-center rounded-lg font-bold text-base hover:bg-[#00B8E6] transition">BOOK NOW</a>
+        <!-- Mobile Navigation - Separate floating card -->
+        <div id="mobile-menu" class="hidden md:hidden mt-3">
+            <div class="navbar-island-mobile px-4 py-4 space-y-1">
+                <a href="{{ url_for('main.index') }}" class="block px-4 py-3 text-white hover:bg-white/10 rounded-xl font-medium transition">Home</a>
+                <a href="{{ url_for('main.packages') }}" class="block px-4 py-3 text-white hover:bg-white/10 rounded-xl font-medium transition">Packages</a>
+                <a href="{{ url_for('main.gallery') }}" class="block px-4 py-3 text-white hover:bg-white/10 rounded-xl font-medium transition">Gallery</a>
+                <a href="{{ url_for('main.testimonials') }}" class="block px-4 py-3 text-white hover:bg-white/10 rounded-xl font-medium transition">Testimonials</a>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                <a href="{{ url_for('admin.dashboard') }}" class="block px-4 py-3 text-[#8B5CF6] hover:bg-[#8B5CF6]/10 rounded-xl font-medium transition">
+                    <i class="fas fa-cog mr-2"></i>Admin
+                </a>
+                {% endif %}
+                <a href="{{ url_for('main.packages') }}#book-session" class="block px-4 py-3 mt-2 bg-[#00D4FF]/20 text-[#00D4FF] text-center rounded-xl font-semibold hover:bg-[#00D4FF]/30 transition">Book Now</a>
             </div>
         </div>
     </nav>
@@ -135,7 +145,7 @@
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="fixed top-20 right-4 z-50 space-y-2" id="flash-messages">
+            <div class="fixed top-24 right-4 z-40 space-y-2" id="flash-messages">
                 {% for category, message in messages %}
                     <div class="bg-white border-l-4 {% if category == 'success' %}border-green-500{% elif category == 'danger' or category == 'error' %}border-red-500{% elif category == 'warning' %}border-yellow-500{% else %}border-blue-500{% endif %} p-4 shadow-lg rounded-r-lg max-w-md animate-slide-in">
                         <div class="flex items-center justify-between">

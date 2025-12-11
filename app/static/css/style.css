@@ -228,52 +228,128 @@ nav a:hover {
     transition: all 0.3s ease;
 }
 
-/* ========== CYBERPUNK NAVBAR UPGRADES ========== */
+/* ========== FLOATING ISLAND NAVBAR ========== */
 
-/* Navbar Base - Glass Morphism */
-.navbar {
-    height: 90px;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.85), rgba(139, 92, 246, 0.15)) !important;
+/* Main floating island container */
+.navbar-island {
+    background: rgba(15, 23, 42, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0, 212, 255, 0.4);
-    box-shadow: 0 2px 20px rgba(0, 212, 255, 0.1);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: 'Orbitron', sans-serif;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    box-shadow: 
+        0 4px 24px rgba(0, 0, 0, 0.15),
+        0 1px 2px rgba(0, 0, 0, 0.1);
+    height: 64px;
+    transition: all 0.3s ease;
 }
 
-/* Navbar Scrolled State */
-.navbar.scrolled {
-    height: 70px;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95), rgba(0, 212, 255, 0.1)) !important;
-    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(0, 212, 255, 0.1);
-    border-bottom: 2px solid #00D4FF;
+/* Subtle hover glow on navbar */
+.navbar-island:hover {
+    border-color: rgba(0, 212, 255, 0.2);
+    box-shadow: 
+        0 4px 24px rgba(0, 0, 0, 0.18),
+        0 0 20px rgba(0, 212, 255, 0.08);
 }
 
-/* Pulsing Neon Polygon Logo */
+/* Scrolled state - slightly more solid */
+nav.scrolled .navbar-island {
+    background: rgba(15, 23, 42, 0.98);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.25);
+}
+
+/* Mobile dropdown island */
+.navbar-island-mobile {
+    background: rgba(15, 23, 42, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Clean nav links */
+.nav-link-clean {
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 0;
+    transition: color 0.2s ease;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.nav-link-clean:hover {
+    color: #ffffff;
+}
+
+/* Book button - accent style */
+.btn-book-island {
+    background: rgba(0, 212, 255, 0.15);
+    color: #00D4FF;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-book-island:hover {
+    background: rgba(0, 212, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Logo polygon */
 .logo-polygon {
     display: inline-block;
-    width: 30px;
-    height: 30px;
+    width: 26px;
+    height: 26px;
     background: linear-gradient(135deg, #00D4FF, #8B5CF6);
     clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-    margin-right: 12px;
-    animation: pulse-polygon 2s ease-in-out infinite;
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+    margin-right: 10px;
+    animation: pulse-polygon 3s ease-in-out infinite;
 }
 
 @keyframes pulse-polygon {
     0%, 100% { 
         transform: scale(1);
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+        filter: brightness(1);
     }
     50% { 
-        transform: scale(1.1);
-        box-shadow: 0 0 30px rgba(0, 212, 255, 0.9), 0 0 50px rgba(139, 92, 246, 0.5);
+        transform: scale(1.05);
+        filter: brightness(1.2);
     }
 }
 
-/* Nav Links - Glowing Underline + Ripple */
+/* Adjust main content padding for floating nav */
+main.pt-16 {
+    padding-top: 6.5rem !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .navbar-island {
+        height: 56px;
+        border-radius: 0.875rem;
+    }
+    
+    .logo-polygon {
+        width: 22px;
+        height: 22px;
+        margin-right: 8px;
+    }
+    
+    main.pt-16 {
+        padding-top: 5.5rem !important;
+    }
+}
+
+/* Keep old nav-link for backwards compatibility */
 .nav-link {
     position: relative;
     padding: 8px 16px;
@@ -286,29 +362,7 @@ nav a:hover {
     border-bottom: none !important;
 }
 
-.nav-link::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background: #00D4FF;
-    box-shadow: 0 0 8px #00D4FF;
-    transform: translateX(-50%);
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nav-link:hover::before {
-    width: 100%;
-}
-
-.nav-link:hover {
-    color: #00f2ff !important;
-    text-shadow: 0 0 10px rgba(0, 242, 255, 0.8), 0 0 20px rgba(0, 212, 255, 0.5);
-}
-
-/* Book Now Button - Cyberpunk Style */
+/* Book Now Button - keep for other pages */
 .btn-book-cyber {
     position: relative;
     background: linear-gradient(135deg, #00D4FF, #8B5CF6) !important;
@@ -321,21 +375,6 @@ nav a:hover {
     transition: all 0.3s ease;
     overflow: hidden;
     font-family: 'Orbitron', sans-serif;
-}
-
-.btn-book-cyber::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.6s ease;
-}
-
-.btn-book-cyber:hover::before {
-    left: 100%;
 }
 
 .btn-book-cyber:hover {
