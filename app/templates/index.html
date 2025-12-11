@@ -16,7 +16,7 @@
                 <span class="cyan-accent glow-text block mt-2" style="color: #00D4FF;">VIDEO PRODUCTION</span>
             </h1>
             <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
-                <a href="{{ url_for('main.packages') }}#book-session" class="btn-primary btn-book-now text-center inline-block text-sm sm:text-base">
+                <a href="{{ url_for('main.packages') }}" class="btn-primary btn-book-now text-center inline-block text-sm sm:text-base">
                     BOOK YOUR SESSION
                 </a>
                 <a href="{{ url_for('main.gallery') }}" class="btn-secondary text-center inline-block text-sm sm:text-base">
@@ -169,8 +169,7 @@
                         <li><i class="fas fa-check text-green-400 mr-2"></i>1 edited highlight video</li>
                         <li><i class="fas fa-check text-green-400 mr-2"></i>48hr delivery</li>
                     </ul>
-                    <a href="{{ url_for('main.packages') }}#book-session" 
-                       onclick="localStorage.setItem('selectedPackage', 'basic')"
+                    <a href="{{ url_for('payment.checkout', package='basic') }}" 
                        class="block w-full bg-[#00D4FF] text-white py-3 rounded-xl font-bold hover:bg-[#00B8E6] transition">
                         Book Basic
                     </a>
@@ -194,8 +193,7 @@
                         <li><i class="fas fa-check text-green-400 mr-2"></i>2 edited videos</li>
                         <li><i class="fas fa-check text-green-400 mr-2"></i>24hr priority delivery</li>
                     </ul>
-                    <a href="{{ url_for('main.packages') }}#book-session" 
-                       onclick="localStorage.setItem('selectedPackage', 'pro')"
+                    <a href="{{ url_for('payment.checkout', package='pro') }}" 
                        class="block w-full bg-[#8B5CF6] text-white py-3 rounded-xl font-bold hover:bg-[#7C3AED] transition">
                         Book Pro
                     </a>
@@ -216,8 +214,7 @@
                         <li><i class="fas fa-check text-green-400 mr-2"></i>3 edited videos + raw clips</li>
                         <li><i class="fas fa-check text-green-400 mr-2"></i>Same day delivery</li>
                     </ul>
-                    <a href="{{ url_for('main.packages') }}#book-session" 
-                       onclick="localStorage.setItem('selectedPackage', 'expert')"
+                    <a href="{{ url_for('payment.checkout', package='expert') }}" 
                        class="block w-full bg-[#F59E0B] text-white py-3 rounded-xl font-bold hover:bg-[#D97706] transition">
                         Book Expert
                     </a>

@@ -253,11 +253,13 @@ def create_app(config_name=None):
     from app.routes.booking import booking_bp
     from app.routes.admin import admin_bp
     from app.routes.sitemap import seo_bp
+    from app.routes.payment import payment_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(booking_bp, url_prefix='/booking')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(payment_bp, url_prefix='/payment')
     app.register_blueprint(seo_bp)
 
     # Register error handlers

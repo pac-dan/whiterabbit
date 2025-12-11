@@ -27,9 +27,9 @@
                         <li><i class="fas fa-check text-green-400 mr-2"></i>1 edited highlight video</li>
                         <li><i class="fas fa-check text-green-400 mr-2"></i>48hr delivery</li>
                     </ul>
-                    <a href="{{ url_for('main.package_detail', package_id=1) }}" 
+                    <a href="{{ url_for('payment.checkout', package='basic') }}" 
                        class="block w-full bg-[#00D4FF] text-white py-3 rounded-xl font-bold hover:bg-[#00B8E6] transition">
-                        View Full Details
+                        Book Basic
                     </a>
                 </div>
             </div>
@@ -51,9 +51,9 @@
                         <li><i class="fas fa-check text-green-400 mr-2"></i>2 edited videos</li>
                         <li><i class="fas fa-check text-green-400 mr-2"></i>24hr priority delivery</li>
                     </ul>
-                    <a href="{{ url_for('main.package_detail', package_id=2) }}" 
+                    <a href="{{ url_for('payment.checkout', package='pro') }}" 
                        class="block w-full bg-[#8B5CF6] text-white py-3 rounded-xl font-bold hover:bg-[#7C3AED] transition">
-                        View Full Details
+                        Book Pro
                     </a>
                 </div>
             </div>
@@ -72,9 +72,9 @@
                         <li><i class="fas fa-check text-green-400 mr-2"></i>3 edited videos + raw clips</li>
                         <li><i class="fas fa-check text-green-400 mr-2"></i>Same day delivery</li>
                     </ul>
-                    <a href="{{ url_for('main.package_detail', package_id=3) }}" 
+                    <a href="{{ url_for('payment.checkout', package='expert') }}" 
                        class="block w-full bg-[#F59E0B] text-white py-3 rounded-xl font-bold hover:bg-[#D97706] transition">
-                        View Full Details
+                        Book Expert
                     </a>
                 </div>
             </div>
@@ -121,7 +121,7 @@
             <!-- Basic Session Widget -->
             <div id="calendly-basic" class="calendly-container">
                 <div class="calendly-inline-widget rounded-lg overflow-hidden shadow-xl border-4 border-[#00D4FF]/20" 
-                     data-url="https://calendly.com/mail-kevinjh/2hrs?hide_gdpr_banner=1&background_color=0F172A&primary_color=00D4FF" 
+                     data-url="https://calendly.com/mail-kevinjh/2hrs?hide_gdpr_banner=1&background_color=FFFFFF&text_color=0F172A&primary_color=00D4FF" 
                      style="min-width:320px;height:700px;">
                 </div>
             </div>
@@ -129,7 +129,7 @@
             <!-- Pro Session Widget -->
             <div id="calendly-pro" class="calendly-container hidden">
                 <div class="calendly-inline-widget rounded-lg overflow-hidden shadow-xl border-4 border-[#8B5CF6]/20" 
-                     data-url="https://calendly.com/mail-kevinjh/new-meeting?hide_gdpr_banner=1&background_color=0F172A&primary_color=8B5CF6" 
+                     data-url="https://calendly.com/mail-kevinjh/new-meeting?hide_gdpr_banner=1&background_color=FFFFFF&text_color=0F172A&primary_color=8B5CF6" 
                      style="min-width:320px;height:700px;">
                 </div>
             </div>
@@ -137,7 +137,7 @@
             <!-- Expert Session Widget -->
             <div id="calendly-expert" class="calendly-container hidden">
                 <div class="calendly-inline-widget rounded-lg overflow-hidden shadow-xl border-4 border-[#F59E0B]/20" 
-                     data-url="https://calendly.com/mail-kevinjh/new-meeting-1?hide_gdpr_banner=1&background_color=0F172A&primary_color=F59E0B" 
+                     data-url="https://calendly.com/mail-kevinjh/new-meeting-1?hide_gdpr_banner=1&background_color=FFFFFF&text_color=0F172A&primary_color=F59E0B" 
                      style="min-width:320px;height:700px;">
                 </div>
             </div>
