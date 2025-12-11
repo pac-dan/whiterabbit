@@ -7,6 +7,7 @@ from app.models.booking import Booking, BookingStatus
 from app.models.package import Package
 from app.models.video import Video
 from app.models.testimonial import Testimonial
+from app.models.waiver import Waiver
 from app.utils.validators import (
     validate_required, validate_price, validate_integer,
     validate_youtube_id, validate_url, validate_rating,
@@ -503,6 +504,17 @@ def view_user(user_id):
     user_bookings = Booking.query.filter_by(user_id=user_id).order_by(Booking.booking_date.desc()).all()
 
     return render_template('admin/user_detail.html', user=user, bookings=user_bookings)
+
+
+# Waiver Management
+
+@admin_bp.route('/waivers')
+@login_required
+@admin_required
+def waivers():
+    """View all signed waivers"""
+    all_waivers = Waiver.query.order_by(Waiver.signed_at.desc()).all()
+    return render_template('admin/waivers.html', waivers=all_waivers)
 
 
 # Social Media Management (Future Integration)

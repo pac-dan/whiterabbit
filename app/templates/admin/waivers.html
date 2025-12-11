@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Waivers - Admin - Momentum Clips{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-12">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-4xl font-bold text-[#0F172A] mb-2">Liability Waivers</h1>
+            <p class="text-xl text-gray-600">View all signed waivers and their details</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="text-[#00D4FF] hover:text-[#00B8E6]">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Total Signed</p>
+                    <p class="text-3xl font-bold text-[#0F172A]">{{ waivers|length }}</p>
+                </div>
+                <div class="bg-green-100 rounded-full p-3">
+                    <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">With Bookings</p>
+                    <p class="text-3xl font-bold text-[#0F172A]">{{ waivers|selectattr('booking_id')|list|length }}</p>
+                </div>
+                <div class="bg-blue-100 rounded-full p-3">
+                    <i class="fas fa-calendar-check text-[#00D4FF] text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Standalone</p>
+                    <p class="text-3xl font-bold text-[#0F172A]">{{ waivers|rejectattr('booking_id')|list|length }}</p>
+                </div>
+                <div class="bg-purple-100 rounded-full p-3">
+                    <i class="fas fa-user-check text-[#8B5CF6] text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Standalone Waiver Link -->
+    <div class="bg-cyan-50 border-l-4 border-cyan-500 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-link text-cyan-600 mr-3"></i>
+                <div>
+                    <p class="font-semibold text-cyan-800">Standalone Waiver Link</p>
+                    <p class="text-sm text-cyan-700">Share this link for walk-ins or on-site signing</p>
+                </div>
+            </div>
+            <button onclick="copyWaiverLink()" class="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition text-sm">
+                <i class="fas fa-copy mr-2"></i>Copy Link
+            </button>
+        </div>
+        <input type="text" id="waiver-link" value="{{ url_for('main.waiver_standalone', _external=True) }}" 
+               class="mt-3 w-full px-3 py-2 bg-white border border-cyan-200 rounded text-sm text-gray-700" readonly>
+    </div>
+
+    <!-- Waivers Table -->
+    {% if waivers %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Signed By</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Signed At</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for waiver in waivers %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#0F172A]">
+                        #{{ waiver.id }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-[#0F172A]">{{ waiver.legal_name_signature }}</div>
+                        <div class="text-xs text-gray-500">{{ waiver.client_name }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {{ waiver.client_email }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if waiver.booking_id %}
+                        <a href="{{ url_for('admin.view_booking', booking_id=waiver.booking_id) }}" 
+                           class="text-[#00D4FF] hover:underline text-sm">
+                            Booking #{{ waiver.booking_id }}
+                        </a>
+                        {% else %}
+                        <span class="px-2 py-1 rounded text-xs font-semibold bg-purple-100 text-purple-800">
+                            Standalone
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {{ waiver.signed_at.strftime('%b %d, %Y') }}<br>
+                        <span class="text-xs text-gray-400">{{ waiver.signed_at.strftime('%I:%M %p') }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-800">
+                            v{{ waiver.waiver_version }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <button onclick="viewWaiverDetails({{ waiver.id }}, '{{ waiver.legal_name_signature }}', '{{ waiver.client_email }}', '{{ waiver.ip_address }}', '{{ waiver.user_agent[:50] if waiver.user_agent else 'N/A' }}...', '{{ waiver.signed_at.strftime('%B %d, %Y at %I:%M %p') }}', '{{ waiver.waiver_version }}')" 
+                                class="text-[#00D4FF] hover:text-[#00B8E6]">
+                            <i class="fas fa-eye mr-1"></i> View
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <!-- No Waivers -->
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+        <i class="fas fa-file-signature text-gray-400 text-6xl mb-4"></i>
+        <h3 class="text-2xl font-semibold text-gray-700 mb-2">No Waivers Signed Yet</h3>
+        <p class="text-gray-600 mb-6">Waivers will appear here once clients sign them</p>
+        <a href="{{ url_for('main.waiver_standalone') }}" target="_blank"
+           class="inline-block bg-[#00D4FF] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#00B8E6] transition">
+            <i class="fas fa-external-link-alt mr-2"></i> View Standalone Waiver Page
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Waiver Details Modal -->
+<div id="waiver-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden">
+        <div class="bg-[#0F172A] px-6 py-4 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-white">
+                <i class="fas fa-file-signature text-[#00D4FF] mr-2"></i>
+                Waiver Details
+            </h3>
+            <button onclick="closeWaiverModal()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase">Legal Name Signed</p>
+                        <p id="modal-legal-name" class="font-semibold text-[#0F172A]"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase">Email</p>
+                        <p id="modal-email" class="font-semibold text-[#0F172A]"></p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase">Signed At</p>
+                        <p id="modal-signed-at" class="font-semibold text-[#0F172A]"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase">Version</p>
+                        <p id="modal-version" class="font-semibold text-[#0F172A]"></p>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">IP Address</p>
+                    <p id="modal-ip" class="font-semibold text-[#0F172A] font-mono text-sm"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">User Agent</p>
+                    <p id="modal-user-agent" class="text-sm text-gray-600 break-all"></p>
+                </div>
+            </div>
+            <div class="mt-6 pt-4 border-t">
+                <div class="bg-green-50 rounded-lg p-4">
+                    <p class="text-sm text-green-800">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        This waiver is legally binding. The signer acknowledged and agreed to all terms.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyWaiverLink() {
+    const input = document.getElementById('waiver-link');
+    input.select();
+    document.execCommand('copy');
+    alert('Waiver link copied to clipboard!');
+}
+
+function viewWaiverDetails(id, legalName, email, ip, userAgent, signedAt, version) {
+    document.getElementById('modal-legal-name').textContent = legalName;
+    document.getElementById('modal-email').textContent = email;
+    document.getElementById('modal-ip').textContent = ip;
+    document.getElementById('modal-user-agent').textContent = userAgent;
+    document.getElementById('modal-signed-at').textContent = signedAt;
+    document.getElementById('modal-version').textContent = 'v' + version;
+    
+    const modal = document.getElementById('waiver-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeWaiverModal() {
+    const modal = document.getElementById('waiver-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Close modal on backdrop click
+document.getElementById('waiver-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeWaiverModal();
+    }
+});
+</script>
+{% endblock %}
+
