@@ -320,10 +320,9 @@ nav.nav-visible {
     border-radius: 50%;
     object-fit: cover;
     margin-right: 10px;
-    border: 2px solid rgba(0, 212, 255, 0.3);
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
-    margin-right: 10px;
-    animation: pulse-polygon 3s ease-in-out infinite;
+    background-color: white;
+    padding: 3px;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
 }
 
 @keyframes pulse-polygon {
@@ -359,6 +358,7 @@ main.pt-16 {
         width: 30px;
         height: 30px;
         margin-right: 8px;
+        padding: 2px;
     }
 }
 

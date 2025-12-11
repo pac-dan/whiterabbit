@@ -3,59 +3,81 @@
 {% block title %}Packages & Pricing - Momentum Clips{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="relative hero-gradient text-white pt-28 sm:pt-32 pb-12 sm:pb-16 lg:pb-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 heading">CHOOSE YOUR PACKAGE</h1>
-        <p class="text-base sm:text-lg lg:text-2xl text-gray-300 font-medium px-4">Professional video production for every skill level</p>
-    </div>
-</section>
-
 <!-- Compare Packages -->
-<section class="py-12 sm:py-16 hero-gradient">
+<section class="pt-28 sm:pt-32 pb-12 sm:pb-16 hero-gradient">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-10">
-            <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4 heading">COMPARE PACKAGES</h2>
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 heading">COMPARE PACKAGES</h2>
             <p class="text-lg text-gray-300">Find the perfect package for your session</p>
         </div>
         
-        {% if packages %}
-        <!-- Package Cards Grid -->
+        <!-- Package Cards Grid - Hardcoded to match homepage exactly -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {% for package in packages %}
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border {% if package.name == 'Pro Session' %}border-[#8B5CF6]{% else %}border-white/20{% endif %} hover:border-{% if package.name == 'Pro Session' %}[#8B5CF6]{% elif package.name == 'Expert Session' %}[#F59E0B]{% else %}[#00D4FF]{% endif %}/50 transition-all duration-300 hover:transform hover:scale-105 {% if package.name == 'Pro Session' %}relative{% endif %}">
-                {% if package.name == 'Pro Session' %}
-                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span class="bg-[#8B5CF6] text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</span>
-                </div>
-                {% endif %}
+            <!-- Basic Session -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:border-[#00D4FF]/50 transition-all duration-300 hover:transform hover:scale-105">
                 <div class="text-center">
-                    <div class="w-16 h-16 {% if package.name == 'Pro Session' %}bg-[#8B5CF6]/20{% elif package.name == 'Expert Session' %}bg-[#F59E0B]/20{% else %}bg-[#00D4FF]/20{% endif %} rounded-full flex items-center justify-center mx-auto mb-4">
-                        {% if package.name == 'Pro Session' %}
-                        <i class="fas fa-fire text-[#8B5CF6] text-2xl"></i>
-                        {% elif package.name == 'Expert Session' %}
-                        <i class="fas fa-crown text-[#F59E0B] text-2xl"></i>
-                        {% else %}
+                    <div class="w-16 h-16 bg-[#00D4FF]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-snowflake text-[#00D4FF] text-2xl"></i>
-                        {% endif %}
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">{{ package.name }}</h3>
-                    <p class="text-gray-400 text-sm mb-4">{{ package.duration }} hours of filming</p>
-                    <p class="text-3xl font-bold {% if package.name == 'Pro Session' %}text-[#8B5CF6]{% elif package.name == 'Expert Session' %}text-[#F59E0B]{% else %}text-[#00D4FF]{% endif %} mb-4">${{ "%.0f"|format(package.price) }}</p>
+                    <h3 class="text-xl font-bold text-white mb-2">Basic Session</h3>
+                    <p class="text-gray-400 text-sm mb-4">2 hours of filming</p>
+                    <p class="text-3xl font-bold text-[#00D4FF] mb-4">€150</p>
                     <ul class="text-sm text-gray-300 space-y-2 mb-6 text-left">
-                        <li><i class="fas fa-check text-green-400 mr-2"></i>{{ package.video_count }} edited video(s)</li>
-                        <li><i class="fas fa-check text-green-400 mr-2"></i>Up to {{ package.max_riders }} rider(s)</li>
-                        {% if package.includes_drone %}
-                        <li><i class="fas fa-check text-green-400 mr-2"></i>Drone footage included</li>
-                        {% endif %}
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Professional filming</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>1 edited highlight video</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>48hr delivery</li>
                     </ul>
-                    <a href="{{ url_for('main.package_detail', package_id=package.id) }}" 
-                       class="block w-full {% if package.name == 'Pro Session' %}bg-[#8B5CF6] hover:bg-[#7C3AED]{% elif package.name == 'Expert Session' %}bg-[#F59E0B] hover:bg-[#D97706]{% else %}bg-[#00D4FF] hover:bg-[#00B8E6]{% endif %} text-white py-3 rounded-xl font-bold transition">
+                    <a href="{{ url_for('main.package_detail', package_id=1) }}" 
+                       class="block w-full bg-[#00D4FF] text-white py-3 rounded-xl font-bold hover:bg-[#00B8E6] transition">
                         View Full Details
                     </a>
                 </div>
             </div>
-            {% endfor %}
+            
+            <!-- Pro Session - Featured -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-2 border-[#8B5CF6] relative hover:transform hover:scale-105 transition-all duration-300">
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-[#8B5CF6] text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</span>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#8B5CF6]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-fire text-[#8B5CF6] text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Pro Session</h3>
+                    <p class="text-gray-400 text-sm mb-4">2.5 hours of filming</p>
+                    <p class="text-3xl font-bold text-[#8B5CF6] mb-4">€250</p>
+                    <ul class="text-sm text-gray-300 space-y-2 mb-6 text-left">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Extended filming time</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>2 edited videos</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>24hr priority delivery</li>
+                    </ul>
+                    <a href="{{ url_for('main.package_detail', package_id=2) }}" 
+                       class="block w-full bg-[#8B5CF6] text-white py-3 rounded-xl font-bold hover:bg-[#7C3AED] transition">
+                        View Full Details
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Expert Session -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:border-[#F59E0B]/50 transition-all duration-300 hover:transform hover:scale-105">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#F59E0B]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-crown text-[#F59E0B] text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Expert Session</h3>
+                    <p class="text-gray-400 text-sm mb-4">3 hours of filming</p>
+                    <p class="text-3xl font-bold text-[#F59E0B] mb-4">€350</p>
+                    <ul class="text-sm text-gray-300 space-y-2 mb-6 text-left">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Full day flexibility</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>3 edited videos + raw clips</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Same day delivery</li>
+                    </ul>
+                    <a href="{{ url_for('main.package_detail', package_id=3) }}" 
+                       class="block w-full bg-[#F59E0B] text-white py-3 rounded-xl font-bold hover:bg-[#D97706] transition">
+                        View Full Details
+                    </a>
+                </div>
+            </div>
         </div>
         
         <div class="text-center">
@@ -64,11 +86,6 @@
                 Secure booking · Instant confirmation · Free rescheduling
             </p>
         </div>
-        {% else %}
-        <div class="text-center py-12">
-            <p class="text-gray-300 text-xl">No packages available at this time.</p>
-        </div>
-        {% endif %}
     </div>
 </section>
 
