@@ -34,11 +34,16 @@ PACKAGES = {
 @payment_bp.route('/checkout/<package>')
 def checkout(package):
     """Create Stripe Checkout session and redirect to payment"""
+    current_app.logger.info(f'Checkout initiated for package: {package}')
+    
     if package not in PACKAGES:
+        current_app.logger.warning(f'Invalid package: {package}')
         flash('Invalid package selected.', 'danger')
         return redirect(url_for('main.packages'))
     
     stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
+    current_app.logger.info(f'Stripe key configured: {bool(stripe_key)}')
+    
     if not stripe_key:
         current_app.logger.error('STRIPE_SECRET_KEY not configured')
         flash('Payment system is being configured. Please try again later or contact support.', 'warning')
