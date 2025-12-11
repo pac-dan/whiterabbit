@@ -3,9 +3,13 @@ from app.models.package import Package
 from app.models.video import Video
 from app.models.testimonial import Testimonial
 from app.models.newsletter import Newsletter
+from app.models.booking import Booking
+from app.models.waiver import Waiver, WAIVER_TEXT, CURRENT_WAIVER_VERSION
 from app import db, limiter, csrf
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
 import re
+import hashlib
 
 main_bp = Blueprint('main', __name__)
 
@@ -249,6 +253,209 @@ def newsletter_subscribe():
         current_app.logger.error(f'Newsletter subscription error: {str(e)}')
         flash('An error occurred. Please try again later.', 'danger')
         return redirect(request.referrer or url_for('main.index'))
+
+
+# ============== WAIVER ROUTES ==============
+
+@main_bp.route('/waiver/<token>')
+def waiver_form(token):
+    """Display waiver form for signing"""
+    # Decode token to get booking ID
+    try:
+        booking_id = decode_waiver_token(token)
+        booking = Booking.query.get_or_404(booking_id)
+    except:
+        flash('Invalid or expired waiver link.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    # Check if already signed
+    existing_waiver = Waiver.get_by_booking(booking_id)
+    if existing_waiver:
+        return render_template(
+            'waiver_complete.html',
+            booking=booking,
+            waiver=existing_waiver
+        )
+    
+    return render_template(
+        'waiver.html',
+        booking=booking,
+        token=token,
+        waiver_text=WAIVER_TEXT,
+        waiver_version=CURRENT_WAIVER_VERSION
+    )
+
+
+@main_bp.route('/waiver/<token>', methods=['POST'])
+@limiter.limit("5 per hour")
+def waiver_submit(token):
+    """Process waiver signature submission"""
+    # Decode token to get booking ID
+    try:
+        booking_id = decode_waiver_token(token)
+        booking = Booking.query.get_or_404(booking_id)
+    except:
+        flash('Invalid or expired waiver link.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    # Check if already signed
+    if Waiver.is_signed(booking_id):
+        flash('This waiver has already been signed.', 'info')
+        return redirect(url_for('main.waiver_form', token=token))
+    
+    # Get form data
+    legal_name = request.form.get('legal_name', '').strip()
+    agreement = request.form.get('agreement')
+    
+    # Validate
+    if not legal_name or len(legal_name) < 3:
+        flash('Please enter your full legal name.', 'danger')
+        return redirect(url_for('main.waiver_form', token=token))
+    
+    if not agreement:
+        flash('You must agree to the terms to proceed.', 'danger')
+        return redirect(url_for('main.waiver_form', token=token))
+    
+    # Get client info
+    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if ip_address:
+        ip_address = ip_address.split(',')[0].strip()  # Get first IP if multiple
+    user_agent = request.headers.get('User-Agent', '')[:500]  # Limit length
+    
+    # Get client name/email from booking
+    client_name = booking.user.name if booking.user else 'Unknown'
+    client_email = booking.user.email if booking.user else 'unknown@unknown.com'
+    
+    try:
+        # Create waiver record
+        waiver = Waiver(
+            booking_id=booking_id,
+            client_name=client_name,
+            client_email=client_email,
+            legal_name_signature=legal_name,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            waiver_version=CURRENT_WAIVER_VERSION,
+            signed_at=datetime.utcnow()
+        )
+        db.session.add(waiver)
+        
+        # Update booking status
+        booking.waiver_signed = True
+        
+        db.session.commit()
+        
+        # Send confirmation email
+        try:
+            from app.services.email_service import EmailService
+            email_service = EmailService()
+            email_service.send_email(
+                to=client_email,
+                subject='Waiver Signed - Momentum Clips',
+                template='waiver_confirmation',
+                client_name=client_name,
+                legal_name=legal_name,
+                signed_at=waiver.signed_at,
+                booking=booking
+            )
+        except Exception as e:
+            current_app.logger.error(f'Waiver confirmation email error: {str(e)}')
+        
+        flash('Thank you! Your waiver has been signed successfully.', 'success')
+        return render_template(
+            'waiver_complete.html',
+            booking=booking,
+            waiver=waiver
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Waiver submission error: {str(e)}')
+        flash('An error occurred. Please try again.', 'danger')
+        return redirect(url_for('main.waiver_form', token=token))
+
+
+@main_bp.route('/waiver/standalone', methods=['GET', 'POST'])
+def waiver_standalone():
+    """Standalone waiver for walk-ins without a booking"""
+    if request.method == 'GET':
+        return render_template(
+            'waiver_standalone.html',
+            waiver_text=WAIVER_TEXT,
+            waiver_version=CURRENT_WAIVER_VERSION
+        )
+    
+    # POST - process submission
+    legal_name = request.form.get('legal_name', '').strip()
+    client_name = request.form.get('client_name', '').strip()
+    client_email = request.form.get('client_email', '').strip().lower()
+    agreement = request.form.get('agreement')
+    
+    # Validate
+    if not legal_name or len(legal_name) < 3:
+        flash('Please enter your full legal name.', 'danger')
+        return redirect(url_for('main.waiver_standalone'))
+    
+    if not client_email or '@' not in client_email:
+        flash('Please enter a valid email address.', 'danger')
+        return redirect(url_for('main.waiver_standalone'))
+    
+    if not agreement:
+        flash('You must agree to the terms to proceed.', 'danger')
+        return redirect(url_for('main.waiver_standalone'))
+    
+    # Get client info
+    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if ip_address:
+        ip_address = ip_address.split(',')[0].strip()
+    user_agent = request.headers.get('User-Agent', '')[:500]
+    
+    try:
+        # Create waiver record (without booking)
+        waiver = Waiver(
+            booking_id=None,
+            client_name=client_name or legal_name,
+            client_email=client_email,
+            legal_name_signature=legal_name,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            waiver_version=CURRENT_WAIVER_VERSION,
+            signed_at=datetime.utcnow()
+        )
+        db.session.add(waiver)
+        db.session.commit()
+        
+        flash('Thank you! Your waiver has been signed successfully.', 'success')
+        return render_template(
+            'waiver_complete.html',
+            booking=None,
+            waiver=waiver
+        )
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Standalone waiver error: {str(e)}')
+        flash('An error occurred. Please try again.', 'danger')
+        return redirect(url_for('main.waiver_standalone'))
+
+
+def generate_waiver_token(booking_id):
+    """Generate a secure token for waiver link"""
+    secret = current_app.config.get('SECRET_KEY', 'default-secret')
+    data = f"{booking_id}-{secret}"
+    return hashlib.sha256(data.encode()).hexdigest()[:32]
+
+
+def decode_waiver_token(token):
+    """Decode waiver token - for now just look up booking by checking all"""
+    # In production, you'd want to store token->booking_id mapping
+    # For now, iterate through recent bookings to find match
+    from app.models.booking import Booking
+    bookings = Booking.query.order_by(Booking.created_at.desc()).limit(1000).all()
+    for booking in bookings:
+        if generate_waiver_token(booking.id) == token:
+            return booking.id
+    raise ValueError("Invalid token")
 
 
 @main_bp.route('/health')

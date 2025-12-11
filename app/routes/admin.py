@@ -99,8 +99,10 @@ def bookings():
 @admin_required
 def view_booking(booking_id):
     """View and manage a specific booking"""
+    from app.routes.main import generate_waiver_token
     booking = Booking.query.get_or_404(booking_id)
-    return render_template('admin/booking_detail.html', booking=booking)
+    waiver_token = generate_waiver_token(booking_id)
+    return render_template('admin/booking_detail.html', booking=booking, waiver_token=waiver_token)
 
 
 @admin_bp.route('/bookings/<int:booking_id>/update-status', methods=['POST'])

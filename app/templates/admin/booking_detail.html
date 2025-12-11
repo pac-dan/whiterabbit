@@ -3,7 +3,7 @@
 {% block title %}Booking #{{ booking.id }} - Admin - Momentum Clips{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-12">
     <!-- Back Button -->
     <div class="mb-6">
         <a href="{{ url_for('admin.bookings') }}" class="text-[#00D4FF] hover:text-[#00D4FF]">
@@ -137,6 +137,37 @@
                         Update Status
                     </button>
                 </form>
+            </div>
+
+            <!-- Waiver Status -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="font-bold text-[#0F172A] mb-4">
+                    <i class="fas fa-file-signature text-[#00D4FF] mr-2"></i>Liability Waiver
+                </h3>
+                {% if booking.waiver_signed and booking.waiver %}
+                <div class="bg-green-50 rounded-lg p-4 mb-3">
+                    <p class="text-sm font-semibold text-green-800 mb-2">
+                        <i class="fas fa-check-circle mr-2"></i> Waiver Signed
+                    </p>
+                    <div class="text-xs text-green-700 space-y-1">
+                        <p><strong>Signed by:</strong> {{ booking.waiver.legal_name_signature }}</p>
+                        <p><strong>Date:</strong> {{ booking.waiver.signed_at|datetime('%b %d, %Y at %I:%M %p') }}</p>
+                        <p><strong>Version:</strong> {{ booking.waiver.waiver_version }}</p>
+                        <p><strong>IP:</strong> {{ booking.waiver.ip_address }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-yellow-50 rounded-lg p-4 mb-3">
+                    <p class="text-sm font-semibold text-yellow-800 mb-2">
+                        <i class="fas fa-exclamation-circle mr-2"></i> Waiver Pending
+                    </p>
+                    <p class="text-xs text-yellow-700">Customer has not signed the liability waiver yet.</p>
+                </div>
+                <a href="{{ url_for('main.waiver_form', token=waiver_token) }}" target="_blank"
+                   class="block w-full text-center bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00B8E6] transition text-sm">
+                    <i class="fas fa-link mr-2"></i> Copy Waiver Link
+                </a>
+                {% endif %}
             </div>
 
             <!-- Payment Info -->

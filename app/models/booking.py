@@ -56,6 +56,9 @@ class Booking(db.Model):
     # Internal notes (admin only)
     admin_notes = db.Column(db.Text, nullable=True)
 
+    # Waiver status
+    waiver_signed = db.Column(db.Boolean, nullable=False, default=False)
+
     # Timestamps
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)

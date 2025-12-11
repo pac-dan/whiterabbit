@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiver Signed - Momentum Clips</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header -->
+        <tr>
+            <td style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); padding: 40px 30px; text-align: center;">
+                <h1 style="color: #00D4FF; margin: 0; font-size: 28px; font-weight: bold;">MOMENTUM CLIPS</h1>
+                <p style="color: #ffffff; margin: 10px 0 0; font-size: 14px;">Professional Snowboard Videography</p>
+            </td>
+        </tr>
+        
+        <!-- Success Icon -->
+        <tr>
+            <td style="padding: 40px 30px 20px; text-align: center;">
+                <div style="width: 80px; height: 80px; background-color: #10B981; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: white; font-size: 40px;">✓</span>
+                </div>
+            </td>
+        </tr>
+        
+        <!-- Main Content -->
+        <tr>
+            <td style="padding: 0 30px 30px; text-align: center;">
+                <h2 style="color: #0F172A; margin: 0 0 10px; font-size: 24px;">Waiver Signed Successfully</h2>
+                <p style="color: #6B7280; margin: 0; font-size: 16px;">Thank you for completing your liability waiver</p>
+            </td>
+        </tr>
+        
+        <!-- Signature Details -->
+        <tr>
+            <td style="padding: 0 30px 30px;">
+                <div style="background-color: #F9FAFB; border-radius: 12px; padding: 24px;">
+                    <h3 style="color: #0F172A; margin: 0 0 16px; font-size: 18px;">Signature Details</h3>
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
+                                <span style="color: #6B7280; font-size: 14px;">Signed By:</span>
+                            </td>
+                            <td style="padding: 8px 0; border-bottom: 1px solid #E5E7EB; text-align: right;">
+                                <strong style="color: #0F172A; font-size: 14px;">{{ legal_name }}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
+                                <span style="color: #6B7280; font-size: 14px;">Date & Time:</span>
+                            </td>
+                            <td style="padding: 8px 0; border-bottom: 1px solid #E5E7EB; text-align: right;">
+                                <strong style="color: #0F172A; font-size: 14px;">{{ signed_at.strftime('%B %d, %Y at %I:%M %p') }}</strong>
+                            </td>
+                        </tr>
+                        {% if booking %}
+                        <tr>
+                            <td style="padding: 8px 0;">
+                                <span style="color: #6B7280; font-size: 14px;">Session Date:</span>
+                            </td>
+                            <td style="padding: 8px 0; text-align: right;">
+                                <strong style="color: #0F172A; font-size: 14px;">{{ booking.booking_date.strftime('%B %d, %Y') if booking.booking_date else 'TBD' }}</strong>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </td>
+        </tr>
+        
+        <!-- What's Next -->
+        <tr>
+            <td style="padding: 0 30px 30px;">
+                <div style="background-color: #EFF6FF; border-left: 4px solid #00D4FF; padding: 16px 20px;">
+                    <h4 style="color: #0F172A; margin: 0 0 8px; font-size: 16px;">What's Next?</h4>
+                    <ul style="color: #4B5563; margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+                        <li>Your waiver is now on file and valid for your session</li>
+                        <li>Arrive at your session location 10 minutes early</li>
+                        <li>Bring appropriate gear for weather conditions</li>
+                        <li>Get ready for an epic filming session!</li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        
+        <!-- Footer -->
+        <tr>
+            <td style="background-color: #F9FAFB; padding: 30px; text-align: center; border-top: 1px solid #E5E7EB;">
+                <p style="color: #6B7280; margin: 0 0 10px; font-size: 14px;">
+                    Questions? Contact us at <a href="mailto:info@momentumclips.com" style="color: #00D4FF; text-decoration: none;">info@momentumclips.com</a>
+                </p>
+                <p style="color: #9CA3AF; margin: 0; font-size: 12px;">
+                    © {{ now.year if now else 2024 }} Momentum Clips. All rights reserved.
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+

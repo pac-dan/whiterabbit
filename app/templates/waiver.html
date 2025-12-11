@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Waiver - Momentum Clips{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-[#0F172A] text-white pt-28 sm:pt-32 pb-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#00D4FF]/20 mb-6">
+            <i class="fas fa-file-signature text-3xl text-[#00D4FF]"></i>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-bold mb-4 heading">LIABILITY WAIVER</h1>
+        <p class="text-lg text-gray-300 mb-2">Please read and sign before your session</p>
+        {% if booking %}
+        <p class="text-sm text-[#00D4FF]">
+            <i class="fas fa-calendar mr-2"></i>
+            Session: {{ booking.booking_date.strftime('%B %d, %Y at %I:%M %p') if booking.booking_date else 'TBD' }}
+        </p>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Waiver Content -->
+<section class="py-8 sm:py-12 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Important Notice -->
+        <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8 rounded-r-lg">
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle text-amber-500 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-bold text-amber-800">Important Legal Document</h3>
+                    <p class="text-sm text-amber-700">Please read this waiver carefully. By signing, you acknowledge that you understand and accept the risks involved in snowboard filming activities.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Waiver Text Container -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="bg-[#0F172A] px-6 py-4">
+                <h2 class="text-lg font-bold text-white">
+                    <i class="fas fa-scroll mr-2 text-[#00D4FF]"></i>
+                    Assumption of Risk and Release of Liability
+                </h2>
+                <p class="text-sm text-gray-400">Version {{ waiver_version }}</p>
+            </div>
+            
+            <!-- Scrollable Waiver Text -->
+            <div id="waiver-text-container" class="p-6 max-h-96 overflow-y-auto border-b-4 border-gray-200 bg-gray-50">
+                <div class="prose prose-sm max-w-none text-gray-700 whitespace-pre-line font-mono text-sm leading-relaxed">{{ waiver_text }}</div>
+            </div>
+            
+            <!-- Scroll Indicator -->
+            <div id="scroll-indicator" class="px-6 py-3 bg-[#00D4FF]/10 text-center">
+                <p class="text-sm text-[#00D4FF] font-medium">
+                    <i class="fas fa-arrow-down mr-2 animate-bounce"></i>
+                    Please scroll down to read the entire waiver
+                </p>
+            </div>
+        </div>
+
+        <!-- Signature Form -->
+        <form method="POST" action="{{ url_for('main.waiver_submit', token=token) }}" id="waiver-form" class="bg-white rounded-xl shadow-lg p-6 sm:p-8">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <h3 class="text-xl font-bold text-[#0F172A] mb-6">
+                <i class="fas fa-pen-fancy mr-2 text-[#00D4FF]"></i>
+                Digital Signature
+            </h3>
+            
+            <!-- Agreement Checkbox -->
+            <div class="mb-6">
+                <label class="flex items-start cursor-pointer group">
+                    <input type="checkbox" name="agreement" id="agreement" 
+                           class="mt-1 w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-[#00D4FF] cursor-pointer"
+                           required disabled>
+                    <span class="ml-3 text-gray-700">
+                        <span class="font-semibold">I have read, understand, and agree</span> to the above Assumption of Risk, Waiver of Liability, and Indemnity Agreement. I understand that by signing this document, I am giving up substantial legal rights.
+                    </span>
+                </label>
+            </div>
+            
+            <!-- Legal Name Input -->
+            <div class="mb-6">
+                <label for="legal_name" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Full Legal Name (as it appears on your ID)
+                </label>
+                <input type="text" name="legal_name" id="legal_name" 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00D4FF] focus:border-[#00D4FF] transition text-lg"
+                       placeholder="Enter your full legal name"
+                       required disabled
+                       autocomplete="name">
+                <p class="mt-2 text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Typing your full legal name serves as your electronic signature
+                </p>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" id="submit-btn"
+                    class="w-full py-4 px-6 bg-gray-400 text-white font-bold rounded-lg cursor-not-allowed transition-all duration-300"
+                    disabled>
+                <i class="fas fa-signature mr-2"></i>
+                Sign Waiver
+            </button>
+            
+            <!-- Form Status -->
+            <p id="form-status" class="mt-4 text-center text-sm text-gray-500">
+                <i class="fas fa-lock mr-1"></i>
+                Please read the entire waiver to enable signing
+            </p>
+        </form>
+        
+        <!-- Legal Notice -->
+        <div class="mt-8 text-center text-sm text-gray-500">
+            <p>
+                <i class="fas fa-shield-alt mr-1"></i>
+                Your signature will be securely stored with timestamp and verification data.
+            </p>
+            <p class="mt-2">
+                Questions? Contact us at <a href="mailto:info@momentumclips.com" class="text-[#00D4FF] hover:underline">info@momentumclips.com</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const waiverContainer = document.getElementById('waiver-text-container');
+    const scrollIndicator = document.getElementById('scroll-indicator');
+    const agreementCheckbox = document.getElementById('agreement');
+    const legalNameInput = document.getElementById('legal_name');
+    const submitBtn = document.getElementById('submit-btn');
+    const formStatus = document.getElementById('form-status');
+    
+    let hasScrolledToBottom = false;
+    
+    // Check if user has scrolled to bottom of waiver
+    waiverContainer.addEventListener('scroll', function() {
+        const scrollTop = waiverContainer.scrollTop;
+        const scrollHeight = waiverContainer.scrollHeight;
+        const clientHeight = waiverContainer.clientHeight;
+        
+        // Consider "bottom" when within 50px of actual bottom
+        if (scrollTop + clientHeight >= scrollHeight - 50) {
+            hasScrolledToBottom = true;
+            scrollIndicator.innerHTML = '<p class="text-sm text-green-600 font-medium"><i class="fas fa-check-circle mr-2"></i>You have read the entire waiver</p>';
+            scrollIndicator.classList.remove('bg-[#00D4FF]/10');
+            scrollIndicator.classList.add('bg-green-50');
+            
+            // Enable form elements
+            agreementCheckbox.disabled = false;
+            legalNameInput.disabled = false;
+            updateSubmitButton();
+        }
+    });
+    
+    // Update submit button state
+    function updateSubmitButton() {
+        const isAgreed = agreementCheckbox.checked;
+        const hasName = legalNameInput.value.trim().length >= 3;
+        
+        if (hasScrolledToBottom && isAgreed && hasName) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            submitBtn.classList.add('bg-[#00D4FF]', 'hover:bg-[#00B8E6]', 'cursor-pointer');
+            formStatus.innerHTML = '<i class="fas fa-check-circle mr-1 text-green-500"></i> Ready to sign';
+            formStatus.classList.remove('text-gray-500');
+            formStatus.classList.add('text-green-600');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            submitBtn.classList.remove('bg-[#00D4FF]', 'hover:bg-[#00B8E6]', 'cursor-pointer');
+            
+            if (!hasScrolledToBottom) {
+                formStatus.innerHTML = '<i class="fas fa-lock mr-1"></i> Please read the entire waiver to enable signing';
+            } else if (!isAgreed) {
+                formStatus.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Please check the agreement box';
+            } else if (!hasName) {
+                formStatus.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Please enter your full legal name';
+            }
+            formStatus.classList.add('text-gray-500');
+            formStatus.classList.remove('text-green-600');
+        }
+    }
+    
+    agreementCheckbox.addEventListener('change', updateSubmitButton);
+    legalNameInput.addEventListener('input', updateSubmitButton);
+    
+    // Auto-scroll indicator for short content
+    if (waiverContainer.scrollHeight <= waiverContainer.clientHeight + 100) {
+        // Content is short enough to see without scrolling
+        hasScrolledToBottom = true;
+        scrollIndicator.style.display = 'none';
+        agreementCheckbox.disabled = false;
+        legalNameInput.disabled = false;
+    }
+});
+</script>
+{% endblock %}
+

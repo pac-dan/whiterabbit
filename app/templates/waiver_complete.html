@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Waiver Signed - Momentum Clips{% endblock %}
+
+{% block content %}
+<!-- Success Section -->
+<section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] py-20">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <!-- Success Animation -->
+        <div class="relative mb-8">
+            <div class="w-32 h-32 mx-auto bg-green-500/20 rounded-full flex items-center justify-center animate-pulse">
+                <div class="w-24 h-24 bg-green-500/30 rounded-full flex items-center justify-center">
+                    <i class="fas fa-check-circle text-6xl text-green-400"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Success Message -->
+        <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4 heading">WAIVER SIGNED SUCCESSFULLY</h1>
+        <p class="text-xl text-gray-300 mb-8">Thank you for completing your liability waiver</p>
+        
+        <!-- Waiver Details Card -->
+        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 sm:p-8 text-left mb-8 border border-white/20">
+            <h2 class="text-lg font-bold text-[#00D4FF] mb-4">
+                <i class="fas fa-file-contract mr-2"></i>
+                Signature Details
+            </h2>
+            
+            <div class="space-y-3 text-gray-300">
+                <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                    <span class="text-gray-400">Signed By:</span>
+                    <span class="font-medium text-white">{{ waiver.legal_name_signature }}</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                    <span class="text-gray-400">Email:</span>
+                    <span class="font-medium text-white">{{ waiver.client_email }}</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                    <span class="text-gray-400">Date & Time:</span>
+                    <span class="font-medium text-white">{{ waiver.signed_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                    <span class="text-gray-400">Waiver Version:</span>
+                    <span class="font-medium text-white">{{ waiver.waiver_version }}</span>
+                </div>
+                {% if booking %}
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400">Session Date:</span>
+                    <span class="font-medium text-white">{{ booking.booking_date.strftime('%B %d, %Y') if booking.booking_date else 'TBD' }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Next Steps -->
+        <div class="bg-[#00D4FF]/10 rounded-xl p-6 border border-[#00D4FF]/30 mb-8">
+            <h3 class="text-lg font-bold text-[#00D4FF] mb-3">
+                <i class="fas fa-info-circle mr-2"></i>
+                What's Next?
+            </h3>
+            <ul class="text-gray-300 text-left space-y-2">
+                <li class="flex items-start">
+                    <i class="fas fa-check text-green-400 mt-1 mr-3"></i>
+                    <span>A confirmation email has been sent to <strong class="text-white">{{ waiver.client_email }}</strong></span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-check text-green-400 mt-1 mr-3"></i>
+                    <span>Your waiver is now on file and valid for your session</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-check text-green-400 mt-1 mr-3"></i>
+                    <span>Arrive at your session location 10 minutes early</span>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('main.index') }}" 
+               class="inline-flex items-center justify-center px-8 py-3 bg-[#00D4FF] text-[#0F172A] font-bold rounded-lg hover:bg-[#00B8E6] transition">
+                <i class="fas fa-home mr-2"></i>
+                Return Home
+            </a>
+            <a href="{{ url_for('main.packages') }}" 
+               class="inline-flex items-center justify-center px-8 py-3 bg-white/10 text-white font-bold rounded-lg hover:bg-white/20 transition border border-white/20">
+                <i class="fas fa-box mr-2"></i>
+                View Packages
+            </a>
+        </div>
+        
+        <!-- Contact -->
+        <p class="mt-8 text-sm text-gray-500">
+            Questions? Contact us at <a href="mailto:info@momentumclips.com" class="text-[#00D4FF] hover:underline">info@momentumclips.com</a>
+        </p>
+    </div>
+</section>
+{% endblock %}
+
