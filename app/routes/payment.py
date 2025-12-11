@@ -2,7 +2,6 @@
 Payment routes for Stripe Checkout
 Flow: Payment → Waiver → Calendly Booking
 """
-import stripe
 from flask import Blueprint, redirect, url_for, flash, request, current_app, render_template, session
 from app import db, csrf
 
@@ -34,6 +33,8 @@ PACKAGES = {
 @payment_bp.route('/checkout/<package>')
 def checkout(package):
     """Create Stripe Checkout session and redirect to payment"""
+    import stripe  # Import here to avoid module-level issues
+    
     current_app.logger.info(f'Checkout initiated for package: {package}')
     
     if package not in PACKAGES:
@@ -90,6 +91,8 @@ def checkout(package):
 @payment_bp.route('/success/<package>')
 def success(package):
     """Handle successful payment - redirect to waiver"""
+    import stripe  # Import here to avoid module-level issues
+    
     session_id = request.args.get('session_id')
     
     if not session_id:
