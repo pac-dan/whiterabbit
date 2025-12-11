@@ -326,9 +326,9 @@ nav.nav-visible {
     }
 }
 
-/* Adjust main content padding for floating nav */
+/* No padding on main - hero goes full bleed to top */
 main.pt-16 {
-    padding-top: 5.5rem !important;
+    padding-top: 0 !important;
 }
 
 /* Mobile adjustments */
@@ -342,10 +342,6 @@ main.pt-16 {
         width: 22px;
         height: 22px;
         margin-right: 8px;
-    }
-    
-    main.pt-16 {
-        padding-top: 5rem !important;
     }
 }
 
