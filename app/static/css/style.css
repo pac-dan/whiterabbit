@@ -252,13 +252,13 @@ nav a:hover {
         0 0 20px rgba(0, 212, 255, 0.08);
 }
 
-/* Scrolled state - slightly more solid */
-nav.scrolled .navbar-island {
-    background: rgba(15, 23, 42, 0.98);
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.2),
-        0 0 20px rgba(0, 212, 255, 0.1);
-    border-color: rgba(0, 212, 255, 0.25);
+/* Hide navbar on scroll down, show on scroll up */
+nav.nav-hidden {
+    transform: translate(-50%, -100%);
+}
+
+nav.nav-visible {
+    transform: translate(-50%, 0);
 }
 
 /* Mobile dropdown island */
@@ -328,7 +328,7 @@ nav.scrolled .navbar-island {
 
 /* Adjust main content padding for floating nav */
 main.pt-16 {
-    padding-top: 6.5rem !important;
+    padding-top: 5.5rem !important;
 }
 
 /* Mobile adjustments */
@@ -345,7 +345,7 @@ main.pt-16 {
     }
     
     main.pt-16 {
-        padding-top: 5.5rem !important;
+        padding-top: 5rem !important;
     }
 }
 

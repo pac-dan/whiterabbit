@@ -2,15 +2,41 @@
  * Momentum Clips - Navbar & UI Interactions
  */
 
-// CYBERPUNK NAVBAR SCROLL EFFECT
-window.addEventListener('scroll', function() {
+// NAVBAR HIDE ON SCROLL DOWN, SHOW ON SCROLL UP
+let lastScrollY = window.scrollY;
+let ticking = false;
+
+function updateNavbar() {
     const nav = document.getElementById('mainNav');
-    if (nav) {
-        if (window.scrollY > 50) {
-            nav.classList.add('scrolled');
+    if (!nav) return;
+    
+    const currentScrollY = window.scrollY;
+    
+    // Only hide/show after scrolling past 100px
+    if (currentScrollY > 100) {
+        if (currentScrollY > lastScrollY) {
+            // Scrolling DOWN - hide navbar
+            nav.classList.add('nav-hidden');
+            nav.classList.remove('nav-visible');
         } else {
-            nav.classList.remove('scrolled');
+            // Scrolling UP - show navbar
+            nav.classList.remove('nav-hidden');
+            nav.classList.add('nav-visible');
         }
+    } else {
+        // At top of page - always show
+        nav.classList.remove('nav-hidden');
+        nav.classList.remove('nav-visible');
+    }
+    
+    lastScrollY = currentScrollY;
+    ticking = false;
+}
+
+window.addEventListener('scroll', function() {
+    if (!ticking) {
+        requestAnimationFrame(updateNavbar);
+        ticking = true;
     }
 });
 
