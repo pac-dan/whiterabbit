@@ -132,15 +132,10 @@
                     <div class="text-gray-600">per session</div>
                 </div>
 
-                <a href="{{ url_for('booking.new_booking', package_id=package.id) }}" 
-                   class="block w-full text-center bg-[#00D4FF] text-white px-6 py-4 rounded-lg font-bold text-lg hover:bg-[#00D4FF] transition mb-4">
+                <a href="{{ url_for('main.packages') }}#book-session" 
+                   class="block w-full text-center bg-[#00D4FF] text-white px-6 py-4 rounded-lg font-bold text-lg hover:bg-[#00B8E6] transition mb-4">
                     <i class="fas fa-calendar-check mr-2"></i> Book Now
                 </a>
-
-                <button onclick="toggleChat()" 
-                        class="block w-full text-center bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
-                    <i class="fas fa-robot mr-2"></i> Ask AI About This Package
-                </button>
 
                 <!-- Quick Facts -->
                 <div class="mt-6 pt-6 border-t border-gray-200 space-y-3 text-sm">

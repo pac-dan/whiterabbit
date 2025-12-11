@@ -304,13 +304,24 @@ nav.nav-visible {
     transform: translateY(-1px);
 }
 
-/* Logo polygon */
+/* Logo polygon (legacy) */
 .logo-polygon {
     display: inline-block;
     width: 26px;
     height: 26px;
     background: linear-gradient(135deg, #00D4FF, #8B5CF6);
     clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+/* Navbar logo image */
+.navbar-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
     margin-right: 10px;
     animation: pulse-polygon 3s ease-in-out infinite;
 }
@@ -341,6 +352,12 @@ main.pt-16 {
     .logo-polygon {
         width: 22px;
         height: 22px;
+        margin-right: 8px;
+    }
+    
+    .navbar-logo {
+        width: 30px;
+        height: 30px;
         margin-right: 8px;
     }
 }
@@ -912,5 +929,62 @@ button[type="submit"]:hover, input[type="submit"]:hover {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========== TRUST BADGE MARQUEE ========== */
+.trust-marquee-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.trust-marquee {
+    display: flex;
+    gap: 3rem;
+    animation: marquee-scroll 30s linear infinite;
+    width: max-content;
+}
+
+.trust-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.trust-badge i {
+    font-size: 1.25rem;
+}
+
+@keyframes marquee-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Pause animation on hover */
+.trust-marquee-container:hover .trust-marquee {
+    animation-play-state: paused;
+}
+
+/* Mobile adjustments for trust badges */
+@media (max-width: 640px) {
+    .trust-marquee {
+        gap: 2rem;
+        animation-duration: 20s;
+    }
+    
+    .trust-badge {
+        font-size: 0.8rem;
+    }
+    
+    .trust-badge i {
+        font-size: 1rem;
     }
 }

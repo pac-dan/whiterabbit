@@ -184,11 +184,11 @@
             <div class="bg-gray-50 rounded-lg p-6 text-center">
                 <i class="fas fa-question-circle text-[#00D4FF] text-3xl mb-3"></i>
                 <h3 class="font-bold text-[#0F172A] mb-2">Have Questions?</h3>
-                <p class="text-gray-600 text-sm mb-4">Chat with our AI assistant or contact us directly</p>
-                <button onclick="toggleChat()" 
-                        class="w-full bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00D4FF] transition">
-                    <i class="fas fa-robot mr-2"></i> Chat Now
-                </button>
+                <p class="text-gray-600 text-sm mb-4">Contact us or book your session today!</p>
+                <a href="{{ url_for('main.contact') }}" 
+                   class="block w-full bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00B8E6] transition">
+                    <i class="fas fa-envelope mr-2"></i> Contact Us
+                </a>
             </div>
         </div>
     </div>
