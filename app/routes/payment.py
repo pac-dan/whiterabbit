@@ -2,6 +2,7 @@
 Payment routes for Stripe Checkout
 Flow: Payment → Waiver → Calendly Booking
 """
+import stripe
 from flask import Blueprint, redirect, url_for, flash, request, current_app, render_template, session
 from app import db, csrf
 
@@ -30,56 +31,22 @@ PACKAGES = {
 }
 
 
-def get_stripe():
-    """Get configured stripe module"""
-    import stripe
-    stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
-    if stripe_key:
-        stripe.api_key = stripe_key
-    return stripe
-
-
 @payment_bp.route('/checkout/<package>')
 def checkout(package):
     """Create Stripe Checkout session and redirect to payment"""
-    current_app.logger.info(f'Checkout initiated for package: {package}')
-    
     if package not in PACKAGES:
-        current_app.logger.warning(f'Invalid package: {package}')
         flash('Invalid package selected.', 'danger')
         return redirect(url_for('main.packages'))
     
-    stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
-    current_app.logger.info(f'Stripe key configured: {bool(stripe_key)}')
+    stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
     
-    if not stripe_key:
-        current_app.logger.error('STRIPE_SECRET_KEY not configured')
-        flash('Payment system is being configured. Please try again later or contact support.', 'warning')
-        return redirect(url_for('main.packages'))
-    
-    # Validate key format
-    if not (stripe_key.startswith('sk_test_') or stripe_key.startswith('sk_live_')):
-        current_app.logger.error('Invalid STRIPE_SECRET_KEY format')
-        flash('Payment configuration error. Please contact support.', 'danger')
+    if not stripe.api_key:
+        flash('Payment system is being configured. Please try again later.', 'warning')
         return redirect(url_for('main.packages'))
     
     pkg = PACKAGES[package]
     
     try:
-        # Import stripe and configure
-        import stripe
-        stripe.api_key = stripe_key
-        
-        # Verify stripe module loaded correctly
-        current_app.logger.info(f'Stripe version: {stripe.VERSION}')
-        current_app.logger.info(f'Stripe checkout module: {stripe.checkout}')
-        
-        if not hasattr(stripe, 'checkout') or stripe.checkout is None:
-            current_app.logger.error('Stripe checkout module not available')
-            flash('Payment system error. Please contact support.', 'danger')
-            return redirect(url_for('main.packages'))
-        
-        # Create Checkout Session
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
@@ -102,17 +69,10 @@ def checkout(package):
             },
         )
         
-        current_app.logger.info(f'Checkout session created: {checkout_session.id}')
         return redirect(checkout_session.url, code=303)
         
-    except AttributeError as e:
-        current_app.logger.error(f'Stripe AttributeError: {str(e)}')
-        current_app.logger.error(f'This usually means stripe module did not load correctly')
-        flash('Payment system temporarily unavailable. Please try again.', 'danger')
-        return redirect(url_for('main.packages'))
-    except Exception as e:
-        error_type = type(e).__name__
-        current_app.logger.error(f'Payment Error ({error_type}): {str(e)}')
+    except stripe.error.StripeError as e:
+        current_app.logger.error(f'Stripe Error: {str(e)}')
         flash('Unable to process payment. Please try again.', 'danger')
         return redirect(url_for('main.packages'))
 
@@ -127,16 +87,14 @@ def success(package):
         return redirect(url_for('main.packages'))
     
     # Verify the payment was successful
-    stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
-    if stripe_key:
+    stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+    if stripe.api_key:
         try:
-            import stripe
-            stripe.api_key = stripe_key
             checkout_session = stripe.checkout.Session.retrieve(session_id)
             if checkout_session.payment_status != 'paid':
                 flash('Payment was not completed. Please try again.', 'warning')
                 return redirect(url_for('main.packages'))
-        except Exception as e:
+        except stripe.error.StripeError as e:
             current_app.logger.error(f'Stripe verification error: {str(e)}')
     
     # Store package info in session for waiver flow
