@@ -185,6 +185,7 @@ nav a:hover {
     background: linear-gradient(135deg, var(--darker-slate) 0%, var(--dark-slate) 100%);
     position: relative;
     overflow: hidden;
+    isolation: isolate; /* ensure pseudo-element stays behind content */
 }
 
 .hero-gradient::before {
@@ -198,6 +199,14 @@ nav a:hover {
     background-size: 4px 4px;
     animation: grain 8s steps(10) infinite;
     opacity: 0.5;
+    pointer-events: none; /* allow scrolling/clicking through the grain overlay */
+    z-index: 0;
+}
+
+/* Ensure content appears above the hero grain overlay */
+.hero-gradient > * {
+    position: relative;
+    z-index: 1;
 }
 
 @keyframes grain {
