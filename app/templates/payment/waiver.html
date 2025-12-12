@@ -39,8 +39,10 @@
                 <!-- Waiver Text -->
                 <div class="mb-6">
                     <h3 class="font-bold text-[#0F172A] mb-4 text-lg">Liability Waiver & Release Agreement</h3>
-                    <div class="bg-gray-50 rounded-xl p-4 max-h-64 overflow-y-auto text-sm text-gray-700 leading-relaxed border border-gray-200">
-                        {{ waiver_text | safe }}
+                    <div class="bg-gray-50 rounded-xl p-4 max-h-[55vh] sm:max-h-96 overflow-y-auto text-sm text-gray-700 leading-relaxed border border-gray-200">
+                        <div class="whitespace-pre-line">
+                            {{ waiver_text }}
+                        </div>
                     </div>
                 </div>
                 
