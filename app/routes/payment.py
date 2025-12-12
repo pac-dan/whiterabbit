@@ -33,7 +33,9 @@ PACKAGES = {
 @payment_bp.route('/checkout/<package>')
 def checkout(package):
     """Create Stripe Checkout session and redirect to payment"""
-    import stripe  # Import here to avoid module-level issues with eventlet
+    # Explicit imports to avoid eventlet lazy loading issues
+    import stripe
+    from stripe.checkout import Session as CheckoutSession
     
     if package not in PACKAGES:
         flash('Invalid package selected.', 'danger')
@@ -48,7 +50,7 @@ def checkout(package):
     pkg = PACKAGES[package]
     
     try:
-        checkout_session = stripe.checkout.Session.create(
+        checkout_session = CheckoutSession.create(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
@@ -81,7 +83,8 @@ def checkout(package):
 @payment_bp.route('/success/<package>')
 def success(package):
     """Handle successful payment - redirect to waiver"""
-    import stripe  # Import here to avoid module-level issues with eventlet
+    import stripe
+    from stripe.checkout import Session as CheckoutSession
     
     session_id = request.args.get('session_id')
     
@@ -93,7 +96,7 @@ def success(package):
     stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
     if stripe.api_key:
         try:
-            checkout_session = stripe.checkout.Session.retrieve(session_id)
+            checkout_session = CheckoutSession.retrieve(session_id)
             if checkout_session.payment_status != 'paid':
                 flash('Payment was not completed. Please try again.', 'warning')
                 return redirect(url_for('main.packages'))
