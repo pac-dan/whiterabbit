@@ -276,6 +276,7 @@ def check_availability():
 def create_checkout_session(booking_id):
     """Create a Stripe Checkout Session for booking"""
     import stripe  # Import here to avoid module-level issues
+    from stripe.checkout import Session as CheckoutSession
     
     booking = Booking.query.get_or_404(booking_id)
 
@@ -304,7 +305,7 @@ def create_checkout_session(booking_id):
         stripe.api_key = stripe_key
 
         # Create Checkout Session
-        session = stripe.checkout.Session.create(
+        session = CheckoutSession.create(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
@@ -346,6 +347,7 @@ def create_checkout_session(booking_id):
 def payment_success(booking_id):
     """Payment success callback"""
     import stripe  # Import here to avoid module-level issues
+    from stripe.checkout import Session as CheckoutSession
     
     booking = Booking.query.get_or_404(booking_id)
     
@@ -360,7 +362,7 @@ def payment_success(booking_id):
     if session_id:
         try:
             stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
-            session = stripe.checkout.Session.retrieve(session_id)
+            session = CheckoutSession.retrieve(session_id)
             
             # Verify the session belongs to this booking
             if session.client_reference_id == str(booking.id):
@@ -410,6 +412,13 @@ def stripe_webhook():
     
     payload = request.get_data(as_text=True)
     sig_header = request.headers.get('Stripe-Signature')
+    current_app.logger.info(
+        "Stripe webhook received",
+        extra={
+            "has_signature_header": bool(sig_header),
+            "payload_len": len(payload) if payload else 0,
+        },
+    )
     
     webhook_secret = current_app.config.get('STRIPE_WEBHOOK_SECRET')
     
@@ -418,6 +427,7 @@ def stripe_webhook():
         return jsonify({'error': 'Webhook not configured'}), 400
     
     try:
+        stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
         event = stripe.Webhook.construct_event(
             payload, sig_header, webhook_secret
         )
@@ -429,18 +439,38 @@ def stripe_webhook():
         # Invalid signature
         current_app.logger.error(f'Invalid webhook signature: {str(e)}')
         return jsonify({'error': 'Invalid signature'}), 400
+
+    current_app.logger.info(
+        "Stripe webhook verified",
+        extra={
+            "event_type": event.get("type"),
+            "event_id": event.get("id"),
+        },
+    )
     
     # Handle the event
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        booking_id = session.get('client_reference_id') or session.get('metadata', {}).get('booking_id')
+    event_type = event.get('type')
+    obj = (event.get('data') or {}).get('object') or {}
+
+    if event_type in ('checkout.session.completed', 'checkout.session.async_payment_succeeded'):
+        booking_id = obj.get('client_reference_id') or (obj.get('metadata') or {}).get('booking_id')
+        payment_status = obj.get('payment_status')
+        current_app.logger.info(
+            "Stripe checkout session event",
+            extra={
+                "event_type": event_type,
+                "booking_id": booking_id,
+                "session_id": obj.get("id"),
+                "payment_status": payment_status,
+            },
+        )
         
         if booking_id:
             booking = Booking.query.get(int(booking_id))
             if booking and booking.status == BookingStatus.PENDING.value:
                 booking.confirm_payment(
-                    payment_intent_id=session.get('payment_intent'),
-                    charge_id=session.get('payment_intent')
+                    payment_intent_id=obj.get('payment_intent'),
+                    charge_id=obj.get('payment_intent')
                 )
                 current_app.logger.info(f'Booking {booking_id} confirmed via webhook (Checkout Session)')
                 
@@ -453,12 +483,17 @@ def stripe_webhook():
                 except Exception as e:
                     current_app.logger.error(f'Failed to send confirmation email for booking {booking_id}: {str(e)}')
                 
-    elif event['type'] == 'checkout.session.expired':
-        session = event['data']['object']
-        booking_id = session.get('client_reference_id') or session.get('metadata', {}).get('booking_id')
+    elif event_type in ('checkout.session.expired', 'checkout.session.async_payment_failed'):
+        booking_id = obj.get('client_reference_id') or (obj.get('metadata') or {}).get('booking_id')
         current_app.logger.warning(f'Checkout session expired for booking {booking_id}')
         
         # TODO: Notify customer of session expiration
+    else:
+        # Acknowledge but log unhandled event types for diagnosis
+        current_app.logger.info(
+            "Stripe webhook unhandled event type (acknowledged)",
+            extra={"event_type": event_type},
+        )
     
     return jsonify({'status': 'success'}), 200
 
