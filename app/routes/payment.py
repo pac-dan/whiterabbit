@@ -220,13 +220,8 @@ def waiver(package):
         confirm_token = _generate_waiver_confirm_token(new_waiver.id)
         confirm_url = url_for('payment.complete', package=package, _external=True, waiver_id=new_waiver.id, token=confirm_token)
 
-        # Calendly supports redirect_url after scheduling; append safely
-        calendly_url = pkg['calendly_url']
-        joiner = '&' if '?' in calendly_url else '?'
-        calendly_redirect = f"{calendly_url}{joiner}{urlencode({'redirect_url': confirm_url})}"
-
         flash('Waiver signed successfully! Now select your preferred time slot.', 'success')
-        return redirect(calendly_redirect)
+        return redirect(url_for('payment.book_time', package=package, waiver_id=new_waiver.id, token=confirm_token))
     
     return render_template('payment/waiver.html', package=package, pkg=pkg, waiver_text=WAIVER_TEXT)
 
@@ -236,6 +231,33 @@ def cancelled():
     """Handle cancelled payment"""
     flash('Payment was cancelled. You can try again when you\'re ready.', 'info')
     return redirect(url_for('main.packages'))
+
+
+@payment_bp.route('/book-time/<package>')
+def book_time(package):
+    """Embedded Calendly step that redirects back to our final confirmation page."""
+    if package not in PACKAGES:
+        flash('Invalid package.', 'danger')
+        return redirect(url_for('main.packages'))
+
+    waiver_id = request.args.get('waiver_id', type=int)
+    token = request.args.get('token', type=str)
+    if not waiver_id or not token:
+        flash('Missing booking details. Please contact support.', 'danger')
+        return redirect(url_for('main.packages'))
+
+    expected = _generate_waiver_confirm_token(waiver_id)
+    if token != expected:
+        flash('Invalid booking token. Please contact support.', 'danger')
+        return redirect(url_for('main.packages'))
+
+    pkg = PACKAGES[package]
+    confirm_url = url_for('payment.complete', package=package, _external=True, waiver_id=waiver_id, token=token)
+    calendly_url = pkg['calendly_url']
+    joiner = '&' if '?' in calendly_url else '?'
+    calendly_embed_url = f"{calendly_url}{joiner}{urlencode({'hide_gdpr_banner': 1, 'redirect_url': confirm_url})}"
+
+    return render_template('payment/book_time.html', pkg=pkg, package_key=package, waiver_id=waiver_id, token=token, calendly_url=calendly_embed_url)
 
 
 @payment_bp.route('/complete/<package>')

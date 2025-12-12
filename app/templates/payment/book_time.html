@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block page_title %}Book Your Time - Momentum Clips{% endblock %}
+
+{% block content %}
+<section class="pt-28 sm:pt-32 pb-12 sm:pb-16 hero-gradient min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-bold text-white mb-3 heading">BOOK YOUR TIME</h1>
+      <p class="text-lg text-gray-300">
+        Package: <span class="text-[#00D4FF] font-semibold">{{ pkg.name }}</span>
+      </p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div class="p-5 sm:p-8">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
+          <p class="text-sm text-gray-700">
+            <i class="fas fa-info-circle text-[#00D4FF] mr-2"></i>
+            Choose your preferred time slot below. After scheduling, you’ll be redirected back to Momentum Clips for final confirmation.
+          </p>
+        </div>
+
+        <div class="calendly-inline-widget rounded-xl overflow-hidden border border-gray-200"
+             data-url="{{ calendly_url }}"
+             style="min-width:320px;height:760px;">
+        </div>
+        <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
+        <div class="mt-6 text-center text-xs text-gray-500">
+          If you don’t get redirected automatically, you can return to
+          <a class="text-[#00D4FF] hover:underline" href="{{ url_for('payment.complete', package=package_key, waiver_id=waiver_id, token=token) }}">final confirmation</a>.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+

@@ -139,6 +139,7 @@ def create_app(config_name=None):
                 "https://cdn.socket.io",
                 "https://js.stripe.com",
                 "https://player.vimeo.com",
+                "https://assets.calendly.com",
                 "https://cdn.tailwindcss.com"  # Tailwind CDN
             ],
             'style-src': [
@@ -159,7 +160,8 @@ def create_app(config_name=None):
             ],
             'frame-src': [
                 "https://js.stripe.com",
-                "https://player.vimeo.com"
+                "https://player.vimeo.com",
+                "https://calendly.com"
             ],
             'connect-src': [
                 "'self'",
