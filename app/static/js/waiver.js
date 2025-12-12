@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const scrollIndicator = document.getElementById('scroll-indicator');
     const agreementCheckbox = document.getElementById('agreement');
     const legalNameInput = document.getElementById('legal_name');
+    // For payment waiver flow (email field uses id="email")
+    const emailInput = document.getElementById('email');
     const submitBtn = document.getElementById('submit-btn');
     const formStatus = document.getElementById('form-status');
     
@@ -18,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check if this is a standalone waiver (has client name/email fields)
     const isStandalone = clientNameInput !== null && clientEmailInput !== null;
+    const isPaymentWaiver = !isStandalone && emailInput !== null;
     
     let hasScrolledToBottom = false;
     
@@ -35,6 +38,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const hasClientName = clientNameInput.value.trim().length >= 2;
             const hasEmail = clientEmailInput.value.includes('@');
             allValid = allValid && hasClientName && hasEmail;
+        }
+
+        // For payment waiver, also require email
+        if (isPaymentWaiver) {
+            const hasEmail = emailInput.value.includes('@');
+            allValid = allValid && hasEmail;
         }
         
         if (allValid) {
@@ -58,6 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     formStatus.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Please check the agreement box';
                 } else if (!hasName) {
                     formStatus.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Please enter your full legal name';
+                } else if (isPaymentWaiver && !(emailInput && emailInput.value.includes('@'))) {
+                    formStatus.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Please enter a valid email address';
                 } else {
                     formStatus.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Please fill in all required fields';
                 }
@@ -89,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (legalNameInput) legalNameInput.disabled = false;
                 if (clientNameInput) clientNameInput.disabled = false;
                 if (clientEmailInput) clientEmailInput.disabled = false;
+                if (emailInput) emailInput.disabled = false;
                 
                 updateSubmitButton();
             }
@@ -102,6 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (legalNameInput) legalNameInput.disabled = false;
             if (clientNameInput) clientNameInput.disabled = false;
             if (clientEmailInput) clientEmailInput.disabled = false;
+            if (emailInput) emailInput.disabled = false;
         }
     }
     
@@ -120,6 +133,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (clientEmailInput) {
         clientEmailInput.addEventListener('input', updateSubmitButton);
+    }
+
+    if (emailInput) {
+        emailInput.addEventListener('input', updateSubmitButton);
     }
     
     // Initial state
