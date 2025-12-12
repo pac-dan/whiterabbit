@@ -39,9 +39,17 @@
                 <!-- Waiver Text -->
                 <div class="mb-6">
                     <h3 class="font-bold text-[#0F172A] mb-4 text-lg">Liability Waiver & Release Agreement</h3>
-                    <div class="bg-gray-50 rounded-xl p-4 max-h-[55vh] sm:max-h-96 overflow-y-auto text-sm text-gray-700 leading-relaxed border border-gray-200">
-                        <div class="whitespace-pre-line">
-                            {{ waiver_text }}
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+                        <!-- Scrollable Waiver Text -->
+                        <div id="waiver-text-container" class="p-4 sm:p-6 max-h-[55vh] sm:max-h-96 overflow-y-auto border-b-4 border-gray-200 bg-gray-50">
+                            <div class="whitespace-pre-line font-mono text-sm leading-relaxed text-gray-700">{{ waiver_text }}</div>
+                        </div>
+                        <!-- Scroll Indicator -->
+                        <div id="scroll-indicator" class="px-6 py-3 bg-[#00D4FF]/10 text-center">
+                            <p class="text-sm text-[#00D4FF] font-medium">
+                                <i class="fas fa-arrow-down mr-2 animate-bounce"></i>
+                                Please scroll down to read the entire waiver
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -56,32 +64,38 @@
                         </label>
                         <input type="email" id="email" name="email" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00D4FF] focus:border-[#00D4FF] transition"
-                               placeholder="your@email.com">
+                               placeholder="your@email.com" disabled>
                     </div>
                     
                     <div>
-                        <label for="legal_name_typed" class="block text-sm font-semibold text-[#0F172A] mb-2">
+                        <label for="legal_name" class="block text-sm font-semibold text-[#0F172A] mb-2">
                             Full Legal Name (Digital Signature) <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" id="legal_name_typed" name="legal_name_typed" required
+                        <input type="text" id="legal_name" name="legal_name_typed" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00D4FF] focus:border-[#00D4FF] transition"
-                               placeholder="Type your full legal name">
+                               placeholder="Type your full legal name" disabled>
                         <p class="mt-1 text-xs text-gray-500">By typing your name, you agree this constitutes your electronic signature.</p>
                     </div>
                     
                     <div class="flex items-start">
-                        <input type="checkbox" id="agree_to_terms" name="agree_to_terms" required
+                        <input type="checkbox" id="agreement" name="agree_to_terms" required
                                class="mt-1 w-5 h-5 text-[#00D4FF] border-gray-300 rounded focus:ring-[#00D4FF]">
-                        <label for="agree_to_terms" class="ml-3 text-sm text-gray-700">
+                        <label for="agreement" class="ml-3 text-sm text-gray-700">
                             I have read, understand, and agree to the terms of this liability waiver. I acknowledge that snowboarding carries inherent risks and I accept full responsibility for my participation. <span class="text-red-500">*</span>
                         </label>
                     </div>
                     
-                    <button type="submit" 
-                            class="w-full bg-[#00D4FF] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#00B8E6] transition-all duration-300 flex items-center justify-center">
+                    <button type="submit" id="submit-btn"
+                            class="w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center bg-gray-400 text-white cursor-not-allowed"
+                            disabled>
                         <i class="fas fa-signature mr-2"></i>
                         Sign & Continue to Book Time
                     </button>
+
+                    <p id="form-status" class="text-center text-sm text-gray-500">
+                        <i class="fas fa-lock mr-1"></i>
+                        Please read the entire waiver to enable signing
+                    </p>
                 </form>
                 
                 <p class="mt-4 text-center text-xs text-gray-500">
@@ -92,5 +106,9 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/waiver.js') }}"></script>
 {% endblock %}
 
