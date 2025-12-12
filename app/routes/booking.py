@@ -6,6 +6,7 @@ from app.models.package import Package
 from datetime import datetime, timedelta
 from sqlalchemy.exc import IntegrityError
 import os
+from app.utils.stripe_helpers import configure_stripe
 
 booking_bp = Blueprint('booking', __name__)
 
@@ -168,7 +169,7 @@ def payment(booking_id):
         return redirect(url_for('booking.index'))
 
     # Initialize Stripe
-    stripe.api_key = stripe_secret
+    configure_stripe(stripe, api_key=stripe_secret)
 
     # Render template with no-cache headers to prevent browser caching
     response = make_response(render_template(
@@ -301,7 +302,7 @@ def create_checkout_session(booking_id):
             flash('Payment system configuration error. Please contact support.', 'danger')
             return redirect(url_for('booking.index'))
         
-        stripe.api_key = stripe_key
+        configure_stripe(stripe, api_key=stripe_key)
 
         # Create Checkout Session
         session = stripe.checkout.Session.create(
@@ -359,7 +360,7 @@ def payment_success(booking_id):
     
     if session_id:
         try:
-            stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+            configure_stripe(stripe)
             session = stripe.checkout.Session.retrieve(session_id)
             
             # Verify the session belongs to this booking

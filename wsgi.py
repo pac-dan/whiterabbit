@@ -18,6 +18,12 @@ import os
 import sys
 import logging
 
+# IMPORTANT (Render / eventlet):
+# eventlet's greendns can intermittently break DNS resolution in some hosted environments,
+# which shows up as NameResolutionError when calling external APIs (e.g., Stripe).
+# Disabling greendns forces the standard resolver and is safe for typical web apps.
+os.environ.setdefault('EVENTLET_NO_GREENDNS', 'yes')
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,

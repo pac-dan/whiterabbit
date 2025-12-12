@@ -4,6 +4,7 @@ Flow: Payment → Waiver → Calendly Booking
 """
 from flask import Blueprint, redirect, url_for, flash, request, current_app, render_template, session
 from app import db, csrf
+from app.utils.stripe_helpers import configure_stripe
 
 payment_bp = Blueprint('payment', __name__)
 
@@ -41,7 +42,7 @@ def checkout(package):
         flash('Invalid package selected.', 'danger')
         return redirect(url_for('main.packages'))
     
-    stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+    configure_stripe(stripe)
     
     if not stripe.api_key:
         flash('Payment system is being configured. Please try again later.', 'warning')
@@ -93,7 +94,7 @@ def success(package):
         return redirect(url_for('main.packages'))
     
     # Verify the payment was successful
-    stripe.api_key = current_app.config.get('STRIPE_SECRET_KEY')
+    configure_stripe(stripe)
     if stripe.api_key:
         try:
             checkout_session = CheckoutSession.retrieve(session_id)
