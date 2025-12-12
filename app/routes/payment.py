@@ -71,6 +71,15 @@ def checkout(package):
         from stripe.checkout import Session as CheckoutSession
         stripe.api_key = stripe_key
         current_app.logger.info(f"Stripe version: {getattr(stripe, 'VERSION', 'unknown')}")
+        # Safe diagnostics (no secrets): key kind + length can help spot malformed env values
+        current_app.logger.info(
+            "Stripe key diagnostics",
+            extra={
+                "stripe_key_kind": ("sk_live" if stripe_key.startswith("sk_live_") else ("sk_test" if stripe_key.startswith("sk_test_") else "other")),
+                "stripe_key_len": len(stripe_key) if isinstance(stripe_key, str) else None,
+                "stripe_api_key_type": type(getattr(stripe, "api_key", None)).__name__,
+            },
+        )
         
         # Create Checkout Session
         checkout_session = CheckoutSession.create(
@@ -103,8 +112,17 @@ def checkout(package):
         flash('Unable to process payment. Please try again.', 'danger')
         return redirect(url_for('main.packages'))
     except Exception as e:
-        error_type = type(e).__name__
-        current_app.logger.error(f'Payment Error ({error_type}): {str(e)}')
+        # Full traceback is critical here: we are seeing AttributeError post-200 from Stripe,
+        # which suggests an internal library issue (not Stripe credentials).
+        key_kind = 'sk_live' if stripe_key.startswith('sk_live_') else ('sk_test' if stripe_key.startswith('sk_test_') else 'other')
+        current_app.logger.exception(
+            'Payment Error (unexpected exception after Stripe call)',
+            extra={
+                'package': package,
+                'stripe_key_kind': key_kind,
+                'stripe_key_present': bool(stripe_key),
+            },
+        )
         flash('Unable to process payment. Please try again.', 'danger')
         return redirect(url_for('main.packages'))
 
