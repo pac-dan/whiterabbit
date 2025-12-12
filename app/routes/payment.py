@@ -92,6 +92,7 @@ def checkout(package):
         # Create Checkout Session
         checkout_session = CheckoutSession.create(
             payment_method_types=['card'],
+            allow_promotion_codes=True,
             line_items=[{
                 'price_data': {
                     'currency': 'eur',
