@@ -4,6 +4,9 @@ Flow: Payment → Waiver → Calendly Booking
 """
 from flask import Blueprint, redirect, url_for, flash, request, current_app, render_template, session
 from app import db, csrf
+from app.services.email_service import EmailService
+from urllib.parse import urlencode
+import hashlib
 
 payment_bp = Blueprint('payment', __name__)
 
@@ -28,6 +31,11 @@ PACKAGES = {
         'calendly_url': 'https://calendly.com/mail-kevinjh/new-meeting-1'
     }
 }
+
+def _generate_waiver_confirm_token(waiver_id: int) -> str:
+    secret = current_app.config.get('SECRET_KEY', 'default-secret')
+    data = f"{waiver_id}-{secret}"
+    return hashlib.sha256(data.encode()).hexdigest()[:32]
 
 
 def get_stripe():
@@ -185,31 +193,39 @@ def waiver(package):
             flash('Please fill in all required fields and agree to the terms.', 'danger')
             return render_template('payment/waiver.html', package=package, pkg=pkg, waiver_text=WAIVER_TEXT)
         
-        # Store waiver in database
-        import hashlib
+        # Store waiver in database (field names must match Waiver model)
         from app.models.waiver import Waiver, CURRENT_WAIVER_VERSION
-        
-        waiver_text_hash = hashlib.sha256(WAIVER_TEXT.encode('utf-8')).hexdigest()
-        
         new_waiver = Waiver(
-            booking_id=None,  # No booking yet - will be linked when Calendly booking comes through
+            booking_id=None,
+            client_name=legal_name,
             client_email=email,
-            legal_name_typed=legal_name,
+            legal_name_signature=legal_name,
             ip_address=request.remote_addr,
             user_agent=request.headers.get('User-Agent'),
             waiver_version=CURRENT_WAIVER_VERSION,
-            waiver_text_hash=waiver_text_hash
         )
         
         db.session.add(new_waiver)
         db.session.commit()
         
-        # Clear payment session and redirect to Calendly
+        # Clear payment session and redirect to Calendly with redirect back to our confirmation page
         session.pop('paid_package', None)
         session.pop('payment_session_id', None)
-        
+
+        # Store minimal data for confirmation/email
+        session['last_waiver_id'] = new_waiver.id
+        session['last_package'] = package
+
+        confirm_token = _generate_waiver_confirm_token(new_waiver.id)
+        confirm_url = url_for('payment.complete', package=package, _external=True, waiver_id=new_waiver.id, token=confirm_token)
+
+        # Calendly supports redirect_url after scheduling; append safely
+        calendly_url = pkg['calendly_url']
+        joiner = '&' if '?' in calendly_url else '?'
+        calendly_redirect = f"{calendly_url}{joiner}{urlencode({'redirect_url': confirm_url})}"
+
         flash('Waiver signed successfully! Now select your preferred time slot.', 'success')
-        return redirect(pkg['calendly_url'])
+        return redirect(calendly_redirect)
     
     return render_template('payment/waiver.html', package=package, pkg=pkg, waiver_text=WAIVER_TEXT)
 
@@ -219,3 +235,44 @@ def cancelled():
     """Handle cancelled payment"""
     flash('Payment was cancelled. You can try again when you\'re ready.', 'info')
     return redirect(url_for('main.packages'))
+
+
+@payment_bp.route('/complete/<package>')
+def complete(package):
+    """Final confirmation after Calendly booking - send confirmation email + show done page."""
+    if package not in PACKAGES:
+        flash('Invalid package.', 'danger')
+        return redirect(url_for('main.packages'))
+
+    waiver_id = request.args.get('waiver_id', type=int)
+    token = request.args.get('token', type=str)
+    if not waiver_id or not token:
+        flash('Missing confirmation details. Please contact support.', 'danger')
+        return redirect(url_for('main.packages'))
+
+    expected = _generate_waiver_confirm_token(waiver_id)
+    if token != expected:
+        flash('Invalid confirmation token. Please contact support.', 'danger')
+        return redirect(url_for('main.packages'))
+
+    from app.models.waiver import Waiver
+    waiver = Waiver.query.get_or_404(waiver_id)
+    pkg = PACKAGES[package]
+
+    # Idempotency: don't spam email on refresh
+    if session.get('confirmation_emailed_waiver_id') != waiver_id:
+        try:
+            email_service = EmailService()
+            email_service.send_email(
+                to=waiver.client_email,
+                subject='Booking Confirmed',
+                template='package_confirmation',
+                waiver=waiver,
+                package=pkg,
+                package_key=package,
+            )
+            session['confirmation_emailed_waiver_id'] = waiver_id
+        except Exception:
+            current_app.logger.exception('Failed to send package confirmation email')
+
+    return render_template('payment/complete.html', waiver=waiver, pkg=pkg, package_key=package)

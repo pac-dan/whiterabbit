@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from urllib.parse import urlparse
 from app import db, limiter
@@ -11,7 +11,7 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['GET', 'POST'])
 @limiter.limit("10 per minute")
 def login():
-    """Login page"""
+    """Admin login page (public user accounts are disabled)"""
     # Redirect if already logged in
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -31,6 +31,11 @@ def login():
 
         # Check credentials
         if user and user.check_password(password):
+            # Only admins may log in (public user login is disabled)
+            if not user.is_admin:
+                flash('Admin access only.', 'danger')
+                return render_template('auth/login.html')
+
             if not user.is_active:
                 flash('Your account has been deactivated. Please contact support.', 'warning')
                 return render_template('auth/login.html')
@@ -56,7 +61,8 @@ def login():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @limiter.limit("5 per hour")
 def register():
-    """Registration page"""
+    """Disabled: public user registration is not supported."""
+    abort(404)
     # Redirect if already logged in
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -122,60 +128,15 @@ def logout():
 @auth_bp.route('/profile')
 @login_required
 def profile():
-    """User profile page"""
-    # Get user's bookings
-    from app.models.booking import Booking
-    upcoming_bookings = Booking.get_upcoming_bookings(user_id=current_user.id)
-    past_bookings = Booking.query.filter_by(user_id=current_user.id)\
-        .filter(Booking.status == 'completed')\
-        .order_by(Booking.booking_date.desc())\
-        .limit(10)\
-        .all()
-
-    return render_template(
-        'auth/profile.html',
-        user=current_user,
-        upcoming_bookings=upcoming_bookings,
-        past_bookings=past_bookings
-    )
+    """Disabled: public user profiles are not supported."""
+    abort(404)
 
 
 @auth_bp.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    """Edit user profile"""
-    if request.method == 'POST':
-        current_user.name = request.form.get('name', current_user.name)
-        current_user.phone = request.form.get('phone', current_user.phone)
-        current_user.experience_level = request.form.get('experience_level', current_user.experience_level)
-        current_user.bio = request.form.get('bio', current_user.bio)
-
-        # Handle password change
-        current_password = request.form.get('current_password')
-        new_password = request.form.get('new_password')
-        confirm_new_password = request.form.get('confirm_new_password')
-
-        if current_password and new_password:
-            if not current_user.check_password(current_password):
-                flash('Current password is incorrect.', 'danger')
-                return render_template('auth/edit_profile.html')
-
-            if new_password != confirm_new_password:
-                flash('New passwords do not match.', 'danger')
-                return render_template('auth/edit_profile.html')
-
-            if len(new_password) < 8:
-                flash('New password must be at least 8 characters long.', 'danger')
-                return render_template('auth/edit_profile.html')
-
-            current_user.set_password(new_password)
-            flash('Password updated successfully.', 'success')
-
-        db.session.commit()
-        flash('Profile updated successfully!', 'success')
-        return redirect(url_for('auth.profile'))
-
-    return render_template('auth/edit_profile.html')
+    """Disabled: public user profile editing is not supported."""
+    abort(404)
 
 
 @auth_bp.route('/forgot-password', methods=['GET', 'POST'])
