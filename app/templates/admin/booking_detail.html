@@ -19,8 +19,9 @@
                 <p class="text-gray-600">Created: {{ booking.created_at|datetime('%B %d, %Y at %I:%M %p') }}</p>
             </div>
             <span class="px-4 py-2 rounded-full text-sm font-bold
-                {% if booking.status == 'confirmed' %}bg-green-100 text-green-800
-                {% elif booking.status == 'pending' %}bg-yellow-100 text-yellow-800
+                {% if booking.status == 'paid' %}bg-green-100 text-green-800
+                {% elif booking.status == 'waiver_signed' %}bg-cyan-100 text-cyan-800
+                {% elif booking.status == 'scheduled' %}bg-purple-100 text-purple-800
                 {% elif booking.status == 'completed' %}bg-blue-100 text-[#00D4FF]
                 {% elif booking.status == 'cancelled' %}bg-red-100 text-red-800
                 {% else %}bg-gray-100 text-[#0F172A]{% endif %}">
@@ -40,21 +41,15 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-600">Name</p>
-                        <p class="font-semibold text-[#0F172A]">{{ booking.user.name }}</p>
+                        <p class="font-semibold text-[#0F172A]">{{ booking.customer_name or '—' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Email</p>
-                        <p class="font-semibold text-[#0F172A]">{{ booking.user.email }}</p>
+                        <p class="font-semibold text-[#0F172A]">{{ booking.customer_email or '—' }}</p>
                     </div>
-                    {% if booking.user.phone %}
-                    <div>
-                        <p class="text-sm text-gray-600">Phone</p>
-                        <p class="font-semibold text-[#0F172A]">{{ booking.user.phone }}</p>
-                    </div>
-                    {% endif %}
                     <div>
                         <p class="text-sm text-gray-600">Experience Level</p>
-                        <p class="font-semibold text-[#0F172A]">{{ booking.rider_experience or 'Not specified' }}</p>
+                        <p class="font-semibold text-[#0F172A]">—</p>
                     </div>
                 </div>
             </div>
@@ -67,25 +62,25 @@
                 <div class="space-y-4">
                     <div>
                         <p class="text-sm text-gray-600">Package</p>
-                        <p class="text-lg font-semibold text-[#0F172A]">{{ booking.package.name }}</p>
-                        <p class="text-gray-600">{{ booking.package.duration }} hours session</p>
+                        <p class="text-lg font-semibold text-[#0F172A]">{{ booking.package_name }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Date & Time</p>
                         <p class="text-lg font-semibold text-[#0F172A]">
-                            {{ booking.booking_date|datetime('%A, %B %d, %Y at %I:%M %p') }}
+                            {% if booking.calendly_event_start %}
+                                {{ booking.calendly_event_start|datetime('%A, %B %d, %Y at %I:%M %p') }}
+                            {% else %}
+                                Not captured
+                            {% endif %}
                         </p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Location</p>
-                        <p class="text-lg font-semibold text-[#0F172A]">{{ booking.location }}</p>
-                        {% if booking.location_details %}
-                        <p class="text-gray-600 mt-1">{{ booking.location_details }}</p>
-                        {% endif %}
+                        <p class="text-lg font-semibold text-[#0F172A]">{{ booking.calendly_location or '—' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Number of Riders</p>
-                        <p class="text-lg font-semibold text-[#0F172A]">{{ booking.number_of_riders }}</p>
+                        <p class="text-lg font-semibold text-[#0F172A]">—</p>
                     </div>
                 </div>
             </div>
@@ -126,12 +121,11 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <select name="status" 
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mb-3">
-                        <option value="pending" {% if booking.status == 'pending' %}selected{% endif %}>Pending</option>
-                        <option value="confirmed" {% if booking.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
-                        <option value="in_progress" {% if booking.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                        <option value="paid" {% if booking.status == 'paid' %}selected{% endif %}>Paid</option>
+                        <option value="waiver_signed" {% if booking.status == 'waiver_signed' %}selected{% endif %}>Waiver Signed</option>
+                        <option value="scheduled" {% if booking.status == 'scheduled' %}selected{% endif %}>Scheduled</option>
                         <option value="completed" {% if booking.status == 'completed' %}selected{% endif %}>Completed</option>
                         <option value="cancelled" {% if booking.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
-                        <option value="refunded" {% if booking.status == 'refunded' %}selected{% endif %}>Refunded</option>
                     </select>
                     <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
                         Update Status
@@ -144,16 +138,16 @@
                 <h3 class="font-bold text-[#0F172A] mb-4">
                     <i class="fas fa-file-signature text-[#00D4FF] mr-2"></i>Liability Waiver
                 </h3>
-                {% if booking.waiver_signed and booking.waiver %}
+                {% if waivers %}
                 <div class="bg-green-50 rounded-lg p-4 mb-3">
                     <p class="text-sm font-semibold text-green-800 mb-2">
                         <i class="fas fa-check-circle mr-2"></i> Waiver Signed
                     </p>
                     <div class="text-xs text-green-700 space-y-1">
-                        <p><strong>Signed by:</strong> {{ booking.waiver.legal_name_signature }}</p>
-                        <p><strong>Date:</strong> {{ booking.waiver.signed_at|datetime('%b %d, %Y at %I:%M %p') }}</p>
-                        <p><strong>Version:</strong> {{ booking.waiver.waiver_version }}</p>
-                        <p><strong>IP:</strong> {{ booking.waiver.ip_address }}</p>
+                        <p><strong>Latest signed by:</strong> {{ waivers[0].legal_name_signature }}</p>
+                        <p><strong>Date:</strong> {{ waivers[0].signed_at|datetime('%b %d, %Y at %I:%M %p') }}</p>
+                        <p><strong>Version:</strong> {{ waivers[0].waiver_version }}</p>
+                        <p><strong>IP:</strong> {{ waivers[0].ip_address }}</p>
                     </div>
                 </div>
                 {% else %}
@@ -163,10 +157,6 @@
                     </p>
                     <p class="text-xs text-yellow-700">Customer has not signed the liability waiver yet.</p>
                 </div>
-                <a href="{{ url_for('main.waiver_form', token=waiver_token) }}" target="_blank"
-                   class="block w-full text-center bg-[#00D4FF] text-white px-4 py-2 rounded-lg hover:bg-[#00B8E6] transition text-sm">
-                    <i class="fas fa-link mr-2"></i> Copy Waiver Link
-                </a>
                 {% endif %}
             </div>
 
@@ -176,7 +166,7 @@
                 <div class="space-y-3">
                     <div class="flex justify-between">
                         <span class="text-gray-600">Amount</span>
-                        <span class="font-bold text-[#0F172A]">${{ "%.2f"|format(booking.amount) }}</span>
+                        <span class="font-bold text-[#0F172A]">€{{ "%.2f"|format((booking.amount_cents or 0) / 100) }}</span>
                     </div>
                     {% if booking.paid_at %}
                     <div class="bg-green-50 rounded p-3">
@@ -204,7 +194,7 @@
             </div>
 
             <!-- Deliver Videos -->
-            {% if booking.status in ['completed', 'in_progress'] %}
+            {% if booking.status in ['scheduled', 'completed'] %}
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h3 class="font-bold text-[#0F172A] mb-4">Deliver Videos</h3>
                 <form method="POST" action="{{ url_for('admin.deliver_booking', booking_id=booking.id) }}">
@@ -221,13 +211,9 @@
 
             <!-- Quick Actions -->
             <div class="bg-gray-50 rounded-lg p-4 space-y-2">
-                <a href="mailto:{{ booking.user.email }}" 
+                <a href="mailto:{{ booking.customer_email }}" 
                    class="block w-full text-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
                     <i class="fas fa-envelope mr-2"></i> Email Customer
-                </a>
-                <a href="{{ url_for('admin.view_user', user_id=booking.user.id) }}" 
-                   class="block w-full text-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
-                    <i class="fas fa-user mr-2"></i> View Customer
                 </a>
             </div>
         </div>

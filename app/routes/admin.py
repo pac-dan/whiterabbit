@@ -3,7 +3,9 @@ from flask_login import login_required, current_user
 from functools import wraps
 from app import db
 from app.models.user import User
-from app.models.booking import Booking, BookingStatus
+from app.models.booking import Booking  # legacy (user-login flow)
+from app.models.public_booking import PublicBooking
+from app.models.public_booking_waiver import PublicBookingWaiver
 from app.models.package import Package
 from app.models.video import Video
 from app.models.testimonial import Testimonial
@@ -37,25 +39,30 @@ def dashboard():
     """Admin dashboard with overview statistics"""
     # Get statistics
     total_users = User.query.count()
-    total_bookings = Booking.query.count()
+    total_bookings = PublicBooking.query.count()
     total_videos = Video.query.count()
     total_testimonials = Testimonial.query.count()
 
     # Get revenue statistics
-    completed_bookings = Booking.query.filter_by(status=BookingStatus.COMPLETED.value).all()
-    total_revenue = sum(float(booking.amount) for booking in completed_bookings)
+    revenue_cents = db.session.query(func.coalesce(func.sum(PublicBooking.amount_cents), 0))\
+        .filter(PublicBooking.status.in_(['paid', 'waiver_signed', 'scheduled', 'completed']))\
+        .scalar()
+    total_revenue = float(revenue_cents or 0) / 100.0
 
     # Get upcoming bookings
-    upcoming_bookings = Booking.get_upcoming_bookings(limit=10)
+    upcoming_bookings = PublicBooking.query.filter(
+        PublicBooking.calendly_event_start.isnot(None),
+        PublicBooking.calendly_event_start >= datetime.utcnow()
+    ).order_by(PublicBooking.calendly_event_start.asc()).limit(10).all()
 
     # Get recent bookings
-    recent_bookings = Booking.query.order_by(Booking.created_at.desc()).limit(10).all()
+    recent_bookings = PublicBooking.query.order_by(PublicBooking.created_at.desc()).limit(10).all()
 
     # Get booking statistics by status
     booking_stats = db.session.query(
-        Booking.status,
-        func.count(Booking.id).label('count')
-    ).group_by(Booking.status).all()
+        PublicBooking.status,
+        func.count(PublicBooking.id).label('count')
+    ).group_by(PublicBooking.status).all()
 
     return render_template(
         'admin/dashboard.html',
@@ -80,12 +87,12 @@ def bookings():
     status_filter = request.args.get('status', None)
     page = request.args.get('page', 1, type=int)
 
-    query = Booking.query
+    query = PublicBooking.query
 
     if status_filter:
         query = query.filter_by(status=status_filter)
 
-    bookings = query.order_by(Booking.booking_date.desc())\
+    bookings = query.order_by(PublicBooking.created_at.desc())\
         .paginate(page=page, per_page=current_app.config['ADMIN_ITEMS_PER_PAGE'], error_out=False)
 
     return render_template(
@@ -100,10 +107,11 @@ def bookings():
 @admin_required
 def view_booking(booking_id):
     """View and manage a specific booking"""
-    from app.routes.main import generate_waiver_token
-    booking = Booking.query.get_or_404(booking_id)
-    waiver_token = generate_waiver_token(booking_id)
-    return render_template('admin/booking_detail.html', booking=booking, waiver_token=waiver_token)
+    booking = PublicBooking.query.get_or_404(booking_id)
+    waiver_links = PublicBookingWaiver.query.filter_by(public_booking_id=booking_id).all()
+    waiver_ids = [wl.waiver_id for wl in waiver_links]
+    waivers = Waiver.query.filter(Waiver.id.in_(waiver_ids)).order_by(Waiver.signed_at.desc()).all() if waiver_ids else []
+    return render_template('admin/booking_detail.html', booking=booking, waivers=waivers)
 
 
 @admin_bp.route('/bookings/<int:booking_id>/update-status', methods=['POST'])
@@ -111,18 +119,16 @@ def view_booking(booking_id):
 @admin_required
 def update_booking_status(booking_id):
     """Update booking status"""
-    booking = Booking.query.get_or_404(booking_id)
+    booking = PublicBooking.query.get_or_404(booking_id)
     new_status = request.form.get('status')
     admin_notes = request.form.get('admin_notes')
 
-    if new_status in [status.value for status in BookingStatus]:
+    if new_status:
         booking.status = new_status
-        if admin_notes:
-            booking.admin_notes = admin_notes
-        db.session.commit()
-        flash('Booking status updated successfully.', 'success')
-    else:
-        flash('Invalid status.', 'danger')
+    if admin_notes is not None:
+        booking.admin_notes = admin_notes
+    db.session.commit()
+    flash('Booking updated successfully.', 'success')
 
     return redirect(url_for('admin.view_booking', booking_id=booking_id))
 
@@ -132,10 +138,13 @@ def update_booking_status(booking_id):
 @admin_required
 def deliver_booking(booking_id):
     """Mark booking as completed and add video links"""
-    booking = Booking.query.get_or_404(booking_id)
+    booking = PublicBooking.query.get_or_404(booking_id)
     video_links = request.form.get('video_links')
 
-    booking.mark_completed(video_links=video_links)
+    booking.status = 'completed'
+    booking.video_links = video_links
+    booking.delivered_at = datetime.utcnow()
+    db.session.commit()
 
     flash('Booking marked as completed and video links delivered.', 'success')
     return redirect(url_for('admin.view_booking', booking_id=booking_id))
@@ -514,7 +523,47 @@ def view_user(user_id):
 def waivers():
     """View all signed waivers"""
     all_waivers = Waiver.query.order_by(Waiver.signed_at.desc()).all()
-    return render_template('admin/waivers.html', waivers=all_waivers)
+
+    # Map waiver_id -> public_booking_id (if linked)
+    links = PublicBookingWaiver.query.all()
+    waiver_to_booking = {l.waiver_id: l.public_booking_id for l in links}
+
+    # Group by email (case-insensitive)
+    groups = {}
+    for w in all_waivers:
+        key = (w.client_email or '').strip().lower()
+        groups.setdefault(key, []).append(w)
+
+    waiver_groups = []
+    for key, ws in groups.items():
+        if not key:
+            continue
+        ws_sorted = sorted(ws, key=lambda x: x.signed_at or datetime.min, reverse=True)
+        latest = ws_sorted[0]
+        latest_booking_id = waiver_to_booking.get(latest.id)
+        waiver_groups.append({
+            'email': latest.client_email,
+            'count': len(ws_sorted),
+            'latest': latest,
+            'latest_booking_id': latest_booking_id
+        })
+
+    waiver_groups.sort(key=lambda g: g['latest'].signed_at or datetime.min, reverse=True)
+
+    linked_count = len(waiver_to_booking)
+    return render_template('admin/waivers.html', waiver_groups=waiver_groups, total_waivers=len(all_waivers), linked_count=linked_count)
+
+
+@admin_bp.route('/waivers/email/<path:email>')
+@login_required
+@admin_required
+def waivers_by_email(email):
+    """View all waiver signatures for a given email."""
+    waivers = Waiver.query.filter(func.lower(Waiver.client_email) == email.strip().lower())\
+        .order_by(Waiver.signed_at.desc()).all()
+    links = PublicBookingWaiver.query.all()
+    waiver_to_booking = {l.waiver_id: l.public_booking_id for l in links}
+    return render_template('admin/waiver_email.html', email=email, waivers=waivers, waiver_to_booking=waiver_to_booking)
 
 
 # Social Media Management (Future Integration)

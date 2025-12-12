@@ -22,17 +22,17 @@
                class="px-4 py-2 rounded-lg {% if not status_filter %}bg-[#00D4FF] text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
                 All
             </a>
-            <a href="{{ url_for('admin.bookings', status='pending') }}" 
-               class="px-4 py-2 rounded-lg {% if status_filter == 'pending' %}bg-yellow-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
-                Pending
+            <a href="{{ url_for('admin.bookings', status='paid') }}" 
+               class="px-4 py-2 rounded-lg {% if status_filter == 'paid' %}bg-green-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Paid
             </a>
-            <a href="{{ url_for('admin.bookings', status='confirmed') }}" 
-               class="px-4 py-2 rounded-lg {% if status_filter == 'confirmed' %}bg-green-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
-                Confirmed
+            <a href="{{ url_for('admin.bookings', status='waiver_signed') }}" 
+               class="px-4 py-2 rounded-lg {% if status_filter == 'waiver_signed' %}bg-[#00D4FF] text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Waiver Signed
             </a>
-            <a href="{{ url_for('admin.bookings', status='in_progress') }}" 
-               class="px-4 py-2 rounded-lg {% if status_filter == 'in_progress' %}bg-[#00D4FF] text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
-                In Progress
+            <a href="{{ url_for('admin.bookings', status='scheduled') }}" 
+               class="px-4 py-2 rounded-lg {% if status_filter == 'scheduled' %}bg-[#8B5CF6] text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Scheduled
             </a>
             <a href="{{ url_for('admin.bookings', status='completed') }}" 
                class="px-4 py-2 rounded-lg {% if status_filter == 'completed' %}bg-[#8B5CF6] text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
@@ -87,22 +87,27 @@
                         #{{ booking.id }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-[#0F172A]">{{ booking.user.name }}</div>
-                        <div class="text-sm text-gray-500">{{ booking.user.email }}</div>
+                        <div class="text-sm font-medium text-[#0F172A]">{{ booking.customer_name or '—' }}</div>
+                        <div class="text-sm text-gray-500">{{ booking.customer_email or '—' }}</div>
                     </td>
                     <td class="px-6 py-4 text-sm text-[#0F172A]">
-                        {{ booking.package.name }}
+                        {{ booking.package_name }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-[#0F172A]">
-                        {{ booking.booking_date|datetime('%b %d, %Y<br>%I:%M %p')|safe }}
+                        {% if booking.calendly_event_start %}
+                            {{ booking.calendly_event_start|datetime('%b %d, %Y<br>%I:%M %p')|safe }}
+                        {% else %}
+                            <span class="text-gray-500">Not captured</span>
+                        {% endif %}
                     </td>
                     <td class="px-6 py-4 text-sm text-[#0F172A]">
-                        {{ booking.location }}
+                        {{ booking.calendly_location or '—' }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            {% if booking.status == 'confirmed' %}bg-green-100 text-green-800
-                            {% elif booking.status == 'pending' %}bg-yellow-100 text-yellow-800
+                            {% if booking.status == 'paid' %}bg-green-100 text-green-800
+                            {% elif booking.status == 'waiver_signed' %}bg-cyan-100 text-cyan-800
+                            {% elif booking.status == 'scheduled' %}bg-purple-100 text-purple-800
                             {% elif booking.status == 'completed' %}bg-purple-100 text-purple-800
                             {% elif booking.status == 'cancelled' %}bg-red-100 text-red-800
                             {% else %}bg-gray-100 text-[#0F172A]{% endif %}">
@@ -110,7 +115,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        {% if booking.waiver_signed %}
+                        {% if booking.latest_waiver_id %}
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                             <i class="fas fa-check-circle mr-1"></i> Signed
                         </span>
@@ -121,7 +126,7 @@
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#0F172A]">
-                        ${{ "%.2f"|format(booking.amount) }}
+                        €{{ "%.2f"|format((booking.amount_cents or 0) / 100) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <a href="{{ url_for('admin.view_booking', booking_id=booking.id) }}" 

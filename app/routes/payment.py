@@ -7,6 +7,7 @@ from app import db, csrf
 from app.services.email_service import EmailService
 from urllib.parse import urlencode
 import hashlib
+from datetime import datetime
 
 payment_bp = Blueprint('payment', __name__)
 
@@ -162,6 +163,31 @@ def success(package):
     # Store package info in session for waiver flow
     session['paid_package'] = package
     session['payment_session_id'] = session_id
+
+    # Create/update a public booking record (no user login)
+    try:
+        from app.models.public_booking import PublicBooking
+        # Use Checkout Session fields if available
+        booking = PublicBooking.query.filter_by(stripe_checkout_session_id=session_id).first()
+        if not booking:
+            booking = PublicBooking(
+                package_key=package,
+                package_name=PACKAGES[package]['name'],
+                stripe_checkout_session_id=session_id,
+                status='paid'
+            )
+            db.session.add(booking)
+
+        # Best-effort: attach Stripe payment_intent and amount
+        if 'checkout_session' in locals():
+            booking.stripe_payment_intent_id = getattr(checkout_session, 'payment_intent', None)
+            booking.amount_cents = int(getattr(checkout_session, 'amount_total', 0) or 0)
+            booking.currency = str(getattr(checkout_session, 'currency', 'eur') or 'eur')
+            booking.paid_at = datetime.utcnow()
+        db.session.commit()
+        session['public_booking_id'] = booking.id
+    except Exception:
+        current_app.logger.exception('Failed to create/update PublicBooking on payment success')
     
     # Redirect to waiver signing
     flash('Payment successful! Please sign the liability waiver to continue.', 'success')
@@ -208,6 +234,31 @@ def waiver(package):
         
         db.session.add(new_waiver)
         db.session.commit()
+
+        # Link waiver to a public booking record and update customer info
+        try:
+            from app.models.public_booking import PublicBooking
+            from app.models.public_booking_waiver import PublicBookingWaiver
+            public_booking_id = session.get('public_booking_id')
+            booking = None
+            if public_booking_id:
+                booking = PublicBooking.query.get(public_booking_id)
+            if not booking:
+                # Fallback: try to find by Stripe session id in this flow
+                stripe_session_id = session.get('payment_session_id')
+                if stripe_session_id:
+                    booking = PublicBooking.query.filter_by(stripe_checkout_session_id=stripe_session_id).first()
+
+            if booking:
+                booking.customer_email = email
+                booking.customer_name = legal_name
+                booking.latest_waiver_id = new_waiver.id
+                booking.status = 'waiver_signed'
+                db.session.add(PublicBookingWaiver(public_booking_id=booking.id, waiver_id=new_waiver.id))
+                db.session.commit()
+                session['public_booking_id'] = booking.id
+        except Exception:
+            current_app.logger.exception('Failed to link waiver to PublicBooking')
         
         # Clear payment session and redirect to Calendly with redirect back to our confirmation page
         session.pop('paid_package', None)
@@ -221,7 +272,7 @@ def waiver(package):
         confirm_url = url_for('payment.complete', package=package, _external=True, waiver_id=new_waiver.id, token=confirm_token)
 
         flash('Waiver signed successfully! Now select your preferred time slot.', 'success')
-        return redirect(url_for('payment.book_time', package=package, waiver_id=new_waiver.id, token=confirm_token))
+        return redirect(url_for('payment.book_time', package=package, waiver_id=new_waiver.id, token=confirm_token, booking_id=session.get('public_booking_id')))
     
     return render_template('payment/waiver.html', package=package, pkg=pkg, waiver_text=WAIVER_TEXT)
 
@@ -242,6 +293,7 @@ def book_time(package):
 
     waiver_id = request.args.get('waiver_id', type=int)
     token = request.args.get('token', type=str)
+    booking_id = request.args.get('booking_id', type=int)
     if not waiver_id or not token:
         flash('Missing booking details. Please contact support.', 'danger')
         return redirect(url_for('main.packages'))
@@ -252,7 +304,7 @@ def book_time(package):
         return redirect(url_for('main.packages'))
 
     pkg = PACKAGES[package]
-    confirm_url = url_for('payment.complete', package=package, _external=True, waiver_id=waiver_id, token=token)
+    confirm_url = url_for('payment.complete', package=package, _external=True, waiver_id=waiver_id, token=token, booking_id=booking_id)
     calendly_url = pkg['calendly_url']
     joiner = '&' if '?' in calendly_url else '?'
     calendly_embed_url = f"{calendly_url}{joiner}{urlencode({'hide_gdpr_banner': 1, 'redirect_url': confirm_url})}"
@@ -269,6 +321,7 @@ def complete(package):
 
     waiver_id = request.args.get('waiver_id', type=int)
     token = request.args.get('token', type=str)
+    booking_id = request.args.get('booking_id', type=int)
     if not waiver_id or not token:
         flash('Missing confirmation details. Please contact support.', 'danger')
         return redirect(url_for('main.packages'))
@@ -281,6 +334,20 @@ def complete(package):
     from app.models.waiver import Waiver
     waiver = Waiver.query.get_or_404(waiver_id)
     pkg = PACKAGES[package]
+
+    # Update booking record with any Calendly details (best-effort)
+    try:
+        from app.models.public_booking import PublicBooking
+        if booking_id:
+            booking = PublicBooking.query.get(booking_id)
+            if booking:
+                booking.status = 'scheduled'
+                # Capture common Calendly redirect params if present
+                booking.calendly_invitee_uuid = request.args.get('invitee_uuid') or booking.calendly_invitee_uuid
+                booking.calendly_event_uuid = request.args.get('event_uuid') or booking.calendly_event_uuid
+                db.session.commit()
+    except Exception:
+        current_app.logger.exception('Failed to update PublicBooking on complete')
 
     # Idempotency: don't spam email on refresh
     if session.get('confirmation_emailed_waiver_id') != waiver_id:
