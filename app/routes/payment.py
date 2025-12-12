@@ -70,7 +70,7 @@ def checkout(package):
         import stripe
         from stripe.checkout import Session as CheckoutSession
         stripe.api_key = stripe_key
-        current_app.logger.info(f'Stripe version: {getattr(stripe, \"VERSION\", \"unknown\")}')
+        current_app.logger.info(f"Stripe version: {getattr(stripe, 'VERSION', 'unknown')}")
         
         # Create Checkout Session
         checkout_session = CheckoutSession.create(
