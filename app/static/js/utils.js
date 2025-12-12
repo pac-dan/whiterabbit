@@ -42,19 +42,8 @@ function formatCurrency(amount, currency = 'USD') {
     }).format(amount);
 }
 
-// Toggle chat widget (Retell AI or fallback)
+// Chat widget removed (AI assistant decommissioned). Keep a safe fallback.
 function toggleChat() {
-    // Try to find and click the Retell AI widget
-    const retellWidget = document.querySelector('[data-retell-widget]') ||
-                        document.querySelector('#retell-widget-bubble') ||
-                        document.querySelector('.retell-chat-bubble');
-    
-    if (retellWidget) {
-        retellWidget.click();
-        return;
-    }
-    
-    // Fallback: redirect to contact page if widget not available
     window.location.href = '/contact';
 }
 

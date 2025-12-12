@@ -123,8 +123,6 @@ def create_app(config_name=None):
     @app.context_processor
     def inject_config():
         return {
-            'RETELL_PUBLIC_KEY': app.config.get('RETELL_PUBLIC_KEY', ''),
-            'RETELL_AGENT_ID': app.config.get('RETELL_AGENT_ID', ''),
             'support_email': app.config.get('SUPPORT_EMAIL', '')
         }
     
@@ -132,7 +130,7 @@ def create_app(config_name=None):
     # Only enforce HTTPS in production
     if not app.config.get('DEBUG', False):
         global talisman
-        # Content Security Policy - adjusted for Retell AI chat widget
+        # Content Security Policy
         csp = {
             'default-src': ["'self'"],
             'script-src': [
@@ -141,7 +139,6 @@ def create_app(config_name=None):
                 "https://cdn.socket.io",
                 "https://js.stripe.com",
                 "https://player.vimeo.com",
-                "https://dashboard.retellai.com",  # Retell widget script
                 "https://cdn.tailwindcss.com"  # Tailwind CDN
             ],
             'style-src': [
@@ -167,7 +164,6 @@ def create_app(config_name=None):
             'connect-src': [
                 "'self'",
                 "https://api.stripe.com",
-                "https://api.retellai.com",  # Retell API
                 "wss://*",  # WebSocket connections
                 "ws://*"
             ]

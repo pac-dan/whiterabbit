@@ -246,21 +246,5 @@
     <!-- Page-specific Scripts -->
     {% block extra_js %}{% endblock %}
 
-    <!-- RETELL AI CHAT WIDGET - DECOMMISSIONED (backend still available) -->
-    <!-- To re-enable, uncomment the section below -->
-    <!--
-    {% if RETELL_PUBLIC_KEY and RETELL_AGENT_ID %}
-    <script
-        id="retell-widget"
-        src="https://dashboard.retellai.com/retell-widget.js"
-        type="module"
-        data-public-key="{{ RETELL_PUBLIC_KEY }}"
-        data-agent-id="{{ RETELL_AGENT_ID }}"
-        data-title="Chat with AI"
-        data-color="#00D4FF"
-        data-bot-name="Momentum AI"
-    ></script>
-    {% endif %}
-    -->
 </body>
 </html>

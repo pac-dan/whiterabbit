@@ -10,7 +10,7 @@
     <tr>
       <td style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); padding: 36px 28px; text-align: center;">
         <h1 style="color: #00D4FF; margin: 0; font-size: 26px; font-weight: 800;">MOMENTUM CLIPS</h1>
-        <p style="color: #ffffff; margin: 10px 0 0; font-size: 14px;">Payment received • Waiver signed • Next: your Calendly details</p>
+        <p style="color: #ffffff; margin: 10px 0 0; font-size: 14px;">Payment received • Waiver signed • Next: choose your time in Calendly</p>
       </td>
     </tr>
 
@@ -25,12 +25,18 @@
         <div style="background-color: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px;">
           <p style="margin: 0; color: #6B7280; font-size: 12px;">Package</p>
           <p style="margin: 6px 0 0; color: #0F172A; font-size: 16px; font-weight: 700;">{{ package.name }}</p>
-          <p style="margin: 6px 0 0; color: #4B5563; font-size: 13px;">{{ package.duration }} • EUR {{ (package.price / 100) | round(0) }}</p>
+          <p style="margin: 6px 0 0; color: #4B5563; font-size: 13px;">{{ package.duration }} • €{{ ((package.price or 0) / 100) | round(0) }}</p>
         </div>
 
         <p style="color: #6B7280; margin: 18px 0 0; font-size: 12px;">
           Signed waiver: {{ waiver.signed_at.strftime('%B %d, %Y at %I:%M %p') }}
         </p>
+
+        <div style="text-align: center; margin-top: 18px;">
+          <a href="https://www.momentumclips.com" style="display: inline-block; background: #00D4FF; color: #ffffff; padding: 12px 22px; text-decoration: none; border-radius: 10px; font-weight: 800;">
+            Back to MomentumClips.com
+          </a>
+        </div>
       </td>
     </tr>
 

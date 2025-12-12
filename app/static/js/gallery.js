@@ -50,19 +50,9 @@ function copyLink() {
         });
 }
 
-// Toggle chat widget
+// Chat widget removed (AI assistant decommissioned). Keep a safe fallback.
 function toggleChat() {
-    // Check if chat toggle exists (for Retell voice widget or other chat systems)
-    const chatToggle = document.getElementById('chat-toggle') || 
-                      document.querySelector('[data-retell-widget]') ||
-                      document.querySelector('.voice-widget-button');
-    
-    if (chatToggle) {
-        chatToggle.click();
-    } else {
-        // If no chat widget, redirect to contact page
-        window.location.href = '/contact';
-    }
+    window.location.href = '/contact';
 }
 
 // Navigate to video detail page
