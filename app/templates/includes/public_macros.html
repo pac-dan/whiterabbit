@@ -1,0 +1,16 @@
+{% macro eyebrow(number, label) -%}<p class="ap-eyebrow"><span>{{ number }}</span><span class="ap-rule"></span>{{ label }}</p>{%- endmacro %}
+{% macro video_card(video, index=0) %}
+{% set media = public_video_media(video, index) %}
+<article class="film-card" data-video-id="{{ video.id }}">
+ <a class="film-art" href="{{ url_for('main.video_detail', video_id=video.id) }}" aria-label="Watch {{ video.title }}">
+  <img src="{{ media.image }}" data-fallback="{{ media.fallback }}" alt="{{ video.title }}" loading="lazy">
+  {% if media.video %}<video class="film-loop" muted loop playsinline preload="none" data-loop-src="{{ media.video }}" aria-hidden="true"></video>{% endif %}
+  <span class="film-index">{{ '%02d'|format(index+1) }} / M+C</span><span class="film-category">{{ video.location_tag or 'Bansko' }}</span>
+  <span class="film-play" aria-hidden="true">↗</span><span class="film-art-label">{{ video.resolution or 'SNOWBOARD FILM' }}</span>
+ </a>
+ <div class="film-copy"><h3><a href="{{ url_for('main.video_detail', video_id=video.id) }}">{{ video.title }}</a></h3><p>{{ video.style_tag or 'Snowboarding' }} <span>/</span> {{ video.rider_level or 'Every rider' }}</p></div>
+</article>
+{% endmacro %}
+{% macro closing(title='Your next run. On film.', description='You ride. We take care of the memories.') %}
+<section class="ap-closing"><div><p class="ap-eyebrow">THE MOUNTAIN IS CALLING</p><h2>{{ title }}</h2><p>{{ description }}</p></div><a class="exp-button" href="{{ url_for('main.packages') }}">Find your session <span aria-hidden="true">↗</span></a></section>
+{% endmacro %}

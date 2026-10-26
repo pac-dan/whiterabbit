@@ -1,81 +1,17 @@
-{% extends "base.html" %}
-
-{% block title %}Packages & Pricing - Momentum Clips{% endblock %}
-
-{% block content %}
-<!-- Compare Packages -->
-<section class="pt-28 sm:pt-32 pb-12 sm:pb-16 hero-gradient">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-10">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 heading">COMPARE PACKAGES</h2>
-            <p class="text-lg text-gray-300">Find the perfect package for your session</p>
-        </div>
-        
-        <!-- Package Cards Grid (data-driven) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-            {% set total = packages|length %}
-            {% for pkg in packages %}
-                {% set key = (pkg.name.split(' ')[0] | lower) %}
-                {% set is_featured = (total >= 3 and loop.index == 2) %}
-                {% set accent = '#00D4FF' %}
-                {% set accent_hover = '#00B8E6' %}
-                {% set icon = 'fa-snowflake' %}
-
-                {% if key == 'pro' %}
-                    {% set accent = '#8B5CF6' %}
-                    {% set accent_hover = '#7C3AED' %}
-                    {% set icon = 'fa-fire' %}
-                {% elif key == 'expert' %}
-                    {% set accent = '#F59E0B' %}
-                    {% set accent_hover = '#D97706' %}
-                    {% set icon = 'fa-crown' %}
-                {% endif %}
-
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border {% if is_featured %}border-2{% else %}border{% endif %} border-white/20 {% if is_featured %}!border-[{{ accent }}]{% endif %} hover:border-[{{ accent }}]/50 transition-all duration-300 hover:transform hover:scale-105 relative">
-                    {% if is_featured %}
-                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                        <span class="bg-[{{ accent }}] text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</span>
-                    </div>
-                    {% endif %}
-
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-[{{ accent }}]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas {{ icon }} text-[{{ accent }}] text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2">{{ pkg.name }}</h3>
-                        <p class="text-gray-400 text-sm mb-4">{{ pkg.duration }} hours of filming</p>
-                        <p class="text-3xl font-bold text-[{{ accent }}] mb-4">€{{ "%.0f"|format(pkg.price) }}</p>
-
-                        <ul class="text-sm text-gray-300 space-y-2 mb-6 text-left">
-                            {% if pkg.features %}
-                                {% for feature in pkg.features.split(',') if feature.strip() %}
-                                    <li><i class="fas fa-check text-green-400 mr-2"></i>{{ feature.strip() }}</li>
-                                {% endfor %}
-                            {% else %}
-                                <li><i class="fas fa-check text-green-400 mr-2"></i>Professional filming</li>
-                                <li><i class="fas fa-check text-green-400 mr-2"></i>{{ pkg.video_count }} edited video{% if pkg.video_count != 1 %}s{% endif %}</li>
-                                {% if pkg.includes_drone %}
-                                <li><i class="fas fa-check text-green-400 mr-2"></i>Drone footage included</li>
-                                {% endif %}
-                            {% endif %}
-                        </ul>
-
-                        <a href="{{ url_for('payment.checkout', package=key) }}"
-                           class="block w-full bg-[{{ accent }}] text-white py-3 rounded-xl font-bold hover:bg-[{{ accent_hover }}] transition">
-                            Book {{ key|capitalize }}
-                        </a>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-        
-        <div class="text-center">
-            <p class="text-sm text-gray-400">
-                <i class="fas fa-shield-alt text-[#00D4FF] mr-2"></i>
-                Secure booking · Instant confirmation · Free rescheduling
-            </p>
-        </div>
-    </div>
-</section>
-
+{% extends 'public_base.html' %}
+{% from 'includes/public_macros.html' import eyebrow with context %}
+{% block page_title %}Sessions & Packages — Momentum Clips{% endblock %}
+{% block title %}Sessions & Packages — Momentum Clips{% endblock %}
+{% block page_content %}
+<header class="ap-intro"><div>{{ eyebrow('01', 'Sessions / Bansko, Bulgaria') }}<h1>Find your<br>line.</h1></div><p>A few good runs. A film that stays with you. Choose the session that fits your time on the mountain.</p></header>
+{% if packages %}<div class="ap-grid session-grid">{% for pkg in packages %}{% set checkout = public_checkout_link(pkg) %}{% set featured = loop.index == 2 and packages|length >= 3 %}
+<article class="session-card{% if featured %} is-featured{% endif %}">
+<div class="session-art"><img src="{{ public_static_media(experience_content.gates.media[loop.index0 % 3].src if experience_content.gates.media[loop.index0 % 3].type == 'image' else none, 'experience/placeholders/gate-' ~ ((loop.index0 % 3)+1) ~ '.webp') }}" alt="" loading="lazy"><span class="session-number">SESSION {{ '%02d'|format(loop.index) }}</span>{% if featured %}<span class="session-label">Featured session</span>{% endif %}</div>
+<div class="session-body"><h2>{{ pkg.name }}</h2><p class="session-description">{{ pkg.description }}</p><p class="session-price">€{{ '%.2f'|format(pkg.price) }} <small>/ session</small></p><p class="session-duration">{{ pkg.duration }} HOURS ON THE MOUNTAIN</p>
+<ul class="ap-feature-list">{% for feature in (pkg.features or '').split(',') if feature.strip() %}<li>{{ feature.strip() }}</li>{% else %}<li>Professional filming</li><li>{{ pkg.video_count }} edited video{{ 's' if pkg.video_count != 1 }}</li>{% endfor %}</ul>
+<div class="session-actions"><a class="exp-button" href="{{ url_for('main.package_detail', package_id=pkg.id) }}">Explore session <span aria-hidden="true">↗</span></a><a class="ap-text-link" href="{{ checkout.url }}">{{ checkout.label }} <span aria-hidden="true">↗</span></a></div></div></article>{% endfor %}</div>
+{% else %}<div class="ap-empty">{{ eyebrow('01','Your next session') }}<h2>Good things<br>are lining up.</h2><p>Session details are coming soon. Tell us about your trip and we’ll help you find your line.</p><a class="exp-button" href="{{ url_for('main.contact') }}">Talk to us ↗</a></div>{% endif %}
+<div class="ap-note"><span>Filmed in Bansko</span><span>Follow-cam &amp; drone</span><span>A film worth keeping</span></div>
+<section class="ap-section"><div class="ap-section-head"><h2>Easy from<br>first run to final cut.</h2><p>You bring the riding. We bring the cameras, the angles and the edit.</p></div><div class="ap-process"><article><span>01</span><h3>Make it a date.</h3><p>Choose your session, complete the booking steps and get ready for the mountain.</p></article><article><span>02</span><h3>Ride your way.</h3><p>Meet your filmer in Bansko. We follow your line and capture the moments in between.</p></article><article><span>03</span><h3>Relive the run.</h3><p>Your footage becomes a highlight film you can watch, share and come back to.</p></article></div></section>
+<section class="ap-closing"><div><p class="ap-eyebrow">NOT SURE WHERE TO START?</p><h2>Let’s find<br>your session.</h2><p>Tell us when you’re visiting and how you like to ride.</p></div><a class="exp-button" href="{{ url_for('main.contact') }}">Talk to the team <span aria-hidden="true">↗</span></a></section>
 {% endblock %}

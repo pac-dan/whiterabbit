@@ -66,9 +66,9 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🏂%3C/text%3E%3C/svg%3E">
 
     <!-- Tailwind CSS -->
-    {% if not experience %}<script src="https://cdn.tailwindcss.com"></script>{% endif %}
+    {% if not experience and not alpine_page %}<script src="https://cdn.tailwindcss.com"></script>{% endif %}
     
-    {% if not experience %}
+    {% if not experience and not alpine_page %}
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,14 +76,15 @@
 
     {% endif %}
     <!-- Font Awesome -->
-    {% if not experience %}<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">{% endif %}
+    {% if not experience and not alpine_page %}<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">{% endif %}
 
     <!-- Custom CSS - MUST load after Tailwind -->
     <link rel="stylesheet" href="/static/css/style.css?v=enhanced12345">
 
     {% block extra_css %}{% endblock %}
+    {% if experience or alpine_page %}<link rel="stylesheet" href="{{ url_for('static', filename='css/public.css', v='alpine-1') }}">{% endif %}
 </head>
-<body{% if experience %} class="experience-page"{% endif %}>
+<body{% if experience or alpine_page %} class="experience-page{% if alpine_page %} alpine-page{% endif %}"{% endif %}>
 
     {% block navigation %}
     <!-- Navigation - Floating Island Style -->
@@ -236,7 +237,7 @@
         </div>
     </footer>
 
-    {% if not experience %}
+    {% if not experience and not alpine_page %}
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

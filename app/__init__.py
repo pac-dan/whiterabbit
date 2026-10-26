@@ -93,6 +93,9 @@ def create_app(config_name=None):
         return {
             'support_email': app.config.get('SUPPORT_EMAIL', '')
         }
+
+    from app.experience.public import public_context
+    app.context_processor(public_context)
     
     # Initialize Flask-Talisman for production security
     # Only enforce HTTPS in production
@@ -128,7 +131,8 @@ def create_app(config_name=None):
             'frame-src': [
                 "https://js.stripe.com",
                 "https://player.vimeo.com",
-                "https://calendly.com"
+                "https://calendly.com",
+                "https://www.youtube-nocookie.com"
             ],
             'connect-src': [
                 "'self'",

@@ -5,14 +5,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='vendor/lenis.css', v=experience_version) }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='experience/css/experience.css', v=experience_version) }}">
 {% endblock %}
-{% block navigation %}
-<a class="skip-link" href="#summit">Skip to content</a>
-<nav class="exp-nav" aria-label="Main navigation" id="mainNav">
- <a class="exp-brand" href="{{ url_for('main.index') }}" aria-label="Momentum Clips home"><img src="{{ url_for('static', filename='images/logo.png') }}" alt=""><span>MOMENTUM<span class="brand-light">CLIPS</span></span></a>
- <div class="exp-nav-links"><a href="{{ url_for('main.packages') }}">Packages</a><a href="{{ url_for('main.gallery') }}">Gallery</a><a href="{{ url_for('main.testimonials') }}">Testimonials</a></div>
- <a class="exp-book" href="{{ url_for('main.packages') }}">Book Now <span aria-hidden="true">↗</span></a>
-</nav>
-{% endblock %}
+{% block navigation %}{% include 'includes/alpine_nav.html' %}{% endblock %}
 {% block content %}
 <div id="experience" data-asset-base="{{ url_for('static', filename='') }}" data-version="{{ experience_version }}">
  <div class="exp-stage" id="exp-stage" aria-hidden="true"><canvas id="exp-canvas" aria-hidden="true"></canvas><div class="exp-scrim"></div></div>
