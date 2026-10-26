@@ -64,8 +64,8 @@ Vector3,
 VectorKeyframeTrack,
 SRGBColorSpace,
 InstancedBufferAttribute
-} from './three.module.min.js?v=bansko-video-1';
-import { toTrianglesDrawMode } from './BufferGeometryUtils.js?v=bansko-video-1';
+} from './three.module.min.js?v=bansko-video-2';
+import { toTrianglesDrawMode } from './BufferGeometryUtils.js?v=bansko-video-2';
 
 class GLTFLoader extends Loader {
 

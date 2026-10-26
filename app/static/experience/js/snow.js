@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-2';
 export function createSnow(scene,camera,quality,rider,path,terrain) {
 const count=6000,a=new Float32Array(count*3);
 for(let i=0;i<count;i++){a[i*3]=Math.sin(i*13.1)*155;a[i*3+1]=(i*17.71)%140;a[i*3+2]=Math.cos(i*4.7)*155;}

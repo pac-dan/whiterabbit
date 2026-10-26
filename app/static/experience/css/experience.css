@@ -61,3 +61,5 @@
  .video-running .chapter-packages .exp-package .exp-button{padding:10px 16px}
 }
 @media(min-width:768px){.video-running .chapter-summit h1{font-size:clamp(40px,6.25vw,96px);max-width:580px}}
+/* Restore the static hero's localized contrast layer above the clip poster. */
+body:not(.exp-running) .chapter-summit:has(.journey-still)::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(90deg,#050816c9,#05081622)}

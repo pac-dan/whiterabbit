@@ -29,7 +29,7 @@ def main():
         tracked=subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],text=True)
         assert not tracked.strip(), tracked
         required=['app/static/experience/js/procedural.js','app/static/experience/js/video-clock.js',
-                  'app/static/experience/js/video-journey.js','app/static/experience/media/bansko-journey-v1.mp4',
+                  'app/static/experience/js/video-journey.js','app/static/experience/media/bansko-journey-v2.mp4',
                   'app/static/experience/media/bansko-journey-poster.webp','app/static/experience/media/bansko-town-poster.webp',
                   'docs/video-journey.md','scripts/build_journey_video.py','scripts/check_video_journey.mjs',
                   'scripts/verify_video_journey.py','tests/test_experience.py']
@@ -47,7 +47,7 @@ def main():
     for p in files:
         check=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
         assert check.returncode==0,check.stderr
-    url='http://127.0.0.1:5000/static/experience/media/bansko-journey-v1.mp4?v=bansko-video-1'
+    url='http://127.0.0.1:5000/static/experience/media/bansko-journey-v2.mp4?v=bansko-video-2'
     response=requests.get(url,headers={'Range':'bytes=0-1023'},timeout=20)
     assert response.status_code==206 and len(response.content)==1024
     assert response.headers['Cache-Control']=='public, max-age=31536000, immutable'

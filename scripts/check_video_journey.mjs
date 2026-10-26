@@ -22,6 +22,7 @@ async function open(viewport,options={},address=base){
  page.on('pageerror',e=>report.errors.push(e.message));
  page.on('console',m=>{if(m.type()==='error'){
   if(page.expectedMediaFailure&&m.text()==='Failed to load resource: net::ERR_FAILED')report.expectedFailures.push({console:m.text(),reason:'Deliberate media failure test'});
+  else if(page.expectedRendererFailure&&m.text().includes('Deliberate renderer init failure'))report.expectedFailures.push({console:m.text(),reason:'Deliberate renderer constructor failure'});
   else report.errors.push(m.text());
  }});
  page.on('requestfailed',r=>{const detail={url:r.url(),error:r.failure()?.errorText};
@@ -95,7 +96,7 @@ try{
    await page.unroute('**/*');await load(page);await ready(page);
    // Verify the front card itself remains interactive through the live WebGL canvas.
    await at(page,.30);await page.waitForTimeout(800);
-   const pointer=await page.evaluate(async()=>{const T=await import('/static/vendor/three.module.min.js?v=bansko-video-1');const c=new T.PerspectiveCamera(53,innerWidth/innerHeight,.25,5000);c.position.set(innerWidth<768?0:10,25,innerWidth<768?118:91);c.lookAt(0,15,0);c.updateMatrixWorld();const v=new T.Vector3(0,14.1,37).project(c);return {x:(v.x+1)*innerWidth/2,y:(1-v.y)*innerHeight/2};});
+   const pointer=await page.evaluate(async()=>{const T=await import('/static/vendor/three.module.min.js?v=bansko-video-2');const c=new T.PerspectiveCamera(53,innerWidth/innerHeight,.25,5000);c.position.set(innerWidth<768?0:10,25,innerWidth<768?118:91);c.lookAt(0,15,0);c.updateMatrixWorld();const v=new T.Vector3(0,14.1,37).project(c);return {x:(v.x+1)*innerWidth/2,y:(1-v.y)*innerHeight/2};});
    destination=null;await page.route('**/*',route=>{if(route.request().isNavigationRequest()) {destination=route.request().url();return route.fulfill({status:200,contentType:'text/html',body:'<h1>Card navigation verified</h1>'});}return route.continue();});
    await page.mouse.click(pointer.x,pointer.y);await until(page,()=>document.querySelector('h1')?.textContent==='Card navigation verified');assert.ok(destination);view.meshDestination=destination;
    await page.unroute('**/*');await load(page);await ready(page);
@@ -106,6 +107,19 @@ try{
    }
    await at(page,.95);assert.equal(await page.locator('.chapter-finale .exp-button').getAttribute('href'),'/packages');
    await page.locator('.chapter-finale .exp-button').click();await page.waitForURL('**/packages');assert.ok(await page.locator('body').textContent());view.booking=true;
+   // Existing media-hosting contract: absolute sources and local query strings.
+   const fixture=await fs.readFile(path.join(root,'app/static/experience/placeholders/ring-01.webp')),seen=[];
+   await page.route(base+'/',async route=>{
+    const response=await context.request.get(base+'/');const html=await response.text();
+    const body=html.replace(/(<script[^>]*id="experience-data"[^>]*>)([\s\S]*?)(<\/script>)/,(_,a,json,b)=>{
+     const d=JSON.parse(json);d.ring.cards[0].media={type:'image',src:'https://media.example.test/first.webp?token=test'};
+     d.ring.cards[1].media={type:'image',src:'experience/media/query-card.webp?token=test'};return a+JSON.stringify(d)+b;});
+    await route.fulfill({response,body});
+   });
+   await page.route('https://media.example.test/**',async route=>{seen.push(route.request().url());await route.fulfill({contentType:'image/webp',headers:{'access-control-allow-origin':'*'},body:fixture});});
+   await page.route('**/static/experience/media/query-card.webp*',async route=>{seen.push(route.request().url());await route.fulfill({contentType:'image/webp',body:fixture});});
+   await load(page);await ready(page);await at(page,.31);await until(page,()=>window.__experience.slots.ring===2);
+   assert.ok(seen.includes('https://media.example.test/first.webp?token=test'));assert.ok(seen.some(x=>x.includes('query-card.webp?token=test&v=bansko-video-2')));view.hostedAndQueriedMedia=seen;
    report.views.push(view);await context.close();
   }
  }else if(group==='fallback'){
@@ -128,6 +142,27 @@ try{
   }
   const noGL=await pw.chromium.launch({channel:'chrome',headless:true,args:['--disable-webgl']});const page=await noGL.newPage({viewport:views[1]});await load(page);await ready(page);await at(page,.42);
   assert.equal(await page.evaluate(()=>document.body.classList.contains('video-gallery-fallback')),true);assert.equal(await page.locator('.fallback-grid').isVisible(),true);await shot(page,'fallback-no-webgl.png');report.noWebGL=true;await noGL.close();
+  const recovery=await open(views[0]);
+  await recovery.page.route(base+'/',async route=>{
+   const response=await recovery.context.request.get(base+'/');let body=await response.text();
+   body=body.replace(/(<script[^>]*id="experience-data"[^>]*>)([\s\S]*?)(<\/script>)/,(_,a,json,b)=>{const d=JSON.parse(json);d.journey.mode='procedural';return a+JSON.stringify(d)+b;})
+    .replace(/<img class="journey-poster[^>]*>/g,'').replace(/<video id="journey-video"[\s\S]*?<\/video>/,'');
+   await route.fulfill({response,body});
+  });
+  await load(recovery.page);await until(recovery.page,()=>window.__experience.mode==='3d');
+  await recovery.page.evaluate(()=>{const t=document.getElementById('exp-track');scrollTo({top:t.offsetTop+(t.offsetHeight-innerHeight)*.21,behavior:'instant'});});
+  await until(recovery.page,()=>window.__experience.chapter===1&&window.__experience.drawCalls>0);
+  await shot(recovery.page,'fallback-procedural-recovery.png');report.proceduralRecovery=await recovery.page.evaluate(()=>({mode:window.__experience.mode,drawCalls:window.__experience.drawCalls,rider:window.__experience.rider.visible}));
+  assert.equal(report.proceduralRecovery.rider,true);await recovery.context.close();
+  const brokenRenderer=await open(views[0]);brokenRenderer.page.expectedRendererFailure=true;
+  await brokenRenderer.context.addInitScript(()=>{
+   const get=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){if(this.id==='exp-canvas'&&type==='webgl2')throw Error('Deliberate renderer init failure');return get.call(this,type,...args);};
+   window.requestAnimationFrame=callback=>setTimeout(()=>callback(performance.now()),40);
+   window.cancelAnimationFrame=id=>clearTimeout(id);
+  });
+  await load(brokenRenderer.page);await ready(brokenRenderer.page);await brokenRenderer.page.waitForTimeout(3000);
+  const degraded=await brokenRenderer.page.evaluate(()=>({mode:window.__experience.mode,tier:window.__experience.tier,grid:document.body.classList.contains('video-gallery-fallback')}));
+  assert.equal(degraded.mode,'video');assert.equal(degraded.grid,true);assert.ok(degraded.tier<3);report.rendererFailureWatchdog=degraded;await brokenRenderer.context.close();
  }else throw Error('Unknown group '+group);
  assert.deepEqual(report.errors,[]);assert.deepEqual(report.failed,[]);report.pass=true;
 }catch(error){report.failure=error.stack;process.exitCode=1;}

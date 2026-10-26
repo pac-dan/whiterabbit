@@ -29,13 +29,13 @@ def main():
     if not binary:
         raise SystemExit('Set FFMPEG to an ffmpeg binary; not needed at runtime.')
     source_hash = hashlib.sha256(args.source.read_bytes()).hexdigest()
-    output = MEDIA / 'bansko-journey-v1.mp4'
+    output = MEDIA / 'bansko-journey-v2.mp4'
     base = [str(binary), '-hide_banner', '-loglevel', 'error', '-y']
     commands = []
     if not args.verify:
         MEDIA.mkdir(parents=True, exist_ok=True)
         commands.append(base + ['-i', str(args.source), '-map', '0:v:0', '-an', '-c:v', 'libx264',
-                               '-preset', 'slow', '-crf', '22', '-pix_fmt', 'yuv420p',
+                               '-preset', 'slow', '-crf', '25', '-maxrate', '3200k', '-bufsize', '3200k', '-pix_fmt', 'yuv420p',
                                '-g', '6', '-keyint_min', '6', '-sc_threshold', '0', '-bf', '0',
                                '-movflags', '+faststart', str(output)])
         for name, time in [('bansko-journey-poster.webp', '0'), ('bansko-town-poster.webp', '8.95')]:
@@ -48,6 +48,7 @@ def main():
     assert 'Audio:' not in info
     assert '1280x720' in info and '24 fps' in info and 'h264' in info
     raw = output.read_bytes()
+    assert len(raw) < 4_000_000, 'Keep the whole movie below the Flask/Vercel response budget'
     assert raw.index(b'moov') < raw.index(b'mdat'), 'fast-start moov must precede media'
     frames = subprocess.run([str(binary), '-hide_banner', '-i', str(output), '-vf', 'showinfo',
                              '-f', 'null', '-'], capture_output=True, text=True, check=True).stderr

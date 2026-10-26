@@ -4,9 +4,9 @@ The homepage now uses the owner's generated snowboard film as a **paused, scroll
 
 ## Change the timing or framing
 
-Edit only `app/experience/content.py`, under `journey`. `cues` pairs page progress (0–1) with a fraction of the **loaded clip's duration**. Existing chapter boundaries are 0, .12, .30, .55, .75, .88 and 1. The gallery uses approximately 2.5–2.9 seconds of this film, leaving enough scroll distance to rotate all twelve cards. Packages take the tree descent from about 2.9 to 6.7 seconds. The portal takes the rising reveal; the final chapter holds just before the video ends.
+Edit only `app/experience/content.py`, under `journey`. `cues` pairs page progress (0â€“1) with a fraction of the **loaded clip's duration**. Existing chapter boundaries are 0, .12, .30, .55, .75, .88 and 1. The gallery uses approximately 2.5â€“2.9 seconds of this film, leaving enough scroll distance to rotate all twelve cards. Packages take the tree descent from about 2.9 to 6.7 seconds. The portal takes the rising reveal; the final chapter holds just before the video ends.
 
-Source inspection: open slope until about 2.4 seconds; trees from 2.4–6.8; camera lift around 6.8; rider leaves view around 7.05; wide evening town from 7.1 through 9 seconds. These are visual cues, not cuts. The browser clamps the endpoint to duration minus .06 seconds so it holds a usable decoded frame rather than an ended/blank frame. There is no independent autoplay or loop.
+Source inspection: open slope until about 2.4 seconds; trees from 2.4â€“6.8; camera lift around 6.8; rider leaves view around 7.05; wide evening town from 7.1 through 9 seconds. These are visual cues, not cuts. The browser clamps the endpoint to duration minus .06 seconds so it holds a usable decoded frame rather than an ended/blank frame. There is no independent autoplay or loop.
 
 `framing` pairs video fractions with horizontal crop percentages. Desktop uses a full-screen cover. Phones use a 58-viewport-height picture above a lower text area, reducing horizontal crop and keeping both the rider and warm town reveal visible. Tune these pairs after changing the clip. Do not compensate by heavily darkening the whole ending.
 
@@ -14,7 +14,7 @@ Source inspection: open slope until about 2.4 seconds; trees from 2.4–6.8; cam
 
 Copy a web-ready H.264 MP4 into `app/static/experience/media/`. Set `journey.src`, `poster` and `town_poster` in the manifest to their static-relative paths. Change `VERSION` and the version strings on changed module imports when publishing changed cached assets. Prefer a new media filename for each revision. No Windows source path is used by the website.
 
-`scripts/build_journey_video.py --source "C:/path/to/source.mp4"` creates the committed silent derivative and two WebP posters. Set `FFMPEG` to an ffmpeg executable if it is not on PATH. This is a one-time content operation, not a deployment build. Current derivative: H.264/yuv420p, original 1280×720 at 24 fps, CRF 22, six-frame GOP (.25 s), no B-frames, no audio, fast-start moov metadata. It trades some download size for fast accurate reverse seeking. The original file is never modified. Rerun with `--verify` to check source hash, silence, metadata ordering and keyframe spacing.
+`scripts/build_journey_video.py --source "C:/path/to/source.mp4"` creates the committed silent derivative and two WebP posters. Set `FFMPEG` to an ffmpeg executable if it is not on PATH. This is a one-time content operation, not a deployment build. Current derivative: H.264/yuv420p, original 1280Ã—720 at 24 fps, CRF 25, 3.2 Mbps max-rate/3.2 Mb buffer, six-frame GOP (.25 s), no B-frames, no audio, fast-start moov metadata. It trades some download size for fast accurate reverse seeking. The original file is never modified. Rerun with `--verify` to check source hash, silence, metadata ordering and keyframe spacing.
 
 ## Fallbacks and recovery
 
@@ -34,3 +34,5 @@ node scripts/check_video_journey.mjs --group fallback
 ```
 
 Reports and screenshots go to `.runs/2026-10-26-video-journey/evidence/`. Set `JOURNEY_BASE` to a deployed preview/public URL and use `--group public` for the seeking/layout smoke check there. Desktop Chromium with a phone viewport checks composition and logic; it does not establish physical iPhone/Safari performance. Browser codecs and bandwidth affect seek latency.
+
+The current movie is below 4 MB, including metadata. Flask media responses stay below Vercel's 4.5 MB function response limit (https://vercel.com/docs/functions/limitations). Do not substitute a larger file without moving it to static/CDN hosting or checking the delivery path.

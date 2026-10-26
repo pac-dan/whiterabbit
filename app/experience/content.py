@@ -5,11 +5,11 @@ Database package/video/testimonial copy stays managed by the existing admin.
 """
 from copy import deepcopy
 
-VERSION = 'bansko-video-1'
+VERSION = 'bansko-video-2'
 EXPERIENCE = {
     'journey': {
         'mode': 'video',  # 'procedural' restores the previous terrain/rider engine.
-        'src': 'experience/media/bansko-journey-v1.mp4',
+        'src': 'experience/media/bansko-journey-v2.mp4',
         'poster': 'experience/media/bansko-journey-poster.webp',
         'town_poster': 'experience/media/bansko-town-poster.webp',
         'fps': 24,

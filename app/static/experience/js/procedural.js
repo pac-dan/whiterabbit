@@ -1,6 +1,6 @@
-import {createQuality} from './quality.js?v=bansko-video-1';
-import {chapterAt,createScroll} from './scroll.js?v=bansko-video-1';
-import {createDebug} from './debug.js?v=bansko-video-1';
+import {createQuality} from './quality.js?v=bansko-video-2';
+import {chapterAt,createScroll} from './scroll.js?v=bansko-video-2';
+import {createDebug} from './debug.js?v=bansko-video-2';
 const root=document.getElementById('experience'),loader=document.getElementById('exp-loader');
 const data=JSON.parse(document.getElementById('experience-data').textContent);
 const url=path=>{if(/^(https?:|blob:|data:)/.test(path))return path;const p=path.startsWith('/')?path:root.dataset.assetBase+path;return `${p}${p.includes('?')?'&':'?'}v=${root.dataset.version}`;};
@@ -22,7 +22,7 @@ try {
 const probe=document.createElement('canvas');
 const gl=probe.getContext('webgl2');if(!gl)throw Error('WebGL 2 is unavailable');gl.getExtension('WEBGL_lose_context')?.loseContext();
 const [T,{createRenderer},{createTerrain},{createPath},{createCamera},{createSky},{createSnow},{createRider},{createRing},{createGates},{createPortal},{createTown},{createSlots},{createOverlay}]=await Promise.all([
-import('../../vendor/three.module.min.js?v=bansko-video-1'),import('./renderer.js?v=bansko-video-1'),import('./terrain.js?v=bansko-video-1'),import('./path.js?v=bansko-video-1'),import('./camera.js?v=bansko-video-1'),import('./sky.js?v=bansko-video-1'),import('./snow.js?v=bansko-video-1'),import('./rider.js?v=bansko-video-1'),import('./ring.js?v=bansko-video-1'),import('./gates.js?v=bansko-video-1'),import('./portal.js?v=bansko-video-1'),import('./town.js?v=bansko-video-1'),import('./slots.js?v=bansko-video-1'),import('./overlay.js?v=bansko-video-1')]);
+import('../../vendor/three.module.min.js?v=bansko-video-2'),import('./renderer.js?v=bansko-video-2'),import('./terrain.js?v=bansko-video-2'),import('./path.js?v=bansko-video-2'),import('./camera.js?v=bansko-video-2'),import('./sky.js?v=bansko-video-2'),import('./snow.js?v=bansko-video-2'),import('./rider.js?v=bansko-video-2'),import('./ring.js?v=bansko-video-2'),import('./gates.js?v=bansko-video-2'),import('./portal.js?v=bansko-video-2'),import('./town.js?v=bansko-video-2'),import('./slots.js?v=bansko-video-2'),import('./overlay.js?v=bansko-video-2')]);
 if(abandoned)return;
 const quality=createQuality();engine=createRenderer(document.getElementById('exp-canvas'),quality,fallback);
 let completed=0;const loaded=()=>{document.getElementById('asset-progress').value=++completed/3;};

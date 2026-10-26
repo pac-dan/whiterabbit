@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-2';
 export function createRenderer(canvas,quality,onFailure,transparent=false) {
 const renderer=new T.WebGLRenderer({canvas,antialias:quality.tier>=2,powerPreference:'high-performance',alpha:transparent});
 if(transparent)renderer.setClearColor(0x000000,0);

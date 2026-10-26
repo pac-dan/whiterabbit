@@ -23,5 +23,5 @@ The terrain and generated placeholders are build assets, not owner media slots.
 The current default rider is articulated and uses illustrative scene scale. GLB replacements are fitted to `rider.height` and multiplied by `scale`. Name the board mesh `Snowboard` (or set `board_node`); use in-place clips. Optional `poses` maps neutral/toe/heel clip names. See docs/content-drop-in.md for the complete example.
 # Scroll-controlled journey
 
-`bansko-journey-v1.mp4` is the owner's generated clip, optimised for seeking; the two `bansko-*-poster.webp` files are extracted from it. Timing, crop and recovery instructions: [docs/video-journey.md](../../../../docs/video-journey.md). Configure it under `journey` in `app/experience/content.py`. It replaces the procedural background while leaving gallery media slots independent.
+`bansko-journey-v2.mp4` is the owner's generated clip, optimised for seeking; the two `bansko-*-poster.webp` files are extracted from it. Timing, crop and recovery instructions: [docs/video-journey.md](../../../../docs/video-journey.md). Configure it under `journey` in `app/experience/content.py`. It replaces the procedural background while leaving gallery media slots independent.
 

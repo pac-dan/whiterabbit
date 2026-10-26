@@ -1,12 +1,12 @@
-import {createScroll,chapterAt} from './scroll.js?v=bansko-video-1';
-import {createOverlay} from './overlay.js?v=bansko-video-1';
-import {createDebug} from './debug.js?v=bansko-video-1';
-import {createVideoClock,interpolate} from './video-clock.js?v=bansko-video-1';
+import {createScroll,chapterAt} from './scroll.js?v=bansko-video-2';
+import {createOverlay} from './overlay.js?v=bansko-video-2';
+import {createDebug} from './debug.js?v=bansko-video-2';
+import {createVideoClock,interpolate} from './video-clock.js?v=bansko-video-2';
 
 const root=document.getElementById('experience'),data=JSON.parse(document.getElementById('experience-data').textContent);
 const config=data.journey,video=document.getElementById('journey-video'),stage=document.getElementById('exp-stage');
 const loader=document.getElementById('exp-loader'),canvas=document.getElementById('exp-canvas');
-const url=p=>`${p.startsWith('/')?p:root.dataset.assetBase+p}?v=${root.dataset.version}`;
+const url=path=>{if(/^(https?:|blob:|data:)/.test(path))return path;const p=path.startsWith('/')?path:root.dataset.assetBase+path;return `${p}${p.includes('?')?'&':'?'}v=${root.dataset.version}`;};
 let runtime=null,generation=0,state={mode:'static',tier:0,fps:0,chapter:0,progress:0,drawCalls:0,frames:0,slots:{}};
 const debug=createDebug(()=>state);
 function stop(){
@@ -44,9 +44,9 @@ async function boot(){
             if(chapter!==2)slots?.pause();
             if(engine){engine.setPaused(chapter!==2);canvas.hidden=chapter!==2;}
             const dt=last?time-last:16.67;last=time;frames++;
-            if(quality?.sample(dt/1000)){engine?.resize();ring.setQuality(quality.tier);}
+            if(quality?.sample(dt/1000)){engine?.resize();ring.setQuality?.(quality.tier);}
             state={mode:'video',progress:p,chapter,tier:quality?.tier??0,fps:quality?.fps??1000/dt,frames,drawCalls:chapter===2?(engine?.renderer.info.render.calls??0):0,
-                ringIndex:ring.active,ringAngle:ring.group?.children[2]?.rotation.y??0,video:clock.state,slots:{},firstFrameMs:state.firstFrameMs??time};
+                ringIndex:ring.active,ringAngle:ring.group?.children[2]?.rotation.y??0,video:clock.state,slots:{ring:ring.cards?.filter(c=>c.handle&&!c.handle.isPlaceholder).length??0},firstFrameMs:state.firstFrameMs??time};
             debug.update();
         }
     };
@@ -56,8 +56,8 @@ async function boot(){
         const probe=document.createElement('canvas'),gl=probe.getContext('webgl2');
         if(!gl)return;gl.getExtension('WEBGL_lose_context')?.loseContext();
         const [T,{createRenderer},{createRing},{createSlots},{createQuality}]=await Promise.all([
-            import('../../vendor/three.module.min.js?v=bansko-video-1'),import('./renderer.js?v=bansko-video-1'),
-            import('./ring.js?v=bansko-video-1'),import('./slots.js?v=bansko-video-1'),import('./quality.js?v=bansko-video-1')]);
+            import('../../vendor/three.module.min.js?v=bansko-video-2'),import('./renderer.js?v=bansko-video-2'),
+            import('./ring.js?v=bansko-video-2'),import('./slots.js?v=bansko-video-2'),import('./quality.js?v=bansko-video-2')]);
         if(disposed||id!==generation)return;
         quality=createQuality();
         engine=createRenderer(canvas,quality,()=>{engine?.dispose();engine=null;canvas.hidden=true;document.body.classList.add('video-gallery-fallback');},true);

@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-2';
 export function placeholderRider() {
 const group=new T.Group();group.name='Momentum rider';
 const jacket=new T.MeshStandardMaterial({color:'#b8ccd6',roughness:.72});
