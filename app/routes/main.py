@@ -28,7 +28,7 @@ def index():
                                   lambda ident: url_for('main.package_detail', package_id=ident))
 
     return render_template(
-        'index.html',
+        'index_video_legacy.html' if experience['journey']['mode'] == 'procedural' else 'index.html',
         packages=featured_packages,
         videos=featured_videos,
         testimonials=featured_testimonials,

@@ -1,79 +1,52 @@
-import {createScroll,chapterAt} from './scroll.js?v=bansko-video-2';
-import {createOverlay} from './overlay.js?v=bansko-video-2';
+import {createDocumentScroll,clamp} from './scroll.js?v=bansko-refine-1';
+import {createVideoClock,interpolate} from './video-clock.js?v=bansko-refine-1';
 import {createDebug} from './debug.js?v=bansko-video-2';
-import {createVideoClock,interpolate} from './video-clock.js?v=bansko-video-2';
-
-const root=document.getElementById('experience'),data=JSON.parse(document.getElementById('experience-data').textContent);
-const config=data.journey,video=document.getElementById('journey-video'),stage=document.getElementById('exp-stage');
-const loader=document.getElementById('exp-loader'),canvas=document.getElementById('exp-canvas');
-const url=path=>{if(/^(https?:|blob:|data:)/.test(path))return path;const p=path.startsWith('/')?path:root.dataset.assetBase+path;return `${p}${p.includes('?')?'&':'?'}v=${root.dataset.version}`;};
-let runtime=null,generation=0,state={mode:'static',tier:0,fps:0,chapter:0,progress:0,drawCalls:0,frames:0,slots:{}};
+const root=document.getElementById('experience'),data=JSON.parse(document.getElementById('experience-data').textContent),config=data.journey;
+const video=document.getElementById('journey-video'),poster=document.getElementById('journey-poster'),town=document.getElementById('town-poster');
+const sections=[...document.querySelectorAll('[data-chapter]')],rail=[...document.querySelectorAll('[data-go-chapter]')];
+const asset=path=>{if(/^(https?:|blob:|data:)/.test(path))return path;const p=path.startsWith('/')?path:root.dataset.assetBase+path;return `${p}${p.includes('?')?'&':'?'}v=${root.dataset.version}`;};
+const motion=matchMedia('(prefers-reduced-motion: reduce)'),mobile=matchMedia('(max-width:767px)').matches;
+let clock=null,scroll=null,gallery=null,loadingGallery=false,raf=0,frames=0,last=0,enabled=false,closed=false,loadTimer=0,generation=0;
+let state={mode:'static',tier:0,fps:0,progress:0,chapter:0,frames:0,drawCalls:0,slots:{}};
 const debug=createDebug(()=>state);
-function stop(){
-    generation++;runtime?.dispose();runtime=null;loader.hidden=true;
-    document.body.classList.remove('exp-running','exp-ended','video-running','video-gallery-fallback');
-    document.querySelectorAll('[data-chapter],[data-package]').forEach(el=>el.inert=false);
-    state={...state,mode:'static',drawCalls:0};debug.update();
+const smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
+function loadTown(){if(!town.src)town.src=town.dataset.src;const still=document.querySelector('.arrival-still');if(still&&!still.src)still.src=town.dataset.src;}
+function start(){
+ if(enabled)return;const token=++generation;enabled=true;root.dataset.mediaStatus='loading';document.body.classList.remove('flow-still');
+ scroll?.destroy();scroll=createDocumentScroll(document.getElementById('exp-track'),sections,true);
+ clock=createVideoClock(video,config,status=>{root.dataset.mediaStatus=status;if(status==='error')console.warn('[Momentum] Film unavailable; the poster and booking remain available.');});
+ let begun=false;const begin=()=>{if(!enabled||token!==generation||begun)return;begun=true;video.src=asset(mobile&&config.mobile_src?config.mobile_src:config.src);video.load();
+  loadTimer=setTimeout(()=>{if(video.readyState<2){root.dataset.mediaStatus='poster';console.warn('[Momentum] Slow film; showing the poster.');}},6000);};
+ // Prioritize the single sharp opening image over motion and portfolio downloads.
+ if(poster.complete)requestAnimationFrame(()=>requestAnimationFrame(begin));else {poster.addEventListener('load',begin,{once:true});poster.addEventListener('error',begin,{once:true});}
+ document.getElementById('static-toggle').hidden=false;document.getElementById('play-descent').hidden=true;
 }
-async function boot(){
-    if(runtime)return;
-    const id=++generation;
-    document.body.classList.add('exp-running','video-running','video-gallery-fallback');
-    const scroll=createScroll(document.getElementById('exp-track'));
-    let ring={active:0,update(){},dispose(){}},engine=null,quality=null,slots=null,raf=0,frames=0,last=0,disposed=false,resizeGallery=()=>{};
-    const clock=createVideoClock(video,config,status=>{
-        root.dataset.mediaStatus=status;
-        if(status==='error')console.warn('[Momentum journey] Video unavailable; keeping the poster and live content.');
-    });
-    const overlay=createOverlay(data,scroll,{get active(){return ring.active;}},null,null,()=>0);
-    root.dataset.mediaStatus='loading';
-    video.src=url(config.src);video.load();
-    const timeout=setTimeout(()=>{if(!clock.state.ready){root.dataset.mediaStatus='poster';console.warn('[Momentum journey] Slow media; poster remains available.');}},6000);
-    runtime={dispose(){disposed=true;clearTimeout(timeout);cancelAnimationFrame(raf);scroll.destroy();overlay.reset();
-        clock.dispose();ring.dispose();slots?.dispose();engine?.dispose();removeEventListener('resize',resizeGallery);canvas.hidden=true;}};
-    loader.hidden=true;
-    const tick=time=>{
-        if(disposed)return;raf=requestAnimationFrame(tick);scroll.update(time);
-        const p=scroll.progress,chapter=chapterAt(p),end=document.querySelector('footer').getBoundingClientRect().top<innerHeight-80;
-        root.dataset.journeyChapter=String(chapter);
-        document.body.classList.toggle('exp-ended',end);
-        root.style.setProperty('--journey-x',`${interpolate(config.framing,interpolate(config.cues,p))}%`);
-        root.dataset.town=String(p>=.88);stage.style.setProperty('--gallery-shade',chapter===2?'1':'0');
-        if(!document.hidden&&!end){
-            clock.update(p,time);ring.update(p);overlay.update(p);
-            if(chapter!==2)slots?.pause();
-            if(engine){engine.setPaused(chapter!==2);canvas.hidden=chapter!==2;}
-            const dt=last?time-last:16.67;last=time;frames++;
-            if(quality?.sample(dt/1000)){engine?.resize();ring.setQuality?.(quality.tier);}
-            state={mode:'video',progress:p,chapter,tier:quality?.tier??0,fps:quality?.fps??1000/dt,frames,drawCalls:chapter===2?(engine?.renderer.info.render.calls??0):0,
-                ringIndex:ring.active,ringAngle:ring.group?.children[2]?.rotation.y??0,video:clock.state,slots:{ring:ring.cards?.filter(c=>c.handle&&!c.handle.isPlaceholder).length??0},firstFrameMs:state.firstFrameMs??time};
-            debug.update();
-        }
-    };
-    raf=requestAnimationFrame(tick);
-    // Only the existing gallery uses WebGL. Terrain/rider/sky/snow/town never load.
-    try{
-        const probe=document.createElement('canvas'),gl=probe.getContext('webgl2');
-        if(!gl)return;gl.getExtension('WEBGL_lose_context')?.loseContext();
-        const [T,{createRenderer},{createRing},{createSlots},{createQuality}]=await Promise.all([
-            import('../../vendor/three.module.min.js?v=bansko-video-2'),import('./renderer.js?v=bansko-video-2'),
-            import('./ring.js?v=bansko-video-2'),import('./slots.js?v=bansko-video-2'),import('./quality.js?v=bansko-video-2')]);
-        if(disposed||id!==generation)return;
-        quality=createQuality();
-        engine=createRenderer(canvas,quality,()=>{engine?.dispose();engine=null;canvas.hidden=true;document.body.classList.add('video-gallery-fallback');},true);
-        engine.scene.add(new T.HemisphereLight('#b9dffa','#15213d',2));
-        resizeGallery=()=>{if(engine){engine.camera.position.set(innerWidth<768?0:10,25,innerWidth<768?118:91);engine.camera.lookAt(0,15,0);}};
-        resizeGallery();addEventListener('resize',resizeGallery);
-        slots=createSlots(url,()=>{});ring=createRing(engine.scene,engine.camera,{shelf:new T.Vector3()},slots,data.ring);
-        ring.setQuality(quality.tier);canvas.hidden=true;
-        document.body.classList.remove('video-gallery-fallback');
-        engine.start(()=>{},()=>{if(document.hidden)slots.pause();});
-    }catch(error){console.warn('[Momentum journey] Gallery grid fallback:',error.message);}
+function still(){generation++;enabled=false;clearTimeout(loadTimer);clock?.dispose();clock=null;root.dataset.frame='false';root.dataset.mediaStatus='poster';document.body.classList.add('flow-still');
+ scroll?.destroy();scroll=createDocumentScroll(document.getElementById('exp-track'),sections,false);
+ document.getElementById('static-toggle').hidden=true;document.getElementById('play-descent').hidden=false;loadTown();}
+video.addEventListener('loadeddata',()=>{if(enabled){root.dataset.frame='true';root.dataset.mediaStatus='ready';}});
+document.getElementById('static-toggle').addEventListener('click',()=>{still();scrollTo({top:0,behavior:'instant'});});
+document.getElementById('play-descent').addEventListener('click',()=>{scrollTo({top:0,behavior:'instant'});start();});
+motion.addEventListener('change',e=>{if(e.matches)still();});
+async function bootGallery(){if(loadingGallery||gallery)return;loadingGallery=true;
+ try{const {createFloatingGallery}=await import('./floating-gallery.js?v=bansko-refine-1');if(!closed)gallery=createFloatingGallery(data.films.cards,asset);}catch(e){console.warn('[Momentum] Open the collection to watch films.',e.message);}}
+const galleryObserver=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){bootGallery();galleryObserver.disconnect();}},{rootMargin:'450px'});
+galleryObserver.observe(document.getElementById('ring'));
+if(motion.matches)still();else start();
+function tick(time){if(closed)return;raf=requestAnimationFrame(tick);scroll.update(time);if(document.hidden)return;
+ const p=scroll.filmProgress,chapter=scroll.chapter,arrival=smooth((p-.78)/.22),galleryTop=scroll.tops[3];
+ root.dataset.flowChapter=String(chapter);root.dataset.town=String(p>=.98);
+ root.style.setProperty('--journey-x',`${interpolate(config.framing,interpolate(config.cues,p))}%`);
+ root.style.setProperty('--arrival',arrival);root.style.setProperty('--frame-top',`${64*(1-arrival)}px`);root.style.setProperty('--frame-height',`${53+47*arrival}svh`);
+ root.style.setProperty('--stage-alpha',1-smooth((scrollY-galleryTop)/(innerHeight*.6)));
+ if(p>.65)loadTown();if(clock)clock.update(p,time);
+ rail.forEach((b,i)=>b.setAttribute('aria-current',String(i===chapter)));
+ document.getElementById('chapter-status').textContent=data.chapters[chapter].toUpperCase();document.getElementById('mainNav').classList.toggle('is-scrolled',scrollY>30);
+ const dt=last?time-last:16.67;last=time;frames++;
+ state={mode:enabled?'video':'static',flow:true,progress:scroll.progress,filmProgress:p,journeyRange:scroll.journeyRange,chapter,tier:0,fps:1000/dt,frames,drawCalls:0,
+  video:clock?.state??{ready:false,paused:true},galleryReady:!!gallery,galleryIndex:gallery?.active??0,slots:{},firstFrameMs:state.firstFrameMs??time};debug.update();
 }
-document.getElementById('static-toggle').addEventListener('click',()=>{stop();scrollTo({top:0,behavior:'instant'});});
-document.getElementById('play-descent').textContent='Play the descent';
-document.getElementById('play-descent').addEventListener('click',()=>{scrollTo({top:0,behavior:'instant'});boot();});
-document.querySelectorAll('[data-dismiss-flash]').forEach(b=>b.addEventListener('click',()=>b.closest('#flash-messages > div')?.remove()));
-const motion=matchMedia('(prefers-reduced-motion: reduce)');motion.addEventListener('change',e=>{if(e.matches)stop();});
-if(!motion.matches)boot();else stop();
-addEventListener('pagehide',stop,{once:true});
+raf=requestAnimationFrame(tick);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){video.pause();gallery?.pause();}});
+addEventListener('pagehide',event=>{video.pause();gallery?.pause();if(!event.persisted){closed=true;cancelAnimationFrame(raf);clearTimeout(loadTimer);scroll?.destroy();clock?.dispose();gallery?.dispose();galleryObserver.disconnect();}});
+addEventListener('pageshow',()=>{last=0;});

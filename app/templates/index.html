@@ -1,45 +1,73 @@
 {% extends 'base.html' %}
 {% block page_title %}Momentum Clips — Your best run. On film.{% endblock %}
-{% block meta_description %}Snowboard video production in Bansko. Follow-cam, drone footage and an edit worth reliving. Take the descent and find your session.{% endblock %}
+{% block meta_description %}Snowboard video production in Bansko. Ride the mountain, relive your film, and find your session.{% endblock %}
+{% block core_css %}{% endblock %}
 {% block extra_css %}
+<link rel="preload" as="image" href="{{ url_for('static', filename=experience.journey.poster, v=experience_version) }}" fetchpriority="high">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='experience/fonts/montserrat-latin.woff2', v='bansko-2') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='vendor/lenis.css', v=experience_version) }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='experience/css/experience.css', v=experience_version) }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='experience/css/flow.css', v=experience_version) }}">
 {% endblock %}
 {% block navigation %}{% include 'includes/alpine_nav.html' %}{% endblock %}
 {% block content %}
-<div id="experience" data-asset-base="{{ url_for('static', filename='') }}" data-version="{{ experience_version }}">
- <div class="exp-stage" id="exp-stage" aria-hidden="true">
- {% if experience.journey.mode == 'video' %}
- <img class="journey-poster journey-opening" src="{{ url_for('static', filename=experience.journey.poster, v=experience_version) }}" alt="" fetchpriority="high">
- <img class="journey-poster journey-town" src="{{ url_for('static', filename=experience.journey.town_poster, v=experience_version) }}" alt="">
- <video id="journey-video" class="journey-video" poster="{{ url_for('static', filename=experience.journey.poster, v=experience_version) }}" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
- {% endif %}
- <canvas id="exp-canvas" aria-hidden="true"></canvas><div class="exp-scrim"></div></div>
- <div class="exp-loader" id="exp-loader" hidden role="status"><img src="{{ url_for('static', filename='images/logo.png') }}" alt=""><span>{{ experience.labels.loading }}</span><progress id="asset-progress" max="1" value="0">Loading</progress></div>
- <div class="exp-coordinate" aria-hidden="true"><span class="coord-dot"></span>41°46′ N &nbsp; 23°28′ E <span class="coordinate-side">{{ experience.labels.range }}</span></div>
- <div class="exp-track" id="exp-track">
- <section id="summit" class="exp-chapter chapter-summit" data-chapter="0" aria-labelledby="summit-title">
-  {% if experience.journey.mode == 'video' %}<img class="journey-still" src="{{ url_for('static', filename=experience.journey.poster, v=experience_version) }}" alt="Snowboarder descending a snowy slope in the generated journey film">{% endif %}
-  <div class="chapter-body"><p class="exp-eyebrow">01 / {{ experience.labels.location }}<span class="eyebrow-rule"></span></p><h1 id="summit-title">{{ experience.hero.headline }}</h1><p class="exp-subline">{{ experience.hero.subline }}</p><a class="exp-link" href="#drop">{{ experience.labels.scroll }} <span aria-hidden="true">↓</span></a></div>
-  <div class="summit-altitude" aria-hidden="true"><span>2,746<span class="unit"> M</span></span><small>TODORKA / THE STARTING LINE</small></div>
- </section>
- <section id="drop" class="exp-chapter chapter-drop" data-chapter="1" aria-labelledby="drop-title">
-  <div class="chapter-body"><p class="exp-eyebrow">02 / Drop in</p><h2 id="drop-title">{{ experience.labels.drop }}</h2><div class="beat-list">{% for beat in experience.beats %}<div class="beat" data-beat="{{ loop.index0 }}"><span class="beat-number">0{{ loop.index }}</span><h3>{{ beat.label }}</h3><img class="beat-media" loading="lazy" src="{{ url_for('static', filename='experience/placeholders/beat-' ~ loop.index ~ '.webp', v=experience_version) }}" alt="{{ beat.label }} media placeholder"></div>{% endfor %}</div></div>
- </section>
- <section id="ring" class="exp-chapter chapter-ring" data-chapter="2" aria-labelledby="ring-title">
-  <div class="chapter-body ring-heading"><p class="exp-eyebrow">03 / The collection</p><h2 id="ring-title">{{ experience.ring.title }}</h2><p class="exp-caption">{{ experience.labels.collection_caption }}</p></div>
-  <div class="ring-active"><span class="exp-counter" id="ring-counter">01 / {{ '%02d'|format(experience.ring.count) }}</span><a id="active-card-link" class="active-card-link" href="{{ experience.ring.cards[0].link }}"><span id="active-card-title">{{ experience.ring.cards[0].title }}</span><span aria-hidden="true"> ↗</span></a><span class="active-card-tags" id="active-card-tags">{{ experience.ring.cards[0].tags }}</span></div>
-  <div class="fallback-grid">{% for card in experience.ring.cards %}<a href="{{ card.link }}"><img loading="lazy" src="{{ url_for('static', filename=card.placeholder, v=experience_version) }}" alt="{{ card.title }} — footage placeholder"><span>{{ card.title }}</span><small>{{ card.tags }}</small></a>{% endfor %}</div>
- </section>
- <section id="sessions" class="exp-chapter chapter-packages" data-chapter="3" aria-labelledby="sessions-title">
-  <div class="chapter-body"><p class="exp-eyebrow">04 / Your session</p><h2 id="sessions-title">{{ experience.gates.title }}</h2><div class="package-list">{% for p in experience.packages %}<article class="exp-package" data-package="{{ loop.index0 }}"><span class="exp-eyebrow">SESSION 0{{ loop.index }}</span><h3>{{ p.name }}</h3><p class="exp-price">${{ '%.0f'|format(p.price) }} <span>/ {{ p.duration }} hours</span></p><ul>{% for f in p.features %}<li>{{ f }}</li>{% endfor %}</ul><a class="exp-button" href="{{ p.link }}">Choose {{ p.name }} <span aria-hidden="true">↗</span></a></article>{% else %}{% for i in range(3) %}<article class="exp-package" data-package="{{ i }}"><span class="exp-eyebrow">SESSION 0{{ i+1 }}</span><h3>{{ experience.labels.empty_package }}</h3><p>{{ experience.labels.empty_package_note }}</p><a class="exp-button" href="{{ url_for('main.contact') }}">Get in touch ↗</a></article>{% endfor %}{% endfor %}</div></div>
- </section>
- <section id="portal" class="exp-chapter chapter-portal" data-chapter="4" aria-labelledby="portal-title"><div class="chapter-body"><p class="exp-eyebrow">05 / Take it with you</p><h2 id="portal-title">{{ experience.portal.title }}</h2>{% if testimonials %}<figure class="exp-quote"><div class="exp-stars" aria-label="{{ testimonials[0].rating }} out of 5 stars">{{ '★' * testimonials[0].rating }}</div><blockquote>“{{ testimonials[0].testimonial_text }}”</blockquote><figcaption>{{ testimonials[0].client_name }} / {{ testimonials[0].project_type or 'Bansko' }}</figcaption></figure>{% else %}<p class="exp-subline">{{ experience.labels.empty_review }}</p>{% endif %}</div></section>
- <section id="bansko" class="exp-chapter chapter-finale" data-chapter="5" aria-labelledby="finale-title"><div class="chapter-body"><p class="exp-eyebrow">06 / Back in Bansko</p><h2 id="finale-title">{{ experience.finale.headline }}</h2><p class="exp-subline">{{ experience.finale.subline }}</p><a class="exp-button" href="{{ url_for('main.packages') }}">{{ experience.finale.button }} <span aria-hidden="true">↗</span></a><div class="exp-socials"><a href="{{ url_for('main.contact') }}">Contact</a><a href="{{ SOCIAL_INSTAGRAM }}" rel="noopener">Instagram ↗</a><a href="{{ SOCIAL_YOUTUBE }}" rel="noopener">YouTube ↗</a></div></div></section>
+{% macro media_url(src) -%}{{ src if src.startswith(('https://','http://')) else url_for('static', filename=src, v=experience_version) }}{%- endmacro %}
+<div id="experience" class="flow-site" data-asset-base="{{ url_for('static', filename='') }}" data-version="{{ experience_version }}">
+ <div id="exp-stage" class="flow-stage" aria-hidden="true">
+  <img id="journey-poster" class="flow-picture" src="{{ media_url(experience.journey.poster) }}" alt="" fetchpriority="high" width="1280" height="720">
+  <img id="town-poster" class="flow-picture" data-src="{{ media_url(experience.journey.town_poster) }}" alt="" width="1280" height="720">
+  <video id="journey-video" class="flow-picture" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+  <div class="flow-shade"></div><div class="flow-town-shade"></div>
  </div>
- <nav class="progress-rail" id="progress-rail" aria-label="Descent chapters">{% for chapter in experience.chapters %}<button type="button" data-go-chapter="{{ loop.index0 }}" aria-label="Scroll to {{ chapter }}"><span class="rail-label">{{ chapter }}</span><span class="rail-tick"></span><span class="rail-number">0{{ loop.index }}</span></button>{% endfor %}</nav>
- <div class="exp-status"><span id="chapter-status">THE SUMMIT</span><span id="altitude-status">2,746 M</span><button id="static-toggle" type="button">Still view</button><button id="play-descent" type="button">Play the 3D descent</button></div>
- <p class="terrain-credit">{% if experience.journey.mode == 'video' %}Mountain-to-town journey: owner-supplied generated footage. The film is an artistic alpine scene.{% else %}Terrain: Mapzen / AWS Terrain Tiles. Produced using Copernicus data and information funded by the European Union — EU-DEM layers. Global SRTM and GMTED2010 courtesy of the U.S. Geological Survey. <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Sources &amp; attribution ↗</a>. Elevations resampled and vertically exaggerated for this experience.{% endif %}</p>
+ <div id="exp-loader" hidden></div>
+ <div id="exp-track" class="flow-track">
+  <section id="summit" class="flow-section flow-hero" data-chapter="0" aria-labelledby="summit-title">
+   <div class="flow-copy"><p class="exp-eyebrow">01 / Bansko, Bulgaria <span class="eyebrow-rule"></span></p>
+    <h1 id="summit-title">{{ experience.hero.headline }}</h1><p class="exp-subline">{{ experience.hero.subline }}</p>
+    <div class="hero-actions"><a id="hero-book" class="exp-button" href="{{ url_for('main.packages') }}">{{ experience.hero.button }} <span aria-hidden="true">↗</span></a><a class="flow-explore" href="#drop">Explore the descent <span aria-hidden="true">↓</span></a></div>
+   </div><span class="flow-location" aria-hidden="true">PIRIN MOUNTAINS / YOUR NEXT RUN</span>
+  </section>
+  <section id="drop" class="flow-section flow-descent" data-chapter="1" aria-labelledby="drop-title">
+   <div class="descent-copy"><p class="exp-eyebrow">02 / The descent</p><h2 id="drop-title">{{ experience.labels.drop }}</h2><div class="flow-beats">{% for beat in experience.beats %}<span>{{ beat.label }}</span>{% endfor %}</div></div>
+  </section>
+  <section id="arrival" class="flow-section flow-arrival" data-chapter="2" aria-labelledby="arrival-title">
+   <img class="arrival-still" alt="Warm lights over the alpine town" width="1280" height="720">
+   <div class="arrival-copy"><p class="exp-eyebrow">03 / Mountain to town</p><h2 id="arrival-title">{{ experience.arrival.headline }}</h2><p>{{ experience.arrival.subline }}</p></div>
+  </section>
+  <section id="ring" class="flow-section flow-films" data-chapter="3" aria-labelledby="ring-title">
+   <div class="flow-section-head"><div><p class="exp-eyebrow">04 / The collection</p><h2 id="ring-title">{{ experience.films.title }}</h2></div><p>{{ experience.films.subline }}</p></div>
+   <div class="floating-gallery" id="floating-gallery" role="region" aria-roledescription="carousel" aria-label="Film selection">
+    <div class="film-stage" id="film-stage">
+     {% for card in experience.films.cards %}
+     <article class="floating-film{% if loop.first %} is-selected{% endif %}" data-film="{{ loop.index0 }}" aria-label="{{ loop.index }} of {{ experience.films.cards|length }}: {{ card.title }}">
+      <button class="film-select" type="button" data-select-film="{{ loop.index0 }}" aria-label="{{ 'Play' if loop.first else 'Select' }} {{ card.title }}"{% if not loop.first %} tabindex="-1"{% endif %}>
+       <img data-src="{{ media_url(card.poster) }}" data-fallback="{{ media_url(card.fallback) }}" alt="{{ card.title if not card.missing else experience.films.missing_poster_label }}" width="360" height="540">
+       <span class="film-type">{{ card.tags if card.concept else 'MOMENTUM / FILM' }}</span><span class="film-play-icon" aria-hidden="true">↗</span>
+       {% if card.missing %}<span class="film-missing">{{ experience.films.missing_poster_label }}</span>{% endif %}
+      </button>
+      <h3>{{ card.title }}</h3>
+     </article>
+     {% endfor %}
+    </div>
+    <div class="film-navigation"><button id="film-prev" type="button" aria-label="Previous film">←</button><span id="film-counter" class="exp-counter" aria-live="polite">01 / {{ '%02d'|format(experience.films.cards|length) }}</span><button id="film-next" type="button" aria-label="Next film">→</button></div>
+    <div class="film-selected-info"><div><h3 id="selected-film-title">{{ experience.films.cards[0].title }}</h3><p id="selected-film-tags">{{ experience.films.cards[0].tags }}</p></div><button type="button" id="play-selected-film" class="film-watch">Watch film <span aria-hidden="true">↗</span></button></div>
+   </div>
+   <a class="flow-text-link" href="{{ url_for('main.gallery') }}">Explore the collection ↗</a>
+   <noscript><p>Choose a film from <a href="{{ url_for('main.gallery') }}">the gallery</a>.</p></noscript>
+  </section>
+  <section id="sessions" class="flow-section flow-sessions" data-chapter="4" aria-labelledby="sessions-title">
+   <div class="flow-section-head"><div><p class="exp-eyebrow">05 / Your session</p><h2 id="sessions-title">{{ experience.gates.title }}</h2></div><p>You ride. We make it unforgettable.</p></div>
+   <div class="flow-packages">{% for p in experience.packages %}<article class="flow-package" data-package="{{ loop.index0 }}"><span class="exp-eyebrow">SESSION 0{{ loop.index }}</span><h3>{{ p.name }}</h3><p class="exp-price">€{{ '%.2f'|format(p.price) }} <span>/ {{ p.duration }} hours</span></p><ul>{% for f in p.features %}<li>{{ f }}</li>{% endfor %}</ul><a class="exp-button" href="{{ p.link }}">Choose {{ p.name }} ↗</a></article>{% else %}{% for i in range(3) %}<article class="flow-package" data-package="{{ i }}"><span class="exp-eyebrow">SESSION 0{{ i+1 }}</span><h3>{{ experience.labels.empty_package }}</h3><p>{{ experience.labels.empty_package_note }}</p><a class="flow-text-link" href="{{ url_for('main.contact') }}">Get in touch ↗</a></article>{% endfor %}{% endfor %}</div>
+  </section>
+  <section id="bansko" class="flow-section flow-close" data-chapter="5" aria-labelledby="finale-title">
+   <div><p class="exp-eyebrow">06 / Make it yours</p><h2 id="finale-title">{{ experience.finale.headline }}</h2><p class="exp-subline">{{ experience.finale.subline }}</p><div class="closing-actions"><a class="exp-button" href="{{ url_for('main.packages') }}">{{ experience.finale.button }} ↗</a><a class="flow-text-link" href="{{ url_for('main.contact') }}">Talk to us ↗</a></div></div>
+   {% if testimonials %}<figure class="flow-review"><blockquote>“{{ testimonials[0].testimonial_text }}”</blockquote><figcaption>{{ testimonials[0].client_name }} / {{ testimonials[0].rating }} out of 5</figcaption></figure>{% endif %}
+  </section>
+ </div>
+ <nav class="flow-progress" aria-label="Journey chapters">{% for chapter in experience.chapters %}<button type="button" data-go-chapter="{{ loop.index0 }}" aria-label="Go to {{ chapter }}"><span>{{ '%02d'|format(loop.index) }}</span></button>{% endfor %}</nav>
+ <div class="flow-status"><span id="chapter-status">THE OPENING</span><button id="static-toggle" type="button">Still View</button><button id="play-descent" type="button" hidden>Play the descent</button></div>
+ <p class="terrain-credit">Journey film: owner-supplied generated footage. An artistic alpine scene.</p>
+ <dialog id="film-dialog" class="film-dialog" aria-labelledby="film-dialog-title"><div class="film-dialog-head"><h2 id="film-dialog-title">Your film</h2><button type="button" id="close-film" aria-label="Close film">Close ×</button></div><div id="film-player"></div><p><a id="film-source-link" href="{{ url_for('main.gallery') }}">View film details ↗</a></p></dialog>
 </div>
 <script type="application/json" id="experience-data"{% if csp_nonce is defined %} nonce="{{ csp_nonce() }}"{% endif %}>{{ experience|tojson }}</script>
 {% endblock %}

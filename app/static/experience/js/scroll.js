@@ -17,3 +17,16 @@ document.querySelectorAll('a[href="#drop"]').forEach(a=>listen(a,'click',e=>{e.p
 return {get progress(){return progress;},get range(){return range;},chapterProgress:i=>clamp((progress-CHAPTERS[i])/(CHAPTERS[i+1]-CHAPTERS[i])),
 update(time){lenis.raf(time);read();},destroy(){listeners.forEach(off=>off());lenis.destroy();removeEventListener('resize',measure);removeEventListener('scroll',read);},reset:measure};
 }
+// Natural-flow homepage. Chapter anchors come from rendered layout, so enlarged
+// text and stacked mobile packages do not leave navigation pointing at old ranges.
+export function createDocumentScroll(track,sections,smooth=true){
+const lenis=smooth?new Lenis({duration:1.05,smoothWheel:true,syncTouch:false}):null;
+let tops=[],range=1;
+const measure=()=>{tops=sections.map(el=>el.getBoundingClientRect().top+scrollY);range=Math.max(1,track.offsetHeight-innerHeight);};
+const observer=new ResizeObserver(measure);observer.observe(track);addEventListener('resize',measure);measure();
+const go=i=>{const y=tops[i];if(lenis)lenis.scrollTo(y);else scrollTo({top:y,behavior:'instant'});};
+const handlers=[];const listen=(el,fn)=>{el.addEventListener('click',fn);handlers.push(()=>el.removeEventListener('click',fn));};
+document.querySelectorAll('[data-go-chapter]').forEach(b=>listen(b,()=>go(Number(b.dataset.goChapter))));
+document.querySelectorAll('a[href="#drop"]').forEach(a=>listen(a,e=>{e.preventDefault();go(1);}));
+return {get progress(){return clamp((scrollY-track.offsetTop)/range);},get chapter(){let i=0;tops.forEach((y,n)=>{if(y<=scrollY+innerHeight*.28)i=n;});return i;},get journeyRange(){return tops[2]-tops[0];},get filmProgress(){return clamp((scrollY-tops[0])/(tops[2]-tops[0]));},get tops(){return tops;},update(time){lenis?.raf(time);},destroy(){lenis?.destroy();observer.disconnect();removeEventListener('resize',measure);handlers.forEach(fn=>fn());}};
+}
