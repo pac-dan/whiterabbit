@@ -1,6 +1,6 @@
-import {createQuality} from './quality.js?v=bansko-1';
-import {chapterAt,createScroll} from './scroll.js?v=bansko-1';
-import {createDebug} from './debug.js?v=bansko-1';
+import {createQuality} from './quality.js?v=bansko-2';
+import {chapterAt,createScroll} from './scroll.js?v=bansko-2';
+import {createDebug} from './debug.js?v=bansko-2';
 
 const root=document.getElementById('experience'),loader=document.getElementById('exp-loader');
 const data=JSON.parse(document.getElementById('experience-data').textContent);
@@ -23,7 +23,7 @@ async function boot() {
     const probe=document.createElement('canvas');
     const gl=probe.getContext('webgl2');if(!gl)throw Error('WebGL 2 is unavailable');gl.getExtension('WEBGL_lose_context')?.loseContext();
     const [T,{createRenderer},{createTerrain},{createPath},{createCamera},{createSky},{createSnow},{createRider},{createRing},{createGates},{createPortal},{createTown},{createSlots},{createOverlay}]=await Promise.all([
-      import('../../vendor/three.module.min.js?v=bansko-1'),import('./renderer.js?v=bansko-1'),import('./terrain.js?v=bansko-1'),import('./path.js?v=bansko-1'),import('./camera.js?v=bansko-1'),import('./sky.js?v=bansko-1'),import('./snow.js?v=bansko-1'),import('./rider.js?v=bansko-1'),import('./ring.js?v=bansko-1'),import('./gates.js?v=bansko-1'),import('./portal.js?v=bansko-1'),import('./town.js?v=bansko-1'),import('./slots.js?v=bansko-1'),import('./overlay.js?v=bansko-1')]);
+      import('../../vendor/three.module.min.js?v=bansko-2'),import('./renderer.js?v=bansko-2'),import('./terrain.js?v=bansko-2'),import('./path.js?v=bansko-2'),import('./camera.js?v=bansko-2'),import('./sky.js?v=bansko-2'),import('./snow.js?v=bansko-2'),import('./rider.js?v=bansko-2'),import('./ring.js?v=bansko-2'),import('./gates.js?v=bansko-2'),import('./portal.js?v=bansko-2'),import('./town.js?v=bansko-2'),import('./slots.js?v=bansko-2'),import('./overlay.js?v=bansko-2')]);
     if(abandoned)return;
     const quality=createQuality();engine=createRenderer(document.getElementById('exp-canvas'),quality,fallback);
     let completed=0;const loaded=()=>{document.getElementById('asset-progress').value=++completed/3;};
@@ -48,7 +48,7 @@ async function boot() {
     addEventListener('scroll',footerScroll,{passive:true});
     runtime={dispose(){document.removeEventListener('visibilitychange',pauseMedia);removeEventListener('scroll',footerScroll);dispose();}};
     engine.start((time,dt)=>{
-      scroll.update(time);const p=scroll.progress;
+      const p=scroll.progress;
       [camera,terrain,sky,rider,ring,gates,portal,town,snow].forEach(m=>m.update(p,dt));overlay.update(p);
       if(quality.sample(dt)){engine.resize();terrain.setQuality();ring.setQuality(quality.tier);snow.setQuality();}
       if(p<.55&&!beatsLoading){beatsLoading=true;Promise.all(data.beats.map((b,i)=>slots.load(b.media,`experience/placeholders/beat-${i+1}.webp`))).then(h=>{beatHandles=h;h.forEach((v,i)=>{beatPanels[i].material.map=v.texture;beatPanels[i].material.color.set('#ffffff');beatPanels[i].material.needsUpdate=true;});}).catch(()=>{});}
@@ -57,7 +57,7 @@ async function boot() {
       if(data.hero.background_video.src&&!heroLoading&&p<.3){heroLoading=true;slots.load(data.hero.background_video,'experience/placeholders/portal.webp').then(h=>{heroHandle=h;if(h.video){h.video.className='exp-hero-video';if(data.hero.background_video.poster)h.video.poster=url(data.hero.background_video.poster);document.getElementById('exp-stage').append(h.video);}}).catch(()=>{});}
       if(heroHandle){heroHandle.activate(p<.12);if(heroHandle.video)heroHandle.video.hidden=p>=.12;}
       state={mode:'3d',tier:quality.tier,fps:quality.fps,progress:p,chapter:chapterAt(p),drawCalls:engine.renderer.info.render.calls,frames:engine.frames,ringIndex:ring.active,ringAngle:ring.group.children[2]?.rotation.y??0,slots:{rider:!rider.handle.isPlaceholder,ring:ring.cards.filter(c=>c.handle&&!c.handle.isPlaceholder).length,beats:beatHandles.filter(h=>!h.isPlaceholder).length},firstFrameMs:state.firstFrameMs??performance.now()};debug.update();
-    });
+    },time=>scroll.update(time));
     clearTimeout(timer);loader.hidden=true;booting=false;
   } catch(error){clearTimeout(timer);dispose();fallback(error);}
 }

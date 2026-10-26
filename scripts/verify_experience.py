@@ -24,7 +24,7 @@ def command(*args):
 
 def report(name='browser-report.json'):
     data = json.loads((EVIDENCE/name).read_text(encoding='utf-8-sig'))
-    assert data['pass'], data.get('failure')
+    assert data['pass'], data.get('failure') or data.get('reason')
     return data
 
 
@@ -50,6 +50,11 @@ def run(mode):
         data = report()
         assert not data['errors'] and not data['requests']
         assert len(data['chapters']) == 14
+        for width in (1440, 375):
+            normal = next(x['state'] for x in data['chapters'] if x['size']['width'] == width and x.get('shot', '').endswith('-ch3.png'))
+            reverse = next(x['state'] for x in data['chapters'] if x['size']['width'] == width and x.get('reverse'))
+            assert normal['ringIndex'] == reverse['ringIndex']
+            assert abs(normal['ringAngle'] - reverse['ringAngle']) < .001
         for row in data['chapters']:
             assert row['state']['mode'] == '3d'
             if row.get('shot'):
@@ -86,7 +91,7 @@ def run(mode):
         proof = report()
         assert len(proof['quality']) == 2
         supplemental = report('supplement-report.json')
-        assert all(x['hiddenPause'] and x['footerPause'] for x in supplemental['quality'])
+        assert all(x['hiddenPause'] and x['footerPause'] and x['wheelResume'] for x in supplemental['quality'])
         print(json.dumps(proof['quality'], indent=2));print(json.dumps(supplemental['quality'], indent=2))
         print('Hardware desktop measurements; mobile is a viewport emulation on the same GPU, not a physical mid-range phone.')
     elif mode == 'budget':
@@ -97,8 +102,10 @@ def run(mode):
             assert size <= (900000 if name == 'javascript' else 1500000), size
             print(f'{name}: {size} bytes')
             for p in files: print(f'  {p.relative_to(ROOT)}: {p.stat().st_size}')
+        for p in (ROOT/'app/static/experience/fonts').glob('*.woff2'):
+            print(f'Local brand font {p.name}: {p.stat().st_size} bytes (OFL license alongside)')
         for asset in ['experience/js/main.js','experience/terrain/bansko-height.bin','vendor/three.module.min.js']:
-            r=requests.get(f'http://127.0.0.1:5000/static/{asset}?v=bansko-1')
+            r=requests.get(f'http://127.0.0.1:5000/static/{asset}?v=bansko-2')
             assert r.status_code == 200
             assert r.headers['Cache-Control'] == 'public, max-age=31536000, immutable'
             print(asset, r.status_code, r.headers['Cache-Control'], len(r.content))

@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-1';
+import * as T from '../../vendor/three.module.min.js?v=bansko-2';
 export function placeholderRider() {
   const group=new T.Group();
   const body=new T.Mesh(new T.BoxGeometry(1.05,1.6,.7),new T.MeshStandardMaterial({color:'#a7b8d6',roughness:.55}));body.position.set(.25,1.5,0);body.rotation.z=-.28;group.add(body);

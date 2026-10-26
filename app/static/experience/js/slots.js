@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-1';
+import * as T from '../../vendor/three.module.min.js?v=bansko-2';
 // Each returned handle owns its resources, including its fallback texture.
 export function createSlots(url,loaded=()=>{}) {
   const handles=new Set(),loader=new T.TextureLoader();let disposed=false;
@@ -25,7 +25,7 @@ export function createSlots(url,loaded=()=>{}) {
   async function model(slot,factory) {
     let object,mixer=null,isPlaceholder=true;
     try{
-      if(slot.src){const {GLTFLoader}=await import('../../vendor/GLTFLoader.js?v=bansko-1');const gltf=await new GLTFLoader().loadAsync(url(slot.src));object=gltf.scene;object.scale.setScalar(slot.scale??1);isPlaceholder=false;
+      if(slot.src){const {GLTFLoader}=await import('../../vendor/GLTFLoader.js?v=bansko-2');const gltf=await new GLTFLoader().loadAsync(url(slot.src));object=gltf.scene;object.scale.setScalar(slot.scale??1);isPlaceholder=false;
         if(gltf.animations.length){mixer=new T.AnimationMixer(object);const clip=gltf.animations.find(a=>a.name===slot.animation)||gltf.animations[0];mixer.clipAction(clip).play();}}
     }catch{/* A broken replacement always resolves to the named placeholder. */}
     if(!object)object=factory();

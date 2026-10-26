@@ -8,7 +8,7 @@ and customer quotes still come from your existing site admin.
 2. Copy it into **app/static/experience/media/**.
 3. In **app/experience/content.py**, replace the matching `None` with its path,
    starting with `experience/media/`. Keep the quotes around the path.
-4. Increase `VERSION` (for example `bansko-1` → `bansko-2`) so visitors receive
+4. Increase `VERSION` (for example `bansko-2` → `bansko-3`) so visitors receive
    the new files. Save and deploy the branch through your normal preview flow.
 
 **Video example — the first recent edit.** Find the `ring` cards list. Replace

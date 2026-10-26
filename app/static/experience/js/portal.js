@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-1';
+import * as T from '../../vendor/three.module.min.js?v=bansko-2';
 export function createPortal(scene,path,slots,data) {
   const group=new T.Group();group.position.copy(path.at(.91,16));scene.add(group);let handle=null,loading=false;
   const material=new T.MeshBasicMaterial({color:'#40ddff',transparent:true,opacity:.5,side:T.DoubleSide});

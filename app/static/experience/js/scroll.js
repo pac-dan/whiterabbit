@@ -1,4 +1,4 @@
-import Lenis from '../../vendor/lenis.mjs?v=bansko-1';
+import Lenis from '../../vendor/lenis.mjs?v=bansko-2';
 export const CHAPTERS=[0,.12,.30,.55,.75,.88,1];
 export const clamp=x=>Math.max(0,Math.min(1,x));
 export const chapterAt=p=>Math.min(5,CHAPTERS.findIndex((v,i)=>i<6&&p>=v&&p<CHAPTERS[i+1]) < 0 ? 5 : CHAPTERS.findIndex((v,i)=>i<6&&p>=v&&p<CHAPTERS[i+1]));

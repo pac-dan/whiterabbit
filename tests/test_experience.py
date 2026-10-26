@@ -59,7 +59,7 @@ def test_homepage_no_executable_inline_scripts_or_handlers(client):
     for attributes, body in re.findall(r'<script([^>]*)>(.*?)</script>', text, re.S):
         assert 'src=' in attributes or 'application/json' in attributes or 'application/ld+json' in attributes
     assert 'cdn.tailwindcss.com' not in text
-    assert '?v=bansko-1' in text
+    assert '?v=bansko-2' in text
 
 
 def test_experience_cache_only(client):

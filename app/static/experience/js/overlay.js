@@ -1,4 +1,4 @@
-import {CHAPTERS,chapterAt,clamp} from './scroll.js?v=bansko-1';
+import {CHAPTERS,chapterAt,clamp} from './scroll.js?v=bansko-2';
 export function createOverlay(data,scroll,ring,terrain,camera) {
   const sections=[...document.querySelectorAll('[data-chapter]')],rail=[...document.querySelectorAll('[data-go-chapter]')];
   const counter=document.getElementById('ring-counter'),title=document.getElementById('active-card-title'),link=document.getElementById('active-card-link'),tags=document.getElementById('active-card-tags');
