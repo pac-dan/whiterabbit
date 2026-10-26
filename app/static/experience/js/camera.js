@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-4';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
 export function createCamera(camera,path,terrain) {
 const add=(v,x,y,z)=>v.clone().add(new T.Vector3(x,y,z));
 const s=path.shelf, g=path.gates, start=path.at(0), town=terrain.geo(41.838,23.488);

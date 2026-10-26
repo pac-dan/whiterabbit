@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-4';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
 export function createTown(scene,terrain) {
 const origin=terrain.geo(41.838,23.488),count=650;
 const geometry=new T.BufferGeometry(),positions=new Float32Array(count*3),sizes=new Float32Array(count);

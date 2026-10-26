@@ -1,5 +1,5 @@
-import {CHAPTERS,chapterAt,clamp} from './scroll.js?v=bansko-4';
-export function createOverlay(data,scroll,ring,terrain,camera) {
+import {CHAPTERS,chapterAt,clamp} from './scroll.js?v=bansko-video-1';
+export function createOverlay(data,scroll,ring,terrain,camera,altitude=null) {
 const sections=[...document.querySelectorAll('[data-chapter]')],rail=[...document.querySelectorAll('[data-go-chapter]')];
 const counter=document.getElementById('ring-counter'),title=document.getElementById('active-card-title'),link=document.getElementById('active-card-link'),tags=document.getElementById('active-card-tags');
 let last=-1;
@@ -11,7 +11,7 @@ document.querySelectorAll('[data-beat]').forEach((b,i)=>b.classList.toggle('is-a
 document.querySelectorAll('[data-package]').forEach((b,i)=>{const show=chapter===3&&i===Math.min(2,Math.floor(local*3));b.classList.toggle('is-active',show);b.inert=!show;});
 if(last!==ring.active){last=ring.active;const card=data.ring.cards[last];counter.textContent=`${String(last+1).padStart(2,'0')} / ${String(data.ring.count).padStart(2,'0')}`;title.textContent=card.title;tags.textContent=card.tags;link.href=card.link;}
 document.getElementById('chapter-status').textContent=data.chapters[chapter].toUpperCase();
-document.getElementById('altitude-status').textContent=`${Math.round(camera.position.y/.145+terrain.meta.minM).toLocaleString('en')} M`;
+document.getElementById('altitude-status').textContent=altitude?'MOUNTAIN / TOWN':`${Math.round(camera.position.y/.145+terrain.meta.minM).toLocaleString('en')} M`;
 document.getElementById('mainNav').classList.toggle('is-scrolled',p>.015);
 },reset(){sections.forEach(s=>{s.inert=false;s.style.removeProperty('--alpha');s.style.removeProperty('--reveal');});document.querySelectorAll('[data-package]').forEach(s=>s.inert=false);}};
 }

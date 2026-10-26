@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-4';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
 export function createSlots(url,loaded=()=>{}) {
 const handles=new Set(),loader=new T.TextureLoader();let disposed=false;
 async function image(path) {const t=await loader.loadAsync(url(path));t.colorSpace=T.SRGBColorSpace;t.anisotropy=2;return t;}
@@ -24,7 +24,7 @@ handles.add(handle);return handle;
 async function model(slot,factory) {
 let object,mixer=null,isPlaceholder=true;const poses={};
 try{
-if(slot.src){const {GLTFLoader}=await import('../../vendor/GLTFLoader.js?v=bansko-4');const gltf=await new GLTFLoader().loadAsync(url(slot.src));object=gltf.scene;object.scale.setScalar(slot.scale??1);isPlaceholder=false;
+if(slot.src){const {GLTFLoader}=await import('../../vendor/GLTFLoader.js?v=bansko-video-1');const gltf=await new GLTFLoader().loadAsync(url(slot.src));object=gltf.scene;object.scale.setScalar(slot.scale??1);isPlaceholder=false;
 if(gltf.animations.length){mixer=new T.AnimationMixer(object);const clip=gltf.animations.find(a=>a.name===slot.animation)||gltf.animations[0];
 if(slot.poses){for(const key of ['neutral','toe','heel']){const pose=gltf.animations.find(a=>a.name===slot.poses[key]);if(pose)poses[key]=mixer.clipAction(pose).play();}}
 if(!poses.neutral||!poses.toe||!poses.heel){Object.keys(poses).forEach(k=>{poses[k].stop();delete poses[k];});mixer.clipAction(clip).play();}}}

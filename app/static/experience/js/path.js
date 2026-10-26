@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-4';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
 export const RIDE_LINE = [[41.765,23.466],[41.772,23.463],[41.778,23.46],[41.784,23.455],[41.789,23.451],[41.794,23.45],[41.798,23.455],[41.803,23.459],[41.808,23.465],[41.814,23.471],[41.821,23.477],[41.829,23.484],[41.838,23.488]];
 export function createPath(terrain) {
 const curve=new T.CatmullRomCurve3(RIDE_LINE.map(([lat,lon])=>terrain.geo(lat,lon)),false,'centripetal');

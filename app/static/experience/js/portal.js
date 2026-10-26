@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-4';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
 export function createPortal(scene,path,slots,data) {
 const group=new T.Group();group.position.copy(path.at(.91,16));scene.add(group);let handle=null,loading=false;
 const direction=path.at(.97).sub(path.at(.86)).normalize();group.quaternion.setFromUnitVectors(new T.Vector3(0,0,-1),direction);

@@ -8,11 +8,18 @@
 {% block navigation %}{% include 'includes/alpine_nav.html' %}{% endblock %}
 {% block content %}
 <div id="experience" data-asset-base="{{ url_for('static', filename='') }}" data-version="{{ experience_version }}">
- <div class="exp-stage" id="exp-stage" aria-hidden="true"><canvas id="exp-canvas" aria-hidden="true"></canvas><div class="exp-scrim"></div></div>
+ <div class="exp-stage" id="exp-stage" aria-hidden="true">
+ {% if experience.journey.mode == 'video' %}
+ <img class="journey-poster journey-opening" src="{{ url_for('static', filename=experience.journey.poster, v=experience_version) }}" alt="" fetchpriority="high">
+ <img class="journey-poster journey-town" src="{{ url_for('static', filename=experience.journey.town_poster, v=experience_version) }}" alt="">
+ <video id="journey-video" class="journey-video" poster="{{ url_for('static', filename=experience.journey.poster, v=experience_version) }}" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback aria-hidden="true"></video>
+ {% endif %}
+ <canvas id="exp-canvas" aria-hidden="true"></canvas><div class="exp-scrim"></div></div>
  <div class="exp-loader" id="exp-loader" hidden role="status"><img src="{{ url_for('static', filename='images/logo.png') }}" alt=""><span>{{ experience.labels.loading }}</span><progress id="asset-progress" max="1" value="0">Loading</progress></div>
  <div class="exp-coordinate" aria-hidden="true"><span class="coord-dot"></span>41°46′ N &nbsp; 23°28′ E <span class="coordinate-side">{{ experience.labels.range }}</span></div>
  <div class="exp-track" id="exp-track">
  <section id="summit" class="exp-chapter chapter-summit" data-chapter="0" aria-labelledby="summit-title">
+  {% if experience.journey.mode == 'video' %}<img class="journey-still" src="{{ url_for('static', filename=experience.journey.poster, v=experience_version) }}" alt="Snowboarder descending a snowy slope in the generated journey film">{% endif %}
   <div class="chapter-body"><p class="exp-eyebrow">01 / {{ experience.labels.location }}<span class="eyebrow-rule"></span></p><h1 id="summit-title">{{ experience.hero.headline }}</h1><p class="exp-subline">{{ experience.hero.subline }}</p><a class="exp-link" href="#drop">{{ experience.labels.scroll }} <span aria-hidden="true">↓</span></a></div>
   <div class="summit-altitude" aria-hidden="true"><span>2,746<span class="unit"> M</span></span><small>TODORKA / THE STARTING LINE</small></div>
  </section>
@@ -32,7 +39,7 @@
  </div>
  <nav class="progress-rail" id="progress-rail" aria-label="Descent chapters">{% for chapter in experience.chapters %}<button type="button" data-go-chapter="{{ loop.index0 }}" aria-label="Scroll to {{ chapter }}"><span class="rail-label">{{ chapter }}</span><span class="rail-tick"></span><span class="rail-number">0{{ loop.index }}</span></button>{% endfor %}</nav>
  <div class="exp-status"><span id="chapter-status">THE SUMMIT</span><span id="altitude-status">2,746 M</span><button id="static-toggle" type="button">Still view</button><button id="play-descent" type="button">Play the 3D descent</button></div>
- <p class="terrain-credit">Terrain: Mapzen / AWS Terrain Tiles. Produced using Copernicus data and information funded by the European Union — EU-DEM layers. Global SRTM and GMTED2010 courtesy of the U.S. Geological Survey. <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Sources &amp; attribution ↗</a>. Elevations resampled and vertically exaggerated for this experience.</p>
+ <p class="terrain-credit">{% if experience.journey.mode == 'video' %}Mountain-to-town journey: owner-supplied generated footage. The film is an artistic alpine scene.{% else %}Terrain: Mapzen / AWS Terrain Tiles. Produced using Copernicus data and information funded by the European Union — EU-DEM layers. Global SRTM and GMTED2010 courtesy of the U.S. Geological Survey. <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Sources &amp; attribution ↗</a>. Elevations resampled and vertically exaggerated for this experience.{% endif %}</p>
 </div>
 <script type="application/json" id="experience-data"{% if csp_nonce is defined %} nonce="{{ csp_nonce() }}"{% endif %}>{{ experience|tojson }}</script>
 {% endblock %}

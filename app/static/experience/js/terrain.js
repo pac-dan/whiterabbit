@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-4';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
 export async function createTerrain(scene, quality, url, loaded) {
 const response = await fetch(url('experience/terrain/bansko-height.json'));
 if (!response.ok) throw Error('Terrain metadata unavailable');

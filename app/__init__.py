@@ -52,7 +52,7 @@ def create_app(config_name=None):
     @app.after_request
     def cache_experience_assets(response):
         from flask import request
-        if request.path.startswith(('/static/vendor/', '/static/experience/')) and response.status_code == 200:
+        if request.path.startswith(('/static/vendor/', '/static/experience/')) and response.status_code in (200, 206):
             response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
         return response
 

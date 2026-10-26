@@ -5,8 +5,21 @@ Database package/video/testimonial copy stays managed by the existing admin.
 """
 from copy import deepcopy
 
-VERSION = 'bansko-4'
+VERSION = 'bansko-video-1'
 EXPERIENCE = {
+    'journey': {
+        'mode': 'video',  # 'procedural' restores the previous terrain/rider engine.
+        'src': 'experience/media/bansko-journey-v1.mp4',
+        'poster': 'experience/media/bansko-journey-poster.webp',
+        'town_poster': 'experience/media/bansko-town-poster.webp',
+        'fps': 24,
+        # [page progress, fraction of loaded video duration]. Short, deliberate
+        # shelf holds give the rotating gallery and package details room to breathe.
+        'cues': [[0, 0], [.12, .055], [.30, .277], [.55, .32],
+                 [.75, .74], [.88, .995], [1, .995]],
+        # object-position X percentages; source rider stays near the centre.
+        'framing': [[0, 52], [.277, 57], [.61, 50], [.75, 53], [1, 58]],
+    },
     'hero': {
         'headline': 'We film your best run.',
         'subline': 'Snowboard video production in Bansko.',

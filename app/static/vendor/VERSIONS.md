@@ -21,3 +21,5 @@ Latin variable WOFF2, SIL Open Font License 1.1 (licenses beside font files). Re
 Local module import cache key: bansko-2 (three/Lenis versions unchanged).
 
 Motion polish: addon import version queries changed to `?v=bansko-4` alongside the homepage modules so GLTFLoader and BufferGeometryUtils share the same cached Three.js module instance. Library versions and implementation remain unchanged.
+
+Video journey: addon queries now use `?v=bansko-video-1` to keep one Three.js instance across the retained gallery and optional procedural recovery engine. Leading indentation was removed from GLTFLoader.js and BufferGeometryUtils.js to preserve the 900 KB repository runtime-JS budget; imports are still relative. Library versions/logic/licenses are unchanged. No new animation library was added.

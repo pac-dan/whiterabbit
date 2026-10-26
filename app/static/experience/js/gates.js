@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-4';
+import * as T from '../../vendor/three.module.min.js?v=bansko-video-1';
 export function createGates(scene,path,slots,data) {
 const group=new T.Group();scene.add(group);const handles=[];let loading=false;
 const faces=path.gates.map((v,i)=>{
