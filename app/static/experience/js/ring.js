@@ -9,9 +9,9 @@ export function createRing(scene,camera,path,slots,data) {
   for(let i=0;i<data.cards.length;i++) {
     const a=i/data.cards.length*Math.PI*2,card=new T.Group();card.position.set(Math.sin(a)*37,13,Math.cos(a)*37);card.rotation.y=a;
     const face=new T.Mesh(geometry,new T.MeshBasicMaterial({color:'#193248',side:T.DoubleSide}));card.add(face);face.userData.index=i;meshes.push(face);
-    const rim=new T.Mesh(new T.PlaneGeometry(12.65,21.65),new T.MeshBasicMaterial({color:i%2?'#8b5cf6':'#00d4ff',side:T.DoubleSide}));rim.position.z=-.08;card.add(rim);
+    const rim=new T.LineLoop(new T.BufferGeometry().setFromPoints([new T.Vector3(-6.2,-10.7,0),new T.Vector3(6.2,-10.7,0),new T.Vector3(6.2,10.7,0),new T.Vector3(-6.2,10.7,0)]),new T.LineBasicMaterial({color:i%2?'#8b5cf6':'#00d4ff'}));card.add(rim);
     const glow=new T.Mesh(new T.PlaneGeometry(14.4,23.4),new T.MeshBasicMaterial({color:i%2?'#8b5cf6':'#00d4ff',transparent:true,opacity:.055,blending:T.AdditiveBlending,depthWrite:false,side:T.DoubleSide}));glow.position.z=-.12;card.add(glow);
-    const mirror=new T.Mesh(geometry,new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.DoubleSide,uniforms:{map:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D map;varying vec2 v;void main(){vec4 c=texture2D(map,vec2(v.x,1.-v.y));gl_FragColor=vec4(c.rgb, .2*(1.-v.y)*(1.-v.y));}'}));mirror.position.copy(card.position);mirror.position.y=-9;mirror.rotation.copy(card.rotation);reflections.push(mirror);pivot.add(mirror);
+    const mirror=new T.Mesh(geometry,new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.DoubleSide,uniforms:{map:{value:null}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D map;varying vec2 v;void main(){vec4 c=texture2D(map,vec2(v.x,1.-v.y));gl_FragColor=vec4(c.rgb, .28*(1.-v.y)*(1.-v.y));}'}));mirror.position.set(Math.sin(a)*48,.08,Math.cos(a)*48);mirror.rotation.set(-Math.PI/2,0,-a);reflections.push(mirror);pivot.add(mirror);
     cards.push({card,face,rim,handle:null});pivot.add(card);
   }
   async function load() {

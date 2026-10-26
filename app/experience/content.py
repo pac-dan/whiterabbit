@@ -32,7 +32,9 @@ EXPERIENCE = {
     'labels': {'location': 'Bansko, Bulgaria', 'range': 'Pirin mountains',
                'scroll': 'Scroll to drop in', 'drop': 'Leave a little more than tracks.',
                'loading': 'Finding your line', 'placeholder': 'Footage slot',
-               'empty_package': 'Package coming soon', 'empty_review': 'Your story starts on the mountain.'},
+               'empty_package': 'Package coming soon', 'empty_package_note': 'Something worth waiting for.',
+               'empty_review': 'Your story starts on the mountain.',
+               'collection_caption': 'A few seconds. A whole feeling.'},
     'chapters': ['Summit', 'Drop in', 'The ring', 'Packages', 'Portal', 'Bansko at night'],
 }
 

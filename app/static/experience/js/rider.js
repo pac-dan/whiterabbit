@@ -10,7 +10,10 @@ export async function createRider(scene,path,terrain,slots,config) {
   const handle=await slots.model(config,placeholderRider),pivot=new T.Group();pivot.add(handle.object);scene.add(pivot);
   return {pivot,handle,position:pivot.position,update(p) {
     const t=T.MathUtils.clamp((p-.12)/.18*.43,0,.43),v=path.at(t,.25),ahead=path.at(Math.min(1,t+.006));
-    pivot.position.copy(v);pivot.lookAt(ahead.x,v.y,ahead.z);pivot.rotation.z=Math.sin(t*95)*.22;
+    const behind=path.at(Math.max(0,t-.006));
+    const yaw=Math.atan2(ahead.x-v.x,ahead.z-v.z),previous=Math.atan2(v.x-behind.x,v.z-behind.z);
+    const curvature=Math.atan2(Math.sin(yaw-previous),Math.cos(yaw-previous));
+    pivot.position.copy(v);pivot.rotation.set(0,yaw,T.MathUtils.clamp(curvature*2,-.32,.32));
     pivot.visible=p>=.105&&p<.305;handle.update(p);
   }};
 }

@@ -11,6 +11,7 @@ export function createCamera(camera,path,terrain) {
     let i=times.findIndex((t,index)=>index<times.length-1&&p>=t&&p<=times[index+1]);if(i<0)i=times.length-2;
     const u=(i+(p-times[i])/(times[i+1]-times[i]))/(times.length-1);
     const pos=positionCurve.getPoint(T.MathUtils.clamp(u,0,1));
+    if(camera.aspect<.8){const pull=T.MathUtils.smoothstep(p,.27,.32)*(1-T.MathUtils.smoothstep(p,.53,.57));pos.z+=70*pull;pos.y+=12*pull;}
     pos.y=Math.max(pos.y,terrain.height(pos.x,pos.z)+9);
     camera.position.copy(pos);camera.lookAt(targetCurve.getPoint(T.MathUtils.clamp(u,0,1)));
   }};

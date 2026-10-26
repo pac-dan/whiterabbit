@@ -1,7 +1,7 @@
 import * as T from '../../vendor/three.module.min.js?v=bansko-1';
 // Each returned handle owns its resources, including its fallback texture.
 export function createSlots(url,loaded=()=>{}) {
-  const handles=new Set(),loader=new T.TextureLoader();
+  const handles=new Set(),loader=new T.TextureLoader();let disposed=false;
   async function image(path) {const t=await loader.loadAsync(url(path));t.colorSpace=T.SRGBColorSpace;t.anisotropy=2;return t;}
   async function load(slot={},placeholder) {
     let texture,video=null,isPlaceholder=true,kind='image';
@@ -13,6 +13,7 @@ export function createSlots(url,loaded=()=>{}) {
       } else if(slot.src) {texture=await image(slot.src);isPlaceholder=false;}
     } catch {if(video){video.pause();video.removeAttribute('src');video.load();video=null;}}
     if(!texture) texture=await image(placeholder);
+    if(disposed){texture.dispose();if(video){video.pause();video.removeAttribute('src');video.load();}throw Error('Slot loader disposed');}
     loaded();
     let active=false;
     const handle={texture,video,isPlaceholder,kind,activate(show){
@@ -29,7 +30,7 @@ export function createSlots(url,loaded=()=>{}) {
     }catch{/* A broken replacement always resolves to the named placeholder. */}
     if(!object)object=factory();
     const handle={object,isPlaceholder,kind:'model',update(p){mixer?.setTime(p*30);},dispose(){mixer?.stopAllAction();mixer?.uncacheRoot(object);object.traverse(o=>{o.geometry?.dispose();if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{Object.values(m).forEach(v=>{if(v?.isTexture)v.dispose();});m.dispose();});}});object.removeFromParent();handles.delete(handle);}};
-    handles.add(handle);return handle;
+    if(disposed){handle.dispose();throw Error('Slot loader disposed');}handles.add(handle);return handle;
   }
-  return {load,model,dispose(){[...handles].forEach(h=>h.dispose());}};
+  return {load,model,pause(){handles.forEach(h=>h.activate?.(false));},dispose(){disposed=true;[...handles].forEach(h=>h.dispose());}};
 }

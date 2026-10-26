@@ -42,22 +42,26 @@ async function boot() {
     document.body.classList.add('exp-running');
     scroll=createScroll(document.getElementById('exp-track'));overlay=createOverlay(data,scroll,ring,terrain,engine.camera);
     ring.setQuality(quality.tier);snow.setQuality();
-    runtime={dispose};
+    const pauseMedia=()=>{if(document.hidden)slots.pause();};document.addEventListener('visibilitychange',pauseMedia);
+    let footerPaused=false;
+    const footerScroll=()=>{const end=document.querySelector('footer').getBoundingClientRect().top<innerHeight-80;document.body.classList.toggle('exp-ended',end);if(end!==footerPaused){footerPaused=end;engine.setPaused(end);if(end)slots.pause();}};
+    addEventListener('scroll',footerScroll,{passive:true});
+    runtime={dispose(){document.removeEventListener('visibilitychange',pauseMedia);removeEventListener('scroll',footerScroll);dispose();}};
     engine.start((time,dt)=>{
       scroll.update(time);const p=scroll.progress;
-      [camera,sky,rider,ring,gates,portal,town,snow].forEach(m=>m.update(p,dt));overlay.update(p);
+      [camera,terrain,sky,rider,ring,gates,portal,town,snow].forEach(m=>m.update(p,dt));overlay.update(p);
       if(quality.sample(dt)){engine.resize();terrain.setQuality();ring.setQuality(quality.tier);snow.setQuality();}
       if(p<.55&&!beatsLoading){beatsLoading=true;Promise.all(data.beats.map((b,i)=>slots.load(b.media,`experience/placeholders/beat-${i+1}.webp`))).then(h=>{beatHandles=h;h.forEach((v,i)=>{beatPanels[i].material.map=v.texture;beatPanels[i].material.color.set('#ffffff');beatPanels[i].material.needsUpdate=true;});}).catch(()=>{});}
       const beat=Math.min(2,Math.floor(scroll.chapterProgress(1)*3));
       beatPanels.forEach((m,i)=>{m.visible=p>.12&&p<.3&&beat===i;m.position.copy(rider.position).add(new T.Vector3(13,10,-5));m.lookAt(engine.camera.position);beatHandles[i]?.activate(m.visible);});
-      if(data.hero.background_video.src&&!heroLoading&&p<.3){heroLoading=true;slots.load(data.hero.background_video,'experience/placeholders/portal.webp').then(h=>{heroHandle=h;if(h.video){h.video.className='exp-hero-video';document.getElementById('exp-stage').append(h.video);}}).catch(()=>{});}
+      if(data.hero.background_video.src&&!heroLoading&&p<.3){heroLoading=true;slots.load(data.hero.background_video,'experience/placeholders/portal.webp').then(h=>{heroHandle=h;if(h.video){h.video.className='exp-hero-video';if(data.hero.background_video.poster)h.video.poster=url(data.hero.background_video.poster);document.getElementById('exp-stage').append(h.video);}}).catch(()=>{});}
       if(heroHandle){heroHandle.activate(p<.12);if(heroHandle.video)heroHandle.video.hidden=p>=.12;}
       state={mode:'3d',tier:quality.tier,fps:quality.fps,progress:p,chapter:chapterAt(p),drawCalls:engine.renderer.info.render.calls,frames:engine.frames,ringIndex:ring.active,ringAngle:ring.group.children[2]?.rotation.y??0,slots:{rider:!rider.handle.isPlaceholder,ring:ring.cards.filter(c=>c.handle&&!c.handle.isPlaceholder).length,beats:beatHandles.filter(h=>!h.isPlaceholder).length},firstFrameMs:state.firstFrameMs??performance.now()};debug.update();
     });
     clearTimeout(timer);loader.hidden=true;booting=false;
   } catch(error){clearTimeout(timer);dispose();fallback(error);}
 }
-document.getElementById('play-descent').addEventListener('click',boot);
+document.getElementById('play-descent').addEventListener('click',()=>{scrollTo({top:0,behavior:'instant'});boot();});
 document.getElementById('static-toggle').addEventListener('click',()=>{fallback();scrollTo({top:0,behavior:'instant'});});
 document.querySelectorAll('[data-dismiss-flash]').forEach(b=>b.addEventListener('click',()=>b.closest('#flash-messages > div')?.remove()));
 const motion=matchMedia('(prefers-reduced-motion: reduce)');motion.addEventListener('change',e=>{if(e.matches)fallback();});

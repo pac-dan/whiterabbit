@@ -37,10 +37,17 @@ export async function createTerrain(scene, quality, url, loaded) {
   }
   const mesh=new T.Mesh(geometry(),material);scene.add(mesh);
   const horizon=new T.Group();scene.add(horizon);
-  for(let i=0;i<18;i++) {
-    const a=i/18*Math.PI*2;
-    const ridge=new T.Mesh(new T.ConeGeometry(220+(i%4)*45,130+(i%5)*45,5),new T.MeshStandardMaterial({color:'#26394f',roughness:1}));
-    ridge.position.set(Math.sin(a)*1000,10,Math.cos(a)*1030);horizon.add(ridge);
+  for(let layer=0;layer<2;layer++) {
+    const vertices=[],radius=1000+layer*220;
+    const peak=i=>70+layer*35+Math.sin(i*1.73)*36+Math.sin(i*.47)*60+Math.cos(i*2.4)*22;
+    for(let i=0;i<100;i++){
+      const a=i/100*Math.PI*2,b=(i+1)/100*Math.PI*2;
+      const x=Math.sin(a)*radius,z=Math.cos(a)*radius,xx=Math.sin(b)*radius,zz=Math.cos(b)*radius;
+      vertices.push(x,-90,z,xx,-90,zz,xx,peak(i+1),zz,x,-90,z,xx,peak(i+1),zz,x,peak(i),z);
+    }
+    const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geometry.computeVertexNormals();
+    horizon.add(new T.Mesh(geometry,new T.MeshBasicMaterial({color:layer?'#23334a':'#1d2c42',side:T.DoubleSide})));
   }
-  return {meta,width,depth,height,geo,mesh,update(){},setQuality(){const old=mesh.geometry;mesh.geometry=geometry();old.dispose();}};
+  const white=new T.Color('#ffffff'),nightColor=new T.Color('#26364d');
+  return {meta,width,depth,height,geo,mesh,update(p){material.color.lerpColors(white,nightColor,T.MathUtils.smoothstep(p,.76,.94));},setQuality(){const old=mesh.geometry;mesh.geometry=geometry();old.dispose();}};
 }

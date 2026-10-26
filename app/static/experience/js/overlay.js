@@ -5,7 +5,7 @@ export function createOverlay(data,scroll,ring,terrain,camera) {
   let last=-1;
   return {update(p) {
     const chapter=chapterAt(p),local=scroll.chapterProgress(chapter);
-    sections.forEach((s,i)=>{const alpha=i===chapter?Math.min(1,local*12+.18,(1-local)*12+.12):0;s.style.setProperty('--alpha',alpha);s.classList.toggle('is-active',i===chapter);s.inert=i!==chapter;});
+    sections.forEach((s,i)=>{const alpha=i===chapter?Math.min(1,i===0||i===5?1:local*12+.18,i===5?1:(1-local)*12+.12):0;s.style.setProperty('--alpha',alpha);s.classList.toggle('is-active',i===chapter);s.inert=i!==chapter;});
     rail.forEach((b,i)=>b.setAttribute('aria-current',String(i===chapter)));
     document.querySelectorAll('[data-beat]').forEach((b,i)=>b.classList.toggle('is-active',chapter===1&&i===Math.min(2,Math.floor(local*3))));
     document.querySelectorAll('[data-package]').forEach((b,i)=>{const show=chapter===3&&i===Math.min(2,Math.floor(local*3));b.classList.toggle('is-active',show);b.inert=!show;});
@@ -13,6 +13,5 @@ export function createOverlay(data,scroll,ring,terrain,camera) {
     document.getElementById('chapter-status').textContent=data.chapters[chapter].toUpperCase();
     document.getElementById('altitude-status').textContent=`${Math.round(camera.position.y/.145+terrain.meta.minM).toLocaleString('en')} M`;
     document.getElementById('mainNav').classList.toggle('is-scrolled',p>.015);
-    document.body.classList.toggle('exp-ended',scrollY>scroll.range+innerHeight*.65);
   },reset(){sections.forEach(s=>{s.inert=false;s.style.removeProperty('--alpha');});document.querySelectorAll('[data-package]').forEach(s=>s.inert=false);}};
 }

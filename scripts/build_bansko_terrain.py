@@ -13,8 +13,10 @@ from PIL import Image, ImageFilter
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'app/static/experience/terrain'
 BBOX = [23.38, 41.75, 23.51, 41.85]
-ATTRIBUTION = ('Terrain: Mapzen terrain tiles, containing Copernicus data (2015), '
-               'EU-DEM layers; data sources: https://github.com/tilezen/joerd/blob/master/docs/attribution.md')
+ATTRIBUTION = ('Terrain: Mapzen / AWS Terrain Tiles. Produced using Copernicus data and '
+               'information funded by the European Union - EU-DEM layers. Global SRTM '
+               'and GMTED2010 courtesy of the U.S. Geological Survey. Elevations resampled. '
+               'https://github.com/tilezen/joerd/blob/master/docs/attribution.md')
 
 def tile(lon, lat, z=12):
     n = 2 ** z
