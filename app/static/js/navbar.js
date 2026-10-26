@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    document.querySelectorAll('[data-dismiss-flash]').forEach(button => button.addEventListener('click', () => button.closest('#flash-messages > div')?.remove()));
     // Auto-hide flash messages
     setTimeout(function() {
         const flashMessages = document.getElementById('flash-messages');

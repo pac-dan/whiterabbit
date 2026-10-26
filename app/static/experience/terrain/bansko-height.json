@@ -1,0 +1,16 @@
+{
+  "width": 512,
+  "height": 512,
+  "minM": 861,
+  "maxM": 2891,
+  "bbox": [
+    23.38,
+    41.75,
+    23.51,
+    41.85
+  ],
+  "metresPerPixelX": 21.111997019590454,
+  "metresPerPixelY": 21.78473581213338,
+  "source": "AWS Open Data Terrain Tiles / Terrarium, zoom 12",
+  "attribution": "Terrain: Mapzen terrain tiles, containing Copernicus data (2015), EU-DEM layers; data sources: https://github.com/tilezen/joerd/blob/master/docs/attribution.md"
+}

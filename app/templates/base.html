@@ -26,7 +26,7 @@
     <meta property="twitter:image" content="{% block twitter_image %}{{ url_for('static', filename='images/og-image.jpg', _external=True) }}{% endblock %}">
     
     <!-- JSON-LD Structured Data for Local Business -->
-    <script type="application/ld+json">
+    <script type="application/ld+json"{% if csp_nonce is defined %} nonce="{{ csp_nonce() }}"{% endif %}>
     {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
@@ -66,7 +66,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🏂%3C/text%3E%3C/svg%3E">
 
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    {% if not experience %}<script src="https://cdn.tailwindcss.com"></script>{% endif %}
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,15 +74,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% if not experience %}<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">{% endif %}
 
     <!-- Custom CSS - MUST load after Tailwind -->
     <link rel="stylesheet" href="/static/css/style.css?v=enhanced12345">
 
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body{% if experience %} class="experience-page"{% endif %}>
 
+    {% block navigation %}
     <!-- Navigation - Floating Island Style -->
     <nav class="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-5xl pt-3 transition-transform duration-300" id="mainNav">
         <div class="navbar-island">
@@ -147,6 +148,7 @@
         </div>
     </nav>
 
+    {% endblock %}
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -158,7 +160,7 @@
                                 <i class="fas {% if category == 'success' %}fa-check-circle text-green-500{% elif category == 'danger' or category == 'error' %}fa-exclamation-circle text-red-500{% elif category == 'warning' %}fa-exclamation-triangle text-yellow-500{% else %}fa-info-circle text-blue-500{% endif %} mr-3"></i>
                                 <p class="text-[#0F172A]">{{ message }}</p>
                             </div>
-                            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-gray-400 hover:text-gray-600">
+                            <button data-dismiss-flash class="ml-4 text-gray-400 hover:text-gray-600">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -232,6 +234,7 @@
         </div>
     </footer>
 
+    {% if not experience %}
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -240,6 +243,7 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
 
+    {% endif %}
     <!-- Page-specific Scripts -->
     {% block extra_js %}{% endblock %}
 

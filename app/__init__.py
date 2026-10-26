@@ -47,6 +47,13 @@ def create_app(config_name=None):
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+    @app.after_request
+    def cache_experience_assets(response):
+        from flask import request
+        if request.path.startswith(('/static/vendor/', '/static/experience/')) and response.status_code == 200:
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        return response
+
     # Initialize extensions with app
     logger.info("[3/10] Initializing database...")
     db.init_app(app)

@@ -22,13 +22,19 @@ def index():
     featured_videos = Video.get_featured_videos(limit=6)
     featured_testimonials = Testimonial.get_featured_testimonials(limit=6)
     average_rating = Testimonial.get_average_rating()
+    from app.experience.content import build_experience, VERSION
+    experience = build_experience(featured_videos, featured_packages,
+                                  url_for('main.gallery'),
+                                  lambda ident: url_for('main.package_detail', package_id=ident))
 
     return render_template(
         'index.html',
         packages=featured_packages,
         videos=featured_videos,
         testimonials=featured_testimonials,
-        average_rating=average_rating
+        average_rating=average_rating,
+        experience=experience,
+        experience_version=VERSION
     )
 
 

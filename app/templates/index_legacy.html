@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+
+{% block title %}Momentum Clips - Professional Snowboard Video Production{% endblock %}
+
+{% block content %}
+
+<!-- EPIC HERO SECTION -->
+<section class="relative text-white overflow-hidden min-h-screen sm:h-screen flex items-center justify-center" style="background: url('{{ url_for('static', filename='images/hero_2.jpg') }}') center/cover no-repeat;">
+    <!-- Darker gradient at bottom for text readability -->
+    <div class="absolute inset-0 bg-gradient-to-b from-[#0F172A]/20 via-[#0F172A]/30 to-[#0F172A]/60 z-0"></div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full text-center py-20 sm:py-0">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 sm:mb-8 leading-tight hero-title heading" style="text-shadow: 0 4px 30px rgba(0, 0, 0, 0.9);">
+                PROFESSIONAL SNOWBOARD<br class="hidden sm:block">
+                <span class="cyan-accent glow-text block mt-2" style="color: #00D4FF;">VIDEO PRODUCTION</span>
+            </h1>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
+                <a href="{{ url_for('main.packages') }}" class="btn-primary btn-book-now text-center inline-block text-sm sm:text-base">
+                    BOOK YOUR SESSION
+                </a>
+                <a href="{{ url_for('main.gallery') }}" class="btn-secondary text-center inline-block text-sm sm:text-base">
+                    WATCH OUR WORK
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Promotional Marquee -->
+<section class="py-4 sm:py-6 overflow-hidden" style="background: linear-gradient(135deg, #F0FDFA 0%, #F8FAFC 50%, #F5F3FF 100%);">
+    <div class="trust-marquee-container">
+        <div class="trust-marquee">
+            <!-- First set of badges -->
+            <div class="trust-badge">
+                <i class="fab fa-youtube text-[#FF0000]"></i>
+                <span>Follow on YouTube</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fab fa-instagram text-[#E4405F]"></i>
+                <span>@momentumclipsbansko</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fab fa-tiktok text-[#000000]"></i>
+                <span>TikTok Videos</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-star text-[#F59E0B]"></i>
+                <span>5-Star Rated</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-video text-[#8B5CF6]"></i>
+                <span>Professional Quality</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-bolt text-[#00D4FF]"></i>
+                <span>Fast Delivery</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-mountain text-[#10B981]"></i>
+                <span>Bansko Bulgaria</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-snowboarding text-[#00D4FF]"></i>
+                <span>Snowboard Experts</span>
+            </div>
+            <!-- Duplicate for seamless loop -->
+            <div class="trust-badge">
+                <i class="fab fa-youtube text-[#FF0000]"></i>
+                <span>Follow on YouTube</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fab fa-instagram text-[#E4405F]"></i>
+                <span>@momentumclipsbansko</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fab fa-tiktok text-[#000000]"></i>
+                <span>TikTok Videos</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-star text-[#F59E0B]"></i>
+                <span>5-Star Rated</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-video text-[#8B5CF6]"></i>
+                <span>Professional Quality</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-bolt text-[#00D4FF]"></i>
+                <span>Fast Delivery</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-mountain text-[#10B981]"></i>
+                <span>Bansko Bulgaria</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-snowboarding text-[#00D4FF]"></i>
+                <span>Snowboard Experts</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-12 sm:py-16" style="background-color: #F8FAFC;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold heading mb-3 sm:mb-4" style="color: #0F172A;">WHY CHOOSE MOMENTUM CLIPS?</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-600 font-medium px-4">PROFESSIONAL QUALITY, <span class="cyan-accent">DELIVERED FAST</span></p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            <div class="text-center glass-card p-5 sm:p-6 scroll-fade-in hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer" data-delay="0" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px); border: 2px solid transparent;" onmouseover="this.style.borderColor='rgba(0, 212, 255, 0.3)'" onmouseout="this.style.borderColor='transparent'">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300" style="background: linear-gradient(135deg, #00D4FF, #8B5CF6); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);">
+                    <i class="fas fa-video text-white text-2xl sm:text-3xl group-hover:animate-pulse"></i>
+                </div>
+                <h3 class="text-lg sm:text-xl font-bold mb-2 heading group-hover:text-[#00D4FF] transition-colors" style="color: #0F172A;">PROFESSIONAL FILMING</h3>
+                <p class="text-sm sm:text-base text-gray-600 font-medium">4K cameras, drones, and GoPros for every angle</p>
+            </div>
+
+            <div class="text-center glass-card p-5 sm:p-6 scroll-fade-in hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer" data-delay="100" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px); border: 2px solid transparent;" onmouseover="this.style.borderColor='rgba(139, 92, 246, 0.3)'" onmouseout="this.style.borderColor='transparent'">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300" style="background: linear-gradient(135deg, #8B5CF6, #00D4FF); box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);">
+                    <i class="fas fa-cut text-white text-2xl sm:text-3xl group-hover:animate-pulse"></i>
+                </div>
+                <h3 class="text-lg sm:text-xl font-bold mb-2 heading group-hover:text-[#8B5CF6] transition-colors" style="color: #0F172A;">EXPERT EDITING</h3>
+                <p class="text-sm sm:text-base text-gray-600 font-medium">Cinematic edits with music and effects</p>
+            </div>
+
+            <div class="text-center glass-card p-5 sm:p-6 scroll-fade-in hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer" data-delay="200" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px); border: 2px solid transparent;" onmouseover="this.style.borderColor='rgba(139, 92, 246, 0.3)'" onmouseout="this.style.borderColor='transparent'">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300" style="background: linear-gradient(135deg, #8B5CF6, #00D4FF); box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);">
+                    <i class="fas fa-robot text-white text-2xl sm:text-3xl group-hover:animate-pulse"></i>
+                </div>
+                <h3 class="text-lg sm:text-xl font-bold mb-2 heading group-hover:text-[#8B5CF6] transition-colors" style="color: #0F172A;">AI-POWERED</h3>
+                <p class="text-sm sm:text-base text-gray-600 font-medium">Claude AI assistant for instant support</p>
+            </div>
+
+            <div class="text-center glass-card p-5 sm:p-6 scroll-fade-in hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer" data-delay="300" style="background: rgba(0, 212, 255, 0.05); backdrop-filter: blur(12px); border: 2px solid transparent;" onmouseover="this.style.borderColor='rgba(0, 212, 255, 0.3)'" onmouseout="this.style.borderColor='transparent'">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300" style="background: linear-gradient(135deg, #00D4FF, #8B5CF6); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);">
+                    <i class="fas fa-bolt text-white text-2xl sm:text-3xl group-hover:animate-pulse"></i>
+                </div>
+                <h3 class="text-lg sm:text-xl font-bold mb-2 heading group-hover:text-[#00D4FF] transition-colors" style="color: #0F172A;">FAST DELIVERY</h3>
+                <p class="text-sm sm:text-base text-gray-600 font-medium">Videos delivered within 48-72 hours</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Book Your Session - Package Selection -->
+<section class="py-12 sm:py-16 hero-gradient" id="book-session">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 heading">BOOK YOUR SESSION</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-300 font-medium px-4">Choose your package to get started</p>
+        </div>
+        
+        <!-- Package Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Basic Session -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:border-[#00D4FF]/50 transition-all duration-300 hover:transform hover:scale-105">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#00D4FF]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-snowflake text-[#00D4FF] text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Basic Session</h3>
+                    <p class="text-gray-400 text-sm mb-4">2 hours of filming</p>
+                    <p class="text-3xl font-bold text-[#00D4FF] mb-4">€150</p>
+                    <ul class="text-sm text-gray-300 space-y-2 mb-6 text-left">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Professional filming</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>1 edited highlight video</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>48hr delivery</li>
+                    </ul>
+                    <a href="{{ url_for('payment.checkout', package='basic') }}" 
+                       class="block w-full bg-[#00D4FF] text-white py-3 rounded-xl font-bold hover:bg-[#00B8E6] transition">
+                        Book Basic
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Pro Session - Featured -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border-2 border-[#8B5CF6] relative hover:transform hover:scale-105 transition-all duration-300">
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-[#8B5CF6] text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</span>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#8B5CF6]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-fire text-[#8B5CF6] text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Pro Session</h3>
+                    <p class="text-gray-400 text-sm mb-4">2.5 hours of filming</p>
+                    <p class="text-3xl font-bold text-[#8B5CF6] mb-4">€250</p>
+                    <ul class="text-sm text-gray-300 space-y-2 mb-6 text-left">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Extended filming time</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>2 edited videos</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>24hr priority delivery</li>
+                    </ul>
+                    <a href="{{ url_for('payment.checkout', package='pro') }}" 
+                       class="block w-full bg-[#8B5CF6] text-white py-3 rounded-xl font-bold hover:bg-[#7C3AED] transition">
+                        Book Pro
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Expert Session -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:border-[#F59E0B]/50 transition-all duration-300 hover:transform hover:scale-105">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#F59E0B]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-crown text-[#F59E0B] text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Expert Session</h3>
+                    <p class="text-gray-400 text-sm mb-4">3 hours of filming</p>
+                    <p class="text-3xl font-bold text-[#F59E0B] mb-4">€350</p>
+                    <ul class="text-sm text-gray-300 space-y-2 mb-6 text-left">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Full day flexibility</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>3 edited videos + raw clips</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Same day delivery</li>
+                    </ul>
+                    <a href="{{ url_for('payment.checkout', package='expert') }}" 
+                       class="block w-full bg-[#F59E0B] text-white py-3 rounded-xl font-bold hover:bg-[#D97706] transition">
+                        Book Expert
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mb-8">
+            <p class="text-sm text-gray-400">
+                <i class="fas fa-shield-alt text-[#00D4FF] mr-2"></i>
+                Secure booking · Instant confirmation · Free rescheduling
+            </p>
+        </div>
+        
+        <!-- Payment Trust Marquee -->
+        <div class="trust-marquee-container bg-white/5 rounded-2xl py-4 border border-white/10">
+            <div class="trust-marquee">
+                <!-- First set of payment badges -->
+                <div class="trust-badge text-white">
+                    <i class="fas fa-lock text-[#00D4FF]"></i>
+                    <span>Secure Payments</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-stripe text-[#635BFF]"></i>
+                    <span>Stripe Certified</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-apple-pay text-white"></i>
+                    <span>Apple Pay</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-google-pay text-white"></i>
+                    <span>Google Pay</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fas fa-shield-alt text-green-400"></i>
+                    <span>SSL Encrypted</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-cc-visa text-[#1A1F71]"></i>
+                    <span>Visa</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-cc-mastercard text-[#EB001B]"></i>
+                    <span>Mastercard</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fas fa-credit-card text-[#00D4FF]"></i>
+                    <span>All Cards Accepted</span>
+                </div>
+                <!-- Duplicate for seamless loop -->
+                <div class="trust-badge text-white">
+                    <i class="fas fa-lock text-[#00D4FF]"></i>
+                    <span>Secure Payments</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-stripe text-[#635BFF]"></i>
+                    <span>Stripe Certified</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-apple-pay text-white"></i>
+                    <span>Apple Pay</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-google-pay text-white"></i>
+                    <span>Google Pay</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fas fa-shield-alt text-green-400"></i>
+                    <span>SSL Encrypted</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-cc-visa text-[#1A1F71]"></i>
+                    <span>Visa</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fab fa-cc-mastercard text-[#EB001B]"></i>
+                    <span>Mastercard</span>
+                </div>
+                <div class="trust-badge text-white">
+                    <i class="fas fa-credit-card text-[#00D4FF]"></i>
+                    <span>All Cards Accepted</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Video Gallery Preview with Carousel -->
+<section class="py-12 sm:py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0F172A] mb-3 sm:mb-4 heading">FEATURED VIDEOS</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-600 font-medium px-4">Check out our best work</p>
+        </div>
+
+        <!-- Swiper Carousel -->
+        <div class="relative">
+            <div class="swiper videoSwiper">
+                <div class="swiper-wrapper">
+            {% for video in videos %}
+                    <div class="swiper-slide">
+                        <div class="group cursor-pointer" data-video-id="{{ video.id }}" onclick="window.location.href='{{ url_for('main.gallery') }}'">
+                            <div class="relative overflow-hidden rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300">
+                                <img src="https://img.youtube.com/vi/{{ video.youtube_id }}/maxresdefault.jpg" alt="{{ video.title }}" class="w-full h-64 sm:h-72 lg:h-80 object-cover group-hover:scale-110 transition-transform duration-500">
+                                <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <i class="fas fa-play-circle text-white text-6xl sm:text-7xl lg:text-8xl pulse-chat"></i>
+                                </div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 sm:p-6">
+                                    <div class="flex items-center space-x-2 text-xs sm:text-sm text-white mb-2">
+                                        <span class="bg-[#00D4FF] px-2 py-1 rounded font-semibold">{{ video.location_tag }}</span>
+                                        <span class="bg-green-600 px-2 py-1 rounded font-semibold">{{ video.rider_level }}</span>
+                                    </div>
+                                    <h3 class="text-white font-bold text-lg sm:text-xl">{{ video.title }}</h3>
+                                    {% if video.description %}
+                                    <p class="text-gray-300 text-sm mt-1 line-clamp-2">{{ video.description }}</p>
+                                    {% endif %}
+                                </div>
+                    </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Navigation buttons -->
+                <div class="swiper-button-next !text-[#00D4FF] !w-12 !h-12 !bg-white !rounded-full !shadow-xl hover:!bg-[#00D4FF] hover:!text-white !transition-colors"></div>
+                <div class="swiper-button-prev !text-[#00D4FF] !w-12 !h-12 !bg-white !rounded-full !shadow-xl hover:!bg-[#00D4FF] hover:!text-white !transition-colors"></div>
+                
+                <!-- Pagination -->
+                <div class="swiper-pagination !bottom-0"></div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8 sm:mt-12">
+            <a href="{{ url_for('main.gallery') }}" class="inline-block bg-[#00D4FF] text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#00B8E6] hover:shadow-2xl hover:scale-105 transition-all duration-300 transform">
+                View Full Gallery <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<!-- FAQ Section -->
+<section class="py-12 sm:py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold heading mb-3 sm:mb-4" style="color: #0F172A;">FREQUENTLY ASKED QUESTIONS</h2>
+            <p class="text-base sm:text-lg lg:text-xl text-gray-600 font-medium px-4">Get quick answers to common questions</p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- FAQ 1 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">How long does it take to get my video?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>Your professionally edited video will be delivered within 48-72 hours after your session. We work quickly without compromising quality!</p>
+                </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">What's included in each package?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>Each package includes professional filming with 4K cameras and GoPros, professional editing, music, effects, and delivery in multiple formats perfect for social media. Higher tiers include drone footage and more edited videos.</p>
+                </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">Do I need to bring my own camera equipment?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>No! We provide all professional filming equipment including 4K cameras, GoPros, stabilizers, and drones (for select packages). You just bring your snowboard and enthusiasm!</p>
+                </div>
+            </div>
+
+            <!-- FAQ 4 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">Can I choose the music for my video?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>Absolutely! You can either choose from our extensive library of licensed music, or request specific tracks. We'll work with you to match the perfect soundtrack to your riding style.</p>
+                </div>
+            </div>
+
+            <!-- FAQ 5 -->
+            <div class="bg-gray-50 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#00D4FF]/30 transition">
+                <button onclick="toggleFAQ(this)" class="w-full text-left px-6 py-4 flex items-center justify-between focus:outline-none">
+                    <span class="font-bold text-[#0F172A] text-lg">What if the weather is bad on my booking day?</span>
+                    <i class="fas fa-chevron-down text-[#00D4FF] transition-transform duration-300"></i>
+                </button>
+                <div class="faq-content px-6 pb-4 text-gray-700 hidden">
+                    <p>We offer free rescheduling for weather-related cancellations! Safety comes first, and we want you to have the best possible conditions for an amazing video.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <a href="{{ url_for('main.faq') }}" class="text-[#00D4FF] hover:text-[#00B8E6] font-semibold text-lg">
+                View All FAQs <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+<script src="{{ url_for('static', filename='js/homepage.js') }}"></script>
+{% endblock %}
