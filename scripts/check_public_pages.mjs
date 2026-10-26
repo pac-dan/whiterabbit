@@ -5,7 +5,7 @@ import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import assert from 'node:assert/strict';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const evidence=path.join(root,'.runs/2026-10-26-alpine-pages/evidence');
+const evidence=process.env.PUBLIC_EVIDENCE??path.join(root,'.runs/2026-10-26-alpine-pages/evidence');
 const shots=path.join(evidence,'shots');await fs.mkdir(shots,{recursive:true});
 let pw;
 try {pw=await import('playwright');} catch {

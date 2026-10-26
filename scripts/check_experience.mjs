@@ -5,7 +5,7 @@ import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import assert from 'node:assert/strict';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const run=path.join(root,'.runs/2026-10-26-bansko-experience');
+const run=process.env.MOTION_RUN??path.join(root,'.runs/2026-10-26-bansko-experience');
 const evidence=path.join(run,'evidence'),shots=path.join(evidence,'shots'),fixtures=path.join(evidence,'fixtures');
 await fs.mkdir(shots,{recursive:true});await fs.mkdir(fixtures,{recursive:true});
 let pw;
@@ -80,7 +80,7 @@ try{
   const noGL=await pw.chromium.launch({headless:true,args:['--disable-webgl']});
   for(const size of sizes){const p=await noGL.newPage({viewport:size});await open(p);assert.equal((await p.evaluate(()=>window.__experience)).mode,'static');for(let i=0;i<6;i++)assert.ok(await p.locator(`[data-chapter="${i}"]`).isVisible());await p.screenshot({path:path.join(shots,`${size.width}x${size.height}-no-webgl.png`),fullPage:true});report.fallback.push({size,noWebGL:true,allSixSections:true});await p.close();}await noGL.close();
   for(const size of sizes){const {c,p}=await context(size);await open(p,'?tier=1&debug=1');assert.equal((await p.evaluate(()=>window.__experience)).tier,1);
-   const result=await p.evaluate(async()=>{const {createQuality}=await import('/static/experience/js/quality.js?v=bansko-2');history.replaceState({},'','?tier=3');const q=createQuality();let stepped=false;for(let i=0;i<65;i++)stepped=q.sample(.04)||stepped;return {start:3,after:q.tier,stepped};});assert.ok(result.stepped&&result.after===2);report.quality.push({size,forced:1,watchdog:result});
+   const result=await p.evaluate(async()=>{const {createQuality}=await import('/static/experience/js/quality.js?v=bansko-3');history.replaceState({},'','?tier=3');const q=createQuality();let stepped=false;for(let i=0;i<65;i++)stepped=q.sample(.04)||stepped;return {start:3,after:q.tier,stepped};});assert.ok(result.stepped&&result.after===2);report.quality.push({size,forced:1,watchdog:result});
    await p.screenshot({path:path.join(shots,`${size.width}x${size.height}-tier1.png`)});await c.close();}
   await supplementProof();
   await slotProof();
@@ -96,10 +96,11 @@ async function slotProof(){
  await p.route('**/__fixture/GLTFExporter.js',r=>r.fulfill({path:path.join(root,'scripts/fixtures/GLTFExporter.js'),contentType:'text/javascript'}));
  await open(p);
  const generated=await p.evaluate(async()=>{
-  const T=await import('/static/vendor/three.module.min.js?v=bansko-2');const {placeholderRider}=await import('/static/experience/js/rider.js?v=bansko-2');const {GLTFExporter}=await import('/__fixture/GLTFExporter.js');
+  const T=await import('/static/vendor/three.module.min.js?v=bansko-3');const {placeholderRider}=await import('/static/experience/js/rider.js?v=bansko-3');const {GLTFExporter}=await import('/__fixture/GLTFExporter.js');
   const rider=placeholderRider();rider.name='proof-rider';rider.children[0].name='proof-body';rider.children[0].material.color.set('#ffb86b');
   const clip=new T.AnimationClip('Ride',1,[new T.QuaternionKeyframeTrack('proof-body.quaternion',[0,1],[0,0,0,1,0,0,.1,.995])]);
-  const model=await new GLTFExporter().parseAsync(rider,{binary:true,animations:[clip]});
+  const pose=(name,z)=>new T.AnimationClip(name,1,[new T.QuaternionKeyframeTrack('proof-body.quaternion',[0,1],[0,0,Math.sin(z/2),Math.cos(z/2),0,0,Math.sin(z/2),Math.cos(z/2)])]);
+  const model=await new GLTFExporter().parseAsync(rider,{binary:true,animations:[clip,pose('Neutral',0),pose('Toe',.45),pose('Heel',-.45)]});
   const canvas=document.createElement('canvas');canvas.width=180;canvas.height=320;const ctx=canvas.getContext('2d');ctx.fillStyle='#00d4ff';ctx.fillRect(0,0,180,320);ctx.fillStyle='#061222';ctx.font='bold 24px sans-serif';ctx.fillText('REAL IMAGE',15,160);
   const png=await new Promise(r=>canvas.toBlob(r,'image/png'));
   const recorder=new MediaRecorder(canvas.captureStream(12),{mimeType:'video/webm;codecs=vp8'}),chunks=[];
@@ -117,13 +118,16 @@ async function slotProof(){
  await gotoProgress(p,.3);await until(p,()=>window.__experience.slots.ring===2);await p.screenshot({path:path.join(shots,'slot-image.png')});
  await gotoProgress(p,.3+.25/11);await p.screenshot({path:path.join(shots,'slot-video.png')});
  const details=await p.evaluate(async()=>{
-  const {createSlots}=await import('/static/experience/js/slots.js?v=bansko-2');const {placeholderRider}=await import('/static/experience/js/rider.js?v=bansko-2');const slots=createSlots(p=>p.startsWith('/')?p:'/static/'+p),placeholder='experience/placeholders/ring-01.webp';
+  const {createSlots}=await import('/static/experience/js/slots.js?v=bansko-3');const {placeholderRider}=await import('/static/experience/js/rider.js?v=bansko-3');const slots=createSlots(p=>p.startsWith('/')?p:'/static/'+p),placeholder='experience/placeholders/ring-01.webp';
   const image=await slots.load({type:'image',src:'/__fixture/image.png'},placeholder);const video=await slots.load({type:'video',src:'/__fixture/video.webm'},placeholder);video.activate(true);await new Promise(r=>setTimeout(r,200));const playing=!video.video.paused;video.activate(false);
   const model=await slots.model({src:'/__fixture/rider.glb',scale:2,animation:'Ride'},placeholderRider);model.update(.01);const rotation=model.object.getObjectByName('proof-body').quaternion.z;
   const badImage=await slots.load({type:'image',src:'/__fixture/corrupt.png'},placeholder);const badVideo=await slots.load({type:'video',src:'/__fixture/corrupt.webm'},placeholder);const badModel=await slots.model({src:'/__fixture/corrupt.glb'},placeholderRider);
-  const result={image:{replaced:!image.isPlaceholder,width:image.texture.image.width},video:{replaced:!video.isPlaceholder,width:video.video.videoWidth,playing,paused:video.video.paused},model:{replaced:!model.isPlaceholder,name:model.object.name,scale:model.object.scale.x,animated:Math.abs(rotation)>0},brokenRecover:[badImage.isPlaceholder,badVideo.isPlaceholder,badModel.isPlaceholder]};slots.dispose();return result;
+  const blend=await slots.model({src:'/__fixture/rider.glb',poses:{neutral:'Neutral',toe:'Toe',heel:'Heel'}},placeholderRider);
+  const angle=edge=>{blend.update(.21,{edge});return blend.object.getObjectByName('proof-body').quaternion.z;};
+  const toe=angle(.8),heel=angle(-.8),reversed=angle(.8);
+  const result={image:{replaced:!image.isPlaceholder,width:image.texture.image.width},video:{replaced:!video.isPlaceholder,width:video.video.videoWidth,playing,paused:video.video.paused},model:{replaced:!model.isPlaceholder,name:model.object.name,scale:model.object.scale.x,animated:Math.abs(rotation)>0,poseBlend:{toe,heel,reversed}},brokenRecover:[badImage.isPlaceholder,badVideo.isPlaceholder,badModel.isPlaceholder]};slots.dispose();return result;
  });
- assert.ok(details.image.replaced&&details.video.replaced&&details.model.replaced);assert.ok(details.video.playing&&details.video.paused&&details.model.animated);assert.ok(details.brokenRecover.every(Boolean));
+ assert.ok(details.image.replaced&&details.video.replaced&&details.model.replaced);assert.ok(details.video.playing&&details.video.paused&&details.model.animated);assert.ok(details.brokenRecover.every(Boolean));assert.ok(details.model.poseBlend.toe>0&&details.model.poseBlend.heel<0);assert.equal(details.model.poseBlend.toe,details.model.poseBlend.reversed);
  await p.unroute(base+'/');await open(p);assert.equal((await p.evaluate(()=>window.__experience.slots)).rider,false);report.slots={...details,restoredToNone:true,fixtures:'evidence/fixtures/'};await c.close();
 }
 async function otherPages(){
@@ -146,7 +150,7 @@ async function supplementProof(){
   await p.locator('[data-go-chapter="2"]').click();await p.waitForTimeout(1600);await until(p,()=>window.__experience.chapter===2);
   await gotoProgress(p,.3);
   const point=await p.evaluate(async()=>{
-   const T=await import('/static/vendor/three.module.min.js?v=bansko-2');const {createTerrain}=await import('/static/experience/js/terrain.js?v=bansko-2');const {createPath}=await import('/static/experience/js/path.js?v=bansko-2');const {createCamera}=await import('/static/experience/js/camera.js?v=bansko-2');
+   const T=await import('/static/vendor/three.module.min.js?v=bansko-3');const {createTerrain}=await import('/static/experience/js/terrain.js?v=bansko-3');const {createPath}=await import('/static/experience/js/path.js?v=bansko-3');const {createCamera}=await import('/static/experience/js/camera.js?v=bansko-3');
    const scene=new T.Scene(),terrain=await createTerrain(scene,{tier:2,segments:1},p=>'/static/'+p,()=>{}),path=createPath(terrain),camera=new T.PerspectiveCamera(53,innerWidth/innerHeight,.25,5000);createCamera(camera,path,terrain).update(.3);camera.updateMatrixWorld();const v=path.shelf.clone().add(new T.Vector3(0,13,37)).project(camera);scene.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});return {x:(v.x*.5+.5)*innerWidth,y:(.5-v.y*.5)*innerHeight};
   });
   let target=null;await p.route('https://www.youtube.com/**',r=>{target=r.request().url();return r.fulfill({status:200,body:'Front mesh navigation verified'});});

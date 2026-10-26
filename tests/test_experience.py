@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 from app import db
-from app.experience.content import EXPERIENCE, build_experience
+from app.experience.content import EXPERIENCE, VERSION, build_experience
 
 
 def manifest(response):
@@ -59,7 +59,7 @@ def test_homepage_no_executable_inline_scripts_or_handlers(client):
     for attributes, body in re.findall(r'<script([^>]*)>(.*?)</script>', text, re.S):
         assert 'src=' in attributes or 'application/json' in attributes or 'application/ld+json' in attributes
     assert 'cdn.tailwindcss.com' not in text
-    assert '?v=bansko-2' in text
+    assert f'?v={VERSION}' in text
 
 
 def test_experience_cache_only(client):
