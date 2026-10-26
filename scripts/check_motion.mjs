@@ -28,6 +28,14 @@ try{
    const overlay=await page.locator(`[data-chapter="${i}"]`).evaluate(e=>({opacity:getComputedStyle(e).opacity,overflow:document.documentElement.scrollWidth>innerWidth,heading:e.querySelector('h1,h2').textContent}));
    assert.equal(state.chapter,i);assert.ok(Number(overlay.opacity)>.9);assert.equal(overlay.overflow,false);
    view.chapters.push({file,state,overlay});
+   if(i===3){
+    view.gates=await page.evaluate(async()=>{
+     const T=await import('/static/vendor/three.module.min.js?v=bansko-4');const {createTerrain}=await import('/static/experience/js/terrain.js?v=bansko-4');const {createPath}=await import('/static/experience/js/path.js?v=bansko-4');const {createCamera}=await import('/static/experience/js/camera.js?v=bansko-4');
+     const scene=new T.Scene(),terrain=await createTerrain(scene,{tier:2,segments:1},s=>'/static/'+s,()=>{}),path=createPath(terrain),camera=new T.PerspectiveCamera(53,innerWidth/innerHeight,.25,5000),controller=createCamera(camera,path,terrain);
+     const frames=[.58,.65,.72].map((p,i)=>{controller.update(p);camera.updateMatrixWorld();const v=path.gates[i].clone().add(new T.Vector3(0,14,0)).project(camera);return {p,x:(v.x+1)/2,y:(1-v.y)/2};});scene.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});return frames;
+    });
+    for(const gate of view.gates)assert.ok(Math.abs(gate.x-(viewport.width<768?.85:.74))<.06&&gate.y>.15&&gate.y<.7,`Gate composition ${JSON.stringify({viewport,gate})}`);
+   }
   }
   const original=await progress(page,.21);await progress(page,.95);const reverse=await progress(page,.21);assert.deepEqual(reverse.rider,original.rider);
   await page.screenshot({path:path.join(out,'shots',`${viewport.width}x${viewport.height}-rider-reverse.png`)});view.reverse=true;
@@ -41,16 +49,27 @@ try{
   const angles=[];for(const n of [.31,.38,.46,.53]){const s=await progress(page,n);angles.push(s.ringAngle);assert.match(await page.locator('#ring-counter').textContent(),/^\d{2} \/ 12$/);}
   assert.equal(new Set(angles).size,4);view.ringRotates=true;
   const data=await page.evaluate(()=>JSON.parse(document.getElementById('experience-data').textContent));const index=(await page.evaluate(()=>window.__experience)).ringIndex;assert.equal(await page.locator('#active-card-link').getAttribute('href'),data.ring.cards[index].link);
-  view.ringLink=true;report.violations.push(...await page.evaluate(()=>window.__violations));report.views.push(view);await context.close();
+  view.ringLink=true;
+  if(!csp){
+   view.moving=await page.evaluate(async()=>{
+    const track=document.getElementById('exp-track'),range=track.offsetHeight-innerHeight;scrollTo({top:track.offsetTop+range*.12,behavior:'instant'});await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    const start=performance.now(),initial=window.__experience.frames,samples=[];let last=start;
+    await new Promise(resolve=>{function step(now){const q=Math.min(1,(now-start)/8000);samples.push(now-last);last=now;scrollTo({top:track.offsetTop+range*(.12+.43*q),behavior:'instant'});if(q<1)requestAnimationFrame(step);else resolve();}requestAnimationFrame(step);});
+    const elapsed=performance.now()-start,frames=window.__experience.frames-initial,sorted=samples.slice().sort((a,b)=>a-b);
+    return {seconds:elapsed/1000,frames,fps:frames/(elapsed/1000),p95Ms:sorted[Math.floor(sorted.length*.95)],tier:window.__experience.tier,note:'Unrecorded continuous descent-to-ring scroll on local GPU; viewport emulation, not physical-phone hardware.'};
+   });
+   assert.ok(view.moving.fps>=(viewport.width<768?30:45),`Moving render rate ${JSON.stringify({viewport,moving:view.moving})}`);
+  }
+  report.violations.push(...await page.evaluate(()=>window.__violations));report.views.push(view);await context.close();
  }
  if(!csp){
   const page=await browser.newPage({viewport:{width:1440,height:900}});await page.goto(base+'/',{waitUntil:'networkidle'});await until(page,()=>window.__experience?.mode==='3d');
   report.modules=await page.evaluate(async()=>{
-   const T=await import('/static/vendor/three.module.min.js?v=bansko-3');
-   const {createTerrain}=await import('/static/experience/js/terrain.js?v=bansko-3');
-   const {createPath}=await import('/static/experience/js/path.js?v=bansko-3');
-   const {createRider,placeholderRider}=await import('/static/experience/js/rider.js?v=bansko-3');
-   const {createSnow}=await import('/static/experience/js/snow.js?v=bansko-3');
+   const T=await import('/static/vendor/three.module.min.js?v=bansko-4');
+   const {createTerrain}=await import('/static/experience/js/terrain.js?v=bansko-4');
+   const {createPath}=await import('/static/experience/js/path.js?v=bansko-4');
+   const {createRider,placeholderRider}=await import('/static/experience/js/rider.js?v=bansko-4');
+   const {createSnow}=await import('/static/experience/js/snow.js?v=bansko-4');
    const scene=new T.Scene(),terrain=await createTerrain(scene,{tier:2,segments:1},s=>'/static/'+s,()=>{}),path=createPath(terrain);
    const rider=await createRider(scene,path,terrain,{model:async()=>({object:placeholderRider(),update(){}})},{height:2.5,scale:1});
    const snow=createSnow(scene,new T.PerspectiveCamera(),{tier:2,particles:2500},rider,path,terrain);

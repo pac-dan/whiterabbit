@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-3';
+import * as T from '../../vendor/three.module.min.js?v=bansko-4';
 export function createRenderer(canvas,quality,onFailure) {
 const renderer=new T.WebGLRenderer({canvas,antialias:quality.tier>=2,powerPreference:'high-performance',alpha:false});
 renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;

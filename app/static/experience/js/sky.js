@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-3';
+import * as T from '../../vendor/three.module.min.js?v=bansko-4';
 export function createSky(scene) {
 const mat=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,uniforms:{night:{value:0}},vertexShader:'varying vec3 v; void main(){v=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 v;uniform float night;void main(){float h=normalize(v).y;vec3 c=mix(vec3(.17,.24,.36),vec3(.012,.025,.065),smoothstep(-.1,.8,h));c=mix(c,c*.4,night);gl_FragColor=vec4(c,1.);}' });
 const dome=new T.Mesh(new T.SphereGeometry(2800,24,16),mat);scene.add(dome);

@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-3';
+import * as T from '../../vendor/three.module.min.js?v=bansko-4';
 export function createCamera(camera,path,terrain) {
 const add=(v,x,y,z)=>v.clone().add(new T.Vector3(x,y,z));
 const s=path.shelf, g=path.gates, start=path.at(0), town=terrain.geo(41.838,23.488);
@@ -23,8 +23,11 @@ const ride=path.ride(path.rideProgress(p));
 const chase=ride.position.clone().addScaledVector(ride.forward,-(portrait?13:14)).addScaledVector(ride.normal,5.5);
 chase.y=Math.max(chase.y,terrain.height(chase.x,chase.z)+1.4);
 pos.lerp(chase,follow);target.lerp(ride.position.clone().addScaledVector(ride.normal,1.3),follow);
+const gates=T.MathUtils.smoothstep(p,.53,.555)*(1-T.MathUtils.smoothstep(p,.74,.765));
+const step=T.MathUtils.clamp((p-.55)*15,0,2),index=Math.floor(step),gate=g[index].clone().lerp(g[Math.min(2,index+1)],T.MathUtils.smoothstep(step-index,.72,1));
+pos.lerp(add(gate,-15,24,portrait?100:80),gates);target.lerp(add(gate,0,13,0),gates);
 const anchorX=portrait?.5:.73,anchorY=portrait?.31:.47;
-camera.setViewOffset(innerWidth,innerHeight,innerWidth*(.5-anchorX)*follow,innerHeight*(.5-anchorY)*follow,innerWidth,innerHeight);
+camera.setViewOffset(innerWidth,innerHeight,innerWidth*((.5-anchorX)*follow+(.5-(portrait?.85:.74))*gates),innerHeight*((.5-anchorY)*follow+.04*gates),innerWidth,innerHeight);
 camera.position.copy(pos);camera.lookAt(target);
 }};
 }

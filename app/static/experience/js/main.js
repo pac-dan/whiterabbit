@@ -1,6 +1,6 @@
-import {createQuality} from './quality.js?v=bansko-3';
-import {chapterAt,createScroll} from './scroll.js?v=bansko-3';
-import {createDebug} from './debug.js?v=bansko-3';
+import {createQuality} from './quality.js?v=bansko-4';
+import {chapterAt,createScroll} from './scroll.js?v=bansko-4';
+import {createDebug} from './debug.js?v=bansko-4';
 const root=document.getElementById('experience'),loader=document.getElementById('exp-loader');
 const data=JSON.parse(document.getElementById('experience-data').textContent);
 const url=path=>{if(/^(https?:|blob:|data:)/.test(path))return path;const p=path.startsWith('/')?path:root.dataset.assetBase+path;return `${p}${p.includes('?')?'&':'?'}v=${root.dataset.version}`;};
@@ -22,7 +22,7 @@ try {
 const probe=document.createElement('canvas');
 const gl=probe.getContext('webgl2');if(!gl)throw Error('WebGL 2 is unavailable');gl.getExtension('WEBGL_lose_context')?.loseContext();
 const [T,{createRenderer},{createTerrain},{createPath},{createCamera},{createSky},{createSnow},{createRider},{createRing},{createGates},{createPortal},{createTown},{createSlots},{createOverlay}]=await Promise.all([
-import('../../vendor/three.module.min.js?v=bansko-3'),import('./renderer.js?v=bansko-3'),import('./terrain.js?v=bansko-3'),import('./path.js?v=bansko-3'),import('./camera.js?v=bansko-3'),import('./sky.js?v=bansko-3'),import('./snow.js?v=bansko-3'),import('./rider.js?v=bansko-3'),import('./ring.js?v=bansko-3'),import('./gates.js?v=bansko-3'),import('./portal.js?v=bansko-3'),import('./town.js?v=bansko-3'),import('./slots.js?v=bansko-3'),import('./overlay.js?v=bansko-3')]);
+import('../../vendor/three.module.min.js?v=bansko-4'),import('./renderer.js?v=bansko-4'),import('./terrain.js?v=bansko-4'),import('./path.js?v=bansko-4'),import('./camera.js?v=bansko-4'),import('./sky.js?v=bansko-4'),import('./snow.js?v=bansko-4'),import('./rider.js?v=bansko-4'),import('./ring.js?v=bansko-4'),import('./gates.js?v=bansko-4'),import('./portal.js?v=bansko-4'),import('./town.js?v=bansko-4'),import('./slots.js?v=bansko-4'),import('./overlay.js?v=bansko-4')]);
 if(abandoned)return;
 const quality=createQuality();engine=createRenderer(document.getElementById('exp-canvas'),quality,fallback);
 let completed=0;const loaded=()=>{document.getElementById('asset-progress').value=++completed/3;};

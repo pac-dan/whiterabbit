@@ -1,4 +1,4 @@
-import * as T from '../../vendor/three.module.min.js?v=bansko-3';
+import * as T from '../../vendor/three.module.min.js?v=bansko-4';
 export function createRing(scene,camera,path,slots,data) {
 const group=new T.Group();group.position.copy(path.shelf);scene.add(group);
 const floor=new T.Mesh(new T.CylinderGeometry(56,60,2,64),new T.MeshStandardMaterial({color:'#0a172a',metalness:.72,roughness:.24}));floor.position.y=-1;group.add(floor);

@@ -8,7 +8,7 @@ and customer quotes still come from your existing site admin.
 2. Copy it into **app/static/experience/media/**.
 3. In **app/experience/content.py**, replace the matching `None` with its path,
    starting with `experience/media/`. Keep the quotes around the path.
-4. Increase `VERSION` (for example `bansko-2` → `bansko-3`) so visitors receive
+4. Increase `VERSION` (for example `bansko-2` → `bansko-4`) so visitors receive
    the new files. Save and deploy the branch through your normal preview flow.
 
 **Video example — the first recent edit.** Find the `ring` cards list. Replace
@@ -106,5 +106,5 @@ there is no full post-processing stack. No third-party demo assets are included.
 For review, add `?debug=1` to the homepage. `window.__experience.rider.bounds`
 reports the projected rider rectangle as fractions of the viewport; `contactGap`
 reports board clearance when a named board is available. The normal UI stays clean.
-The runtime version is `bansko-3`; update `VERSION` and internal import query strings
+The runtime version is `bansko-4`; update `VERSION` and internal import query strings
 together when modifying immutable experience assets. No npm build is needed.

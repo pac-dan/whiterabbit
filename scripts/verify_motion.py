@@ -76,14 +76,15 @@ def run(mode):
   assert not re.search(r'\d+ skipped',log)
   basic=report('browser-report.json');assert len(basic['quality'])==2 and all(q['forced']==1 and q['watchdog']['stepped'] for q in basic['quality'])
   supplement=report('supplement-report.json');assert all(q['hiddenPause'] and q['footerPause'] and q['wheelResume'] and q['performanceState']['firstFrameMs']<2500 for q in supplement['quality'])
+  motion=report('motion-browser.json');assert all(v['moving']['fps']>=(30 if v['viewport']['width']<768 else 45) for v in motion['views'])
   files=[*ROOT.glob('app/static/vendor/*.js'),*ROOT.glob('app/static/vendor/*.mjs'),*ROOT.glob('app/static/experience/js/*.js')]
   size=sum(p.stat().st_size for p in files);assert size<=900000,size
   placeholders=list(ROOT.glob('app/static/experience/placeholders/*.webp'));assert sum(p.stat().st_size for p in placeholders)<=1500000
   assert (ROOT/'app/static/experience/terrain/bansko-height.bin').stat().st_size<=520*1024
   caches=[]
   for name in ['experience/js/main.js','experience/terrain/bansko-height.bin','vendor/three.module.min.js']:
-   r=requests.get('http://127.0.0.1:5000/static/'+name+'?v=bansko-3',timeout=15);assert r.status_code==200 and r.headers['Cache-Control']=='public, max-age=31536000, immutable';caches.append({'file':name,'cache':r.headers['Cache-Control']})
-  result.update(failures=sorted(failed(log)),runtime_bytes=size,files={str(p.relative_to(ROOT)):p.stat().st_size for p in files},cache=caches,quality=supplement['quality'],note='Measured local Windows GPU; mobile viewport emulation is not physical-phone performance.')
+   r=requests.get('http://127.0.0.1:5000/static/'+name+'?v=bansko-4',timeout=15);assert r.status_code==200 and r.headers['Cache-Control']=='public, max-age=31536000, immutable';caches.append({'file':name,'cache':r.headers['Cache-Control']})
+  result.update(failures=sorted(failed(log)),runtime_bytes=size,files={str(p.relative_to(ROOT)):p.stat().st_size for p in files},cache=caches,quality=supplement['quality'],moving=[{'viewport':v['viewport'],**v['moving']} for v in motion['views']],note='Measured local Windows GPU; mobile viewport emulation is not physical-phone performance.')
  elif mode=='delivery':
   for file in ['docs/content-drop-in.md','app/static/experience/media/README.md']:
    text=read(ROOT/file);assert all(token in text for token in ['board_node','poses','height'])

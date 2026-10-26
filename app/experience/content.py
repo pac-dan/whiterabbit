@@ -5,7 +5,7 @@ Database package/video/testimonial copy stays managed by the existing admin.
 """
 from copy import deepcopy
 
-VERSION = 'bansko-3'
+VERSION = 'bansko-4'
 EXPERIENCE = {
     'hero': {
         'headline': 'We film your best run.',
