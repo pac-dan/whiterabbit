@@ -9,3 +9,21 @@
 .exp-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.48;pointer-events:none}.exp-hero-video[hidden]{display:none}
 @media(max-width:767px){.exp-running .chapter-ring h2{max-width:240px;font-size:40px;line-height:1}.exp-running .ring-active{padding:12px 14px;border-radius:6px;background:linear-gradient(90deg,#050816dc,#05081670);left:16px;right:16px}.exp-running .chapter-summit .summit-altitude{bottom:140px}}
 .experience-page footer a[aria-label]::after{content:attr(aria-label);font-size:10px;margin-right:12px}
+
+/* Directed compositions: leave the rider a clear screen-space stage. */
+.exp-running .exp-chapter h1,.exp-running .exp-chapter h2{clip-path:inset(0 0 calc((1 - var(--reveal,1))*100%) 0);transform:translateY(calc((1 - var(--reveal,1))*22px));}
+.exp-running .chapter-drop h2{font-size:clamp(40px,4.8vw,69px);max-width:560px}
+.exp-running .chapter-drop .chapter-body{padding-bottom:36px}
+.exp-running .chapter-drop .exp-eyebrow{color:#cce7f1}
+.exp-running .ring-heading{pointer-events:none}
+.exp-running .ring-active{bottom:12vh;max-width:440px;padding:15px 18px;border-left:1px solid #00d4ff70;background:linear-gradient(90deg,#050816cc,#05081600)}
+.exp-running .exp-stage:after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 55% 42%,transparent 35%,#03091950 100%)}
+@media(max-width:767px){
+ .exp-running .chapter-drop .chapter-body{padding-bottom:34px}
+ .exp-running .chapter-drop h2{font-size:clamp(32px,9.2vw,40px);max-width:310px;line-height:1.02}
+ .exp-running .chapter-drop .beat-list{margin-top:14px}
+ .exp-running .ring-active{bottom:152px;left:20px;right:20px;max-width:none;padding:12px 14px}
+ .exp-running .chapter-ring .ring-heading{max-width:240px}
+ .exp-running .chapter-ring h2{font-size:36px}
+}
+@media(prefers-reduced-motion:reduce){.exp-chapter h1,.exp-chapter h2{clip-path:none!important;transform:none!important}}

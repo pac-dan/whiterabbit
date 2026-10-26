@@ -5,14 +5,15 @@ Database package/video/testimonial copy stays managed by the existing admin.
 """
 from copy import deepcopy
 
-VERSION = 'bansko-2'
+VERSION = 'bansko-3'
 EXPERIENCE = {
     'hero': {
         'headline': 'We film your best run.',
         'subline': 'Snowboard video production in Bansko.',
         'background_video': {'type': 'video', 'src': None, 'poster': None},
     },
-    'rider': {'type': 'model', 'src': None, 'scale': 1.0, 'animation': None},
+    'rider': {'type': 'model', 'src': None, 'scale': 1.0, 'animation': None,
+              'height': 2.5, 'board_node': 'Snowboard', 'poses': None},
     'beats': [
         {'label': '4K follow-cam', 'media': {'type': 'video', 'src': None}},
         {'label': 'Drone shots', 'media': {'type': 'video', 'src': None}},

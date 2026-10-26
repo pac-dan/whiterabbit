@@ -19,3 +19,5 @@ Missing/unreadable media resolve to the existing placeholder. Use local files
 to avoid CORS and CSP changes. Keep originals elsewhere; these are web exports.
 Increment `VERSION` in the same manifest when replacing a file without renaming it.
 The terrain and generated placeholders are build assets, not owner media slots.
+
+The current default rider is articulated and uses illustrative scene scale. GLB replacements are fitted to `rider.height` and multiplied by `scale`. Name the board mesh `Snowboard` (or set `board_node`); use in-place clips. Optional `poses` maps neutral/toe/heel clip names. See docs/content-drop-in.md for the complete example.

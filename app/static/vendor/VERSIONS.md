@@ -19,3 +19,5 @@ Latin variable WOFF2, SIL Open Font License 1.1 (licenses beside font files). Re
 - Orbitron: https://fonts.gstatic.com/s/orbitron/v35/yMJRMIlzdpvBhQQL_Qq7dy0.woff2 (11800 bytes); license: https://raw.githubusercontent.com/google/fonts/main/ofl/orbitron/OFL.txt
 
 Local module import cache key: bansko-2 (three/Lenis versions unchanged).
+
+Motion polish: addon import version queries changed to `?v=bansko-3` alongside the homepage modules so GLTFLoader and BufferGeometryUtils share the same cached Three.js module instance. Library versions and implementation remain unchanged.
