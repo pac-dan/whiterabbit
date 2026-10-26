@@ -8,10 +8,11 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='vendor/lenis.css', v=experience_version) }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='experience/css/experience.css', v=experience_version) }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='experience/css/flow.css', v=experience_version) }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='experience/css/motion.css', v=experience_version) }}">
 {% endblock %}
 {% block navigation %}{% include 'includes/alpine_nav.html' %}{% endblock %}
 {% block content %}
-{% macro media_url(src) -%}{{ src if src.startswith(('https://','http://')) else url_for('static', filename=src, v=experience_version) }}{%- endmacro %}
+{% macro media_url(src) -%}{{ src if src.startswith(('https://','http://','/static/')) else url_for('static', filename=src, v=experience_version) }}{%- endmacro %}
 <div id="experience" class="flow-site" data-asset-base="{{ url_for('static', filename='') }}" data-version="{{ experience_version }}">
  <div id="exp-stage" class="flow-stage" aria-hidden="true">
   <img id="journey-poster" class="flow-picture" src="{{ media_url(experience.journey.poster) }}" alt="" fetchpriority="high" width="1280" height="720">
@@ -49,15 +50,16 @@
      </article>
      {% endfor %}
     </div>
-    <div class="film-navigation"><button id="film-prev" type="button" aria-label="Previous film">←</button><span id="film-counter" class="exp-counter" aria-live="polite">01 / {{ '%02d'|format(experience.films.cards|length) }}</span><button id="film-next" type="button" aria-label="Next film">→</button></div>
+    <p class="film-invitation">DRAG TO EXPLORE <span aria-hidden="true">↔</span> SELECT A MOMENT</p><div class="film-navigation"><button id="film-prev" type="button" aria-label="Previous film">←</button><span id="film-counter" class="exp-counter" aria-live="polite">01 / {{ '%02d'|format(experience.films.cards|length) }}</span><button id="film-next" type="button" aria-label="Next film">→</button></div>
     <div class="film-selected-info"><div><h3 id="selected-film-title">{{ experience.films.cards[0].title }}</h3><p id="selected-film-tags">{{ experience.films.cards[0].tags }}</p></div><button type="button" id="play-selected-film" class="film-watch">Watch film <span aria-hidden="true">↗</span></button></div>
    </div>
+   <p class="film-provenance">{{ experience.films.note }}</p>
    <a class="flow-text-link" href="{{ url_for('main.gallery') }}">Explore the collection ↗</a>
    <noscript><p>Choose a film from <a href="{{ url_for('main.gallery') }}">the gallery</a>.</p></noscript>
   </section>
   <section id="sessions" class="flow-section flow-sessions" data-chapter="4" aria-labelledby="sessions-title">
    <div class="flow-section-head"><div><p class="exp-eyebrow">05 / Your session</p><h2 id="sessions-title">{{ experience.gates.title }}</h2></div><p>You ride. We make it unforgettable.</p></div>
-   <div class="flow-packages">{% for p in experience.packages %}<article class="flow-package" data-package="{{ loop.index0 }}"><span class="exp-eyebrow">SESSION 0{{ loop.index }}</span><h3>{{ p.name }}</h3><p class="exp-price">€{{ '%.2f'|format(p.price) }} <span>/ {{ p.duration }} hours</span></p><ul>{% for f in p.features %}<li>{{ f }}</li>{% endfor %}</ul><a class="exp-button" href="{{ p.link }}">Choose {{ p.name }} ↗</a></article>{% else %}{% for i in range(3) %}<article class="flow-package" data-package="{{ i }}"><span class="exp-eyebrow">SESSION 0{{ i+1 }}</span><h3>{{ experience.labels.empty_package }}</h3><p>{{ experience.labels.empty_package_note }}</p><a class="flow-text-link" href="{{ url_for('main.contact') }}">Get in touch ↗</a></article>{% endfor %}{% endfor %}</div>
+   <div class="flow-packages">{% for p in experience.packages %}<article class="flow-package" data-package="{{ loop.index0 }}"><div class="session-visual"><img src="{{ media_url(experience.gates.media[loop.index0 % 3].src) }}" alt="" loading="lazy" width="480" height="720"><span>CONCEPT / {{ '%02d'|format(loop.index) }}</span></div><span class="exp-eyebrow">SESSION 0{{ loop.index }}</span><h3>{{ p.name }}</h3><p class="exp-price">€{{ '%.2f'|format(p.price) }} <span>/ {{ p.duration }} hours</span></p><ul>{% for f in p.features %}<li>{{ f }}</li>{% endfor %}</ul><a class="exp-button" href="{{ p.link }}">Choose {{ p.name }} ↗</a></article>{% else %}{% for i in range(3) %}<article class="flow-package" data-package="{{ i }}"><span class="exp-eyebrow">SESSION 0{{ i+1 }}</span><h3>{{ experience.labels.empty_package }}</h3><p>{{ experience.labels.empty_package_note }}</p><a class="flow-text-link" href="{{ url_for('main.contact') }}">Get in touch ↗</a></article>{% endfor %}{% endfor %}</div>
   </section>
   <section id="bansko" class="flow-section flow-close" data-chapter="5" aria-labelledby="finale-title">
    <div><p class="exp-eyebrow">06 / Make it yours</p><h2 id="finale-title">{{ experience.finale.headline }}</h2><p class="exp-subline">{{ experience.finale.subline }}</p><div class="closing-actions"><a class="exp-button" href="{{ url_for('main.packages') }}">{{ experience.finale.button }} ↗</a><a class="flow-text-link" href="{{ url_for('main.contact') }}">Talk to us ↗</a></div></div>

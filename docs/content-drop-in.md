@@ -4,7 +4,7 @@ Copy files into **app/static/experience/media/** and edit **app/experience/conte
 
 ## Add a film and poster
 
-The collection starts with the supplied film, labelled **Generated concept film**. Each featured database film then appears once. Missing artwork says **Film preview unavailable**; existing snowboard images are fallback illustrations, not claimed client frames.
+The floating collection starts with five labelled moments from the supplied **Generated concept film**. Each has an extracted portrait poster and a start time in `films.moments`. They are chapters of one film, not five client projects. Featured database films with a supplied poster or local media join this collection once. Unillustrated database records remain on the existing gallery page, where temporary images are labelled **Concept artwork / preview pending**.
 
 For the first database film, change `ring.cards[0].media`:
 
@@ -13,7 +13,7 @@ For the first database film, change `ring.cards[0].media`:
  'poster': 'experience/media/first-run.webp'}
 ```
 
-Use portrait 720×1280 H.264 MP4 and a matching WebP poster. Keep files under 4 MB with current Flask hosting. The poster appears on the card; the film plays with controls only when selected. Without local video, an existing database YouTube ID opens its player after a click. Check that the ID is a real, playable business film before publishing; seeded IDs are not proof of client work.
+Use portrait 720×1280 H.264 MP4 and a matching WebP poster. Keep files under 4 MB with current Flask hosting. The poster appears on the card; the film plays with controls only when selected. Concept cards start at their configured moment and continue to the end; player controls can replay the complete film. Without local video, an existing database YouTube ID opens its player after a click. Check that the ID is a real, playable business film before publishing; seeded IDs are not proof of client work.
 
 ## Change a card image
 

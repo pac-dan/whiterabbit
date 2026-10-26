@@ -5,7 +5,7 @@ Database package/video/testimonial copy stays managed by the existing admin.
 """
 from copy import deepcopy
 
-VERSION = 'bansko-refine-1'
+VERSION = 'bansko-films-2'
 EXPERIENCE = {
     'journey': {
         'mode': 'video',  # 'procedural' restores the previous terrain/rider engine.
@@ -40,15 +40,24 @@ EXPERIENCE = {
                    'media': {'type': 'video', 'src': None}, 'link': None}
                   for i in range(1, 13)],
     },
-    'gates': {'title': 'Find your line.', 'media': [{'type': 'image', 'src': None} for _ in range(3)]},
+    'gates': {'title': 'Find your line.', 'media': [
+        {'type': 'image', 'src': f'experience/media/moments/moment-{i}.webp'} for i in (1, 3, 5)]},
     'portal': {'title': 'A run worth reliving.', 'media': {'type': 'image', 'src': None}},
     'finale': {'headline': 'Book your session', 'button': 'See packages',
                'subline': 'You ride. We make it unforgettable.'},
     'arrival': {'headline': 'Back in Bansko.', 'subline': 'The run ends. The feeling stays.'},
-    'films': {'title': 'Recent edits', 'subline': 'Follow the feeling. Find your film.',
+    'films': {'title': 'Feel every turn.', 'subline': 'One alpine concept. Five moments to step into.',
+              'note': 'Explore moments from our generated concept film. Client films join the collection as footage is added.',
               'concept': {'title': 'From mountain to town', 'label': 'Generated concept film',
                           'poster': 'experience/media/bansko-journey-poster.webp',
                           'src': 'experience/media/bansko-descent-720-v3.mp4'},
+              'moments': [
+                  {'title': 'The open line', 'start': 0, 'poster': 'experience/media/moments/moment-1.webp'},
+                  {'title': 'Into the pines', 'start': 2.4, 'poster': 'experience/media/moments/moment-2.webp'},
+                  {'title': 'Follow the feeling', 'start': 4.7, 'poster': 'experience/media/moments/moment-3.webp'},
+                  {'title': 'Above it all', 'start': 6.8, 'poster': 'experience/media/moments/moment-4.webp'},
+                  {'title': 'After the last turn', 'start': 8, 'poster': 'experience/media/moments/moment-5.webp'},
+              ],
               'missing_poster_label': 'Film preview unavailable'},
     'labels': {'location': 'Bansko, Bulgaria', 'range': 'Pirin mountains',
                'scroll': 'Scroll to drop in', 'drop': 'Leave a little more than tracks.',
@@ -81,15 +90,20 @@ def build_experience(videos, packages, gallery_url, package_url):
     # A supplied concept film is labelled honestly; DB entries are never duplicated
     # to pad a carousel. Seeded YouTube artwork is not presented as client imagery.
     concept = data['films']['concept']
-    films = [dict(title=concept['title'], tags=concept['label'], poster=concept['poster'],
-                  src=concept['src'], youtube_id=None, link=gallery_url, concept=True,
-                  fallback=concept['poster'], missing=False)]
+    films = [dict(title=m['title'], tags=f"Generated concept film / {m['start']:04.1f}s",
+                  poster=m['poster'], src=concept['src'], start=m['start'], youtube_id=None,
+                  link=gallery_url, concept=True, fallback=concept['poster'], missing=False)
+             for m in data['films']['moments']]
     for i, video in enumerate(videos):
         override = cards[i % len(cards)].get('media', {})
         poster = override.get('poster') or (override.get('src') if override.get('type') == 'image' else None)
         custom = video.thumbnail_url
         if not poster and custom and 'img.youtube.com' not in custom:
             poster = custom
+        # Keep unillustrated/seeded entries on the existing gallery page, rather
+        # than dressing them with unrelated imagery and implying client work.
+        if not poster and not override.get('src'):
+            continue
         fallback = 'images/hero_2.jpg' if i % 2 else 'images/hero_1.jpg'
         films.append(dict(title=video.title, tags=' / '.join(filter(None,[video.location_tag,video.style_tag])),
                           poster=poster or fallback, fallback=fallback, missing=not bool(poster),

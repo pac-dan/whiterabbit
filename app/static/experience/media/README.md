@@ -8,3 +8,5 @@ Configure files in `app/experience/content.py`; paths start at static/, for exam
 * Retained procedural slots: GLB under 3 MB, Y-up/metres/+Z, embedded textures and in-place animation; gate/portal images 1200×1600 WebP. These are not rendered by the current video homepage.
 
 Keep originals elsewhere. Use new filenames and increment VERSION for changed media. Older bansko-journey-v2.mp4 remains for recovery; the refinement does not request it.
+
+The moments/ WebP files are direct 480×720 crops from the supplied original, created by scripts/build_film_posters.py. They do not add native detail or represent separate client films. Their times and titles are configured under films.moments.

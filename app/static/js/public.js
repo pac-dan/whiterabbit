@@ -1,4 +1,12 @@
 /** Small, CSP-safe public-page interactions. Native scrolling; no 3D dependencies. */
+import {createPageMotion} from '../experience/js/page-motion.js?v=bansko-films-2';
+const pageMotion=createPageMotion(document.querySelector('.alpine-main'));
+let motionFrame=0;
+const updateMotion=()=>{if(!motionFrame)motionFrame=requestAnimationFrame(()=>{motionFrame=0;pageMotion.update();});};
+addEventListener('scroll',updateMotion,{passive:true});addEventListener('resize',updateMotion);
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',updateMotion);
+document.addEventListener('visibilitychange',updateMotion);
+addEventListener('pagehide',e=>{if(!e.persisted){pageMotion.dispose();cancelAnimationFrame(motionFrame);}});
 const nav = document.getElementById('mainNav');
 const updateNav = () => nav?.classList.toggle('is-scrolled', scrollY > 20);
 addEventListener('scroll', updateNav, {passive: true});

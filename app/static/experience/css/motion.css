@@ -1,0 +1,8 @@
+/* Motion changes transforms/light, never masks or hides essential copy. */
+.motion-enabled .session-art img,.motion-enabled .session-visual img,.motion-enabled .story-image img{transform:translateY(var(--image-shift,0px)) scale(1.09);transition:transform .18s linear}
+.motion-enabled .flow-package,.motion-enabled .session-card,.motion-enabled .review-card,.motion-enabled .film-card{transition:box-shadow .4s,border-color .4s,background .4s}
+.motion-enabled .flow-package:hover,.motion-enabled .session-card:hover,.motion-enabled .review-card:hover{border-color:#6ed7e48c;box-shadow:0 12px 55px #00d4ff10}
+.motion-enabled .exp-button span,.motion-enabled .ap-text-link span{display:inline-block;transition:transform .3s}.motion-enabled .exp-button:hover span,.motion-enabled .ap-text-link:hover span{transform:translate(3px,-3px)}
+.motion-enabled .ap-closing,.motion-enabled .flow-close{background-size:180% 180%;animation:alpine-light 16s ease-in-out infinite alternate}
+@keyframes alpine-light{from{background-position:0% 40%}to{background-position:100% 60%}}
+@media(prefers-reduced-motion:reduce){.motion-enabled *{animation:none!important;transition:none!important}}

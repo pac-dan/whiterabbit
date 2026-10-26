@@ -30,13 +30,14 @@ def public_context():
         index = featured.get(video.id, index) % len(EXPERIENCE['ring']['cards'])
         card = EXPERIENCE['ring']['cards'][index]
         media = card['media']
-        placeholder = f'experience/placeholders/ring-{index+1:02}.webp'
+        placeholder = EXPERIENCE['films']['moments'][index % len(EXPERIENCE['films']['moments'])]['poster']
         custom = video.thumbnail_url
         # Seeded YouTube thumbnails are not real artwork. Real custom thumbnails remain usable.
         if custom and 'img.youtube.com' in custom:
             custom = None
-        image = media.get('src') if media.get('type') == 'image' else custom
+        image = media.get('src') if media.get('type') == 'image' else media.get('poster') or custom
         return dict(image=static_media(image, placeholder), fallback=static_media(None, placeholder),
+                    concept_artwork=not bool(image),
                     video=static_media(media['src'], placeholder) if media.get('src') and media.get('type') == 'video' else None)
 
     def checkout_link(package):
