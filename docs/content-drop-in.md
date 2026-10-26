@@ -1,115 +1,44 @@
 # Add your footage to Momentum Clips
 
-The background journey now uses the owner's generated film. To replace it or
-tune scroll timing and mobile crop, see [the video journey guide](video-journey.md).
-The procedural athlete/model slot is retained for recovery mode; it is not
-loaded behind the film. Gallery and other content slots remain independent.
+Copy files into **app/static/experience/media/** and edit **app/experience/content.py**. Packages, prices, film titles and testimonials continue to come from the existing admin. No JavaScript build is required.
 
-Everything you
-need to edit is in **app/experience/content.py**. Packages, prices, video titles
-and customer quotes still come from your existing site admin.
+## Add a film and poster
 
-1. Export your media using the sizes below.
-2. Copy it into **app/static/experience/media/**.
-3. In **app/experience/content.py**, replace the matching `None` with its path,
-   starting with `experience/media/`. Keep the quotes around the path.
-4. Increase `VERSION` (for example `bansko-2` → `bansko-4`) so visitors receive
-   the new files. Save and deploy the branch through your normal preview flow.
+The collection starts with the supplied film, labelled **Generated concept film**. Each featured database film then appears once. Missing artwork says **Film preview unavailable**; existing snowboard images are fallback illustrations, not claimed client frames.
 
-**Video example — the first recent edit.** Find the `ring` cards list. Replace
-the first card's media entry with:
+For the first database film, change `ring.cards[0].media`:
 
 ```python
-'media': {'type': 'video', 'src': 'experience/media/first-run.mp4'},
+{'type': 'video', 'src': 'experience/media/first-run.mp4',
+ 'poster': 'experience/media/first-run.webp'}
 ```
 
-Use a 720×1280 portrait H.264 MP4, 4–8 seconds, no audio, under 4 MB. Videos
-loop silently only while their card is at the front. `ring.source: 'videos'`
-keeps titles/tags/YouTube links from the gallery database; each media index
-still takes its file here. There are twelve positions; six DB edits repeat.
-For your own titles and links, set `source` to `'manual'` and edit each card's
-`title`, `tags`, `link` and `media`. `count` supports 8–12 positions.
+Use portrait 720×1280 H.264 MP4 and a matching WebP poster. Keep files under 4 MB with current Flask hosting. The poster appears on the card; the film plays with controls only when selected. Without local video, an existing database YouTube ID opens its player after a click. Check that the ID is a real, playable business film before publishing; seeded IDs are not proof of client work.
 
-**Image example — the first package gate.** In `gates.media`, set the first
-entry to:
+## Change a card image
+
+For a poster retaining the database film destination:
 
 ```python
-{'type': 'image', 'src': 'experience/media/beginner-gate.webp'},
+{'type': 'image', 'src': 'experience/media/first-run.webp'}
 ```
 
-Use a 1200×1600 WebP under about 250 KB. The three gate positions follow the
-three packages displayed by the existing database query. The portal accepts
-the same image entry under `portal.media`. Beat slots accept either images
-or videos under `beats[n].media`; edit their `label` alongside the media.
+A portrait WebP around 720×1080 and under 250 KB works well. Genuine custom database thumbnails are also used. Titles/tags stay in the database. The current homepage uses featured database entries; the old manual twelve-slot ring belongs to the recoverable procedural implementation.
 
-**3D rider example.** Replace the rider entry with:
+## Replace the journey
+
+Set `journey.src`, `mobile_src`, `poster` and `town_poster` to new static-relative filenames. Edit its cues for timing and framing for crop. See [video-journey.md](video-journey.md). A sharper original would improve full-screen desktop quality more than upscaling the current 720p source.
+
+## Retained model slot
+
+The procedural rider is retained for recovery and is not loaded by the filmed journey. Its replacement contract remains:
 
 ```python
-'rider': {
-    'type': 'model', 'src': 'experience/media/rider.glb',
-    'scale': 1.0, 'animation': 'Ride',
-},
+'rider': {'type': 'model', 'src': 'experience/media/rider.glb',
+          'scale': 1.0, 'height': 2.5, 'animation': 'Ride',
+          'board_node': 'Snowboard', 'poses': None}
 ```
 
-Ask your artist for a GLB under 3 MB, Y-up, metres, facing +Z, textures embedded,
-without Draco compression. Put the feet/board at Y=0. `scale` adjusts its size.
-If the animation name is missing, the first animation plays. A file that fails
-to load restores the articulated snowboarder automatically.
+Use GLB under 3 MB, Y-up, metres, facing +Z, embedded textures, in-place animation. Changing this slot does not add a 3D rider over the film.
 
-**Opening background.** Set `hero.background_video.src` to a local H.264 MP4,
-1920×1080 and under 8 MB. Set `poster` to an optional local WebP. Your video
-appears over the 3D summit as a quiet full-screen layer. Headline and subline
-are in `hero`; closing copy is in `finale`. Other labels live in the same file.
-
-Leave any `src` as `None` to keep its named placeholder. The still view works
-without WebGL, with reduced motion, and if the 3D cannot load. Real gallery
-titles, packages, quote and booking links stay accessible in that view.
-Mobile visitors receive smaller rendering settings automatically. Check your
-preview on a phone after adding large videos; avoid loading all clips at once.
-
-
-## Updated descent and rider (motion polish)
-
-The default rider is now an original articulated placeholder with helmet, goggles,
-jacket, gloves, boots, bindings and a shaped board. Its pose, edge lean, track and
-spray follow the same progress-driven line as the camera. The terrain remains real
-elevation data; the rider is deliberately larger than geographic scale so it reads
-clearly in the cinematic shot. This is still a content slot, not a final athlete model.
-
-A replacement GLB is centred at its base and fitted to `rider.height` (default 2.5
-scene units). `scale` multiplies that fitted size. Keep `scale: 1.0` initially.
-Use in-place animations: the camera/path own travel, so the clip must not move the
-model across the mountain. Y remains up and the board's travel direction is +Z;
-the snowboarder's body should stand sideways across the board.
-
-Name the board mesh `Snowboard`, or set `board_node` to its mesh name in
-`app/experience/content.py`. That lets the engine sample the actual board vertices
-against the snow when it leans. Without that name, the base pivot is still aligned
-to the slope, but exact edge contact needs checking in the preview.
-
-One animation continues to work through `animation` as before. For an artist-supplied
-three-pose rider, use names matching the GLB clips, for example:
-
-```python
-'rider': {
-    'type': 'model', 'src': 'experience/media/rider.glb',
-    'scale': 1.0, 'height': 2.5, 'board_node': 'Snowboard',
-    'animation': 'Ride',
-    'poses': {'neutral': 'Neutral', 'toe': 'Toe', 'heel': 'Heel'},
-},
-```
-
-All three pose clips must exist to activate blending. Otherwise the named single
-animation (or first clip) is used. Clip time and blend weights are sampled from scroll
-progress, so stopping or reversing does not leave a half-finished timed transition.
-Leave `poses` as `None` for the existing simple model contract.
-
-The ring has rounded, soft rims, continuous front-card emphasis and a cheap faded
-floor reflection on tiers 2/3. A small seeded particle morph adds depth in the portal;
-there is no full post-processing stack. No third-party demo assets are included.
-
-For review, add `?debug=1` to the homepage. `window.__experience.rider.bounds`
-reports the projected rider rectangle as fractions of the viewport; `contactGap`
-reports board clearance when a named board is available. The normal UI stays clean.
-The runtime version is `bansko-4`; update `VERSION` and internal import query strings
-together when modifying immutable experience assets. No npm build is needed.
+Increase VERSION after content changes, deploy a preview, and check actual cards/playback on desktop and phone. Keep original footage elsewhere; this folder contains web exports.

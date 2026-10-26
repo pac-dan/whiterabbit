@@ -1,27 +1,10 @@
-# Drop your media here
+# Media drop-in
 
-Edit **app/experience/content.py** after copying files into this directory.
-All `src` values start at Flask's `static/` directory, for example
-`experience/media/ring-01.mp4`. Leave `None` for the branded placeholder.
-See **docs/content-drop-in.md** for worked examples.
+Configure files in `app/experience/content.py`; paths start at static/, for example `experience/media/first-run.mp4`. See [the owner guide](../../../../docs/content-drop-in.md).
 
-| Slot | Recommended file |
-| --- | --- |
-| `ring.cards[0..11].media`, `beats[0..2].media` | 720×1280 portrait H.264 MP4, ≤4 MB, 4–8 second loop, no audio. WebM also works. |
-| `gates.media[0..2]`, `portal.media` | 1200×1600 WebP. JPEG and PNG also work. |
-| `rider` | GLB ≤3 MB, Y-up, metres, facing +Z, optional idle/ride animation. Embed textures; no Draco compression. |
-| `hero.background_video` | 1920×1080 H.264 MP4 ≤8 MB; optional local `poster` image. |
+* Journey: bansko-descent-720-v3.mp4 and bansko-descent-540-v3.mp4 are silent responsive derivatives of the owner's generated 720p source. Only one loads. Sharp opening/town WebP posters remain from the source. See [timing and delivery](../../../../docs/video-journey.md).
+* Floating films: ring.cards[i].media supplies local src and optional poster for the corresponding featured database film. Prefer portrait 720×1280 H.264 MP4 under 4 MB and WebP poster under 250 KB. Playback is explicit.
+* Images: portrait WebP/JPEG/PNG; use an honest frame from the actual film. Missing posters are labelled unavailable.
+* Retained procedural slots: GLB under 3 MB, Y-up/metres/+Z, embedded textures and in-place animation; gate/portal images 1200×1600 WebP. These are not rendered by the current video homepage.
 
-Changing `type` from `image` to `video` works for all flat media slots.
-Videos are muted, loop and play inline, and pause outside their active chapter.
-GLB animations use the configured name, or the first clip if it is not found.
-Missing/unreadable media resolve to the existing placeholder. Use local files
-to avoid CORS and CSP changes. Keep originals elsewhere; these are web exports.
-Increment `VERSION` in the same manifest when replacing a file without renaming it.
-The terrain and generated placeholders are build assets, not owner media slots.
-
-The current default rider is articulated and uses illustrative scene scale. GLB replacements are fitted to `rider.height` and multiplied by `scale`. Name the board mesh `Snowboard` (or set `board_node`); use in-place clips. Optional `poses` maps neutral/toe/heel clip names. See docs/content-drop-in.md for the complete example.
-# Scroll-controlled journey
-
-`bansko-journey-v2.mp4` is the owner's generated clip, optimised for seeking; the two `bansko-*-poster.webp` files are extracted from it. Timing, crop and recovery instructions: [docs/video-journey.md](../../../../docs/video-journey.md). Configure it under `journey` in `app/experience/content.py`. It replaces the procedural background while leaving gallery media slots independent.
-
+Keep originals elsewhere. Use new filenames and increment VERSION for changed media. Older bansko-journey-v2.mp4 remains for recovery; the refinement does not request it.

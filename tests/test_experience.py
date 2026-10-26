@@ -115,3 +115,31 @@ def test_journey_media_range_request(client):
     assert len(response.data) == 1024
     assert response.headers['Content-Type'].startswith('video/mp4')
     assert response.headers['Cache-Control'] == 'public, max-age=31536000, immutable'
+
+
+def test_refinement_order_and_empty_film_collection(client):
+    response = client.get('/')
+    text = response.get_data(as_text=True)
+    sections = re.findall(r'<section id="([^"]+)"[^>]*data-chapter=', text)
+    assert sections == ['summit', 'drop', 'arrival', 'ring', 'sessions', 'bansko']
+    data = manifest(response)
+    assert len(data['films']['cards']) == 1
+    assert data['films']['cards'][0]['concept'] is True
+    assert 'Generated concept film' in text
+    assert 'id="hero-book"' in text
+    assert '<canvas' not in text
+
+
+def test_refinement_database_films_are_not_padded(client, sample_video):
+    cards = manifest(client.get('/'))['films']['cards']
+    assert len(cards) == 2
+    assert cards[1]['title'] == sample_video.title
+    assert cards[1]['link'] == f'/gallery/{sample_video.id}'
+
+
+def test_refinement_responsive_media(client):
+    journey = manifest(client.get('/'))['journey']
+    assert journey['src'] != journey['mobile_src']
+    response = client.get('/static/' + journey['mobile_src'], headers={'Range': 'bytes=0-1023'})
+    assert response.status_code == 206
+    assert len(response.data) == 1024
