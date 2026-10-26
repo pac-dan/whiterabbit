@@ -1,6 +1,11 @@
 # Add your footage to Momentum Clips
 
-The mountain, ride and transitions are ready for your files. Everything you
+The background journey now uses the owner's generated film. To replace it or
+tune scroll timing and mobile crop, see [the video journey guide](video-journey.md).
+The procedural athlete/model slot is retained for recovery mode; it is not
+loaded behind the film. Gallery and other content slots remain independent.
+
+Everything you
 need to edit is in **app/experience/content.py**. Packages, prices, video titles
 and customer quotes still come from your existing site admin.
 

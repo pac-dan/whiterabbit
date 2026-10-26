@@ -89,3 +89,29 @@ def test_terrain_binary_and_extrema():
     assert (folder/'bansko-height-256.bin').stat().st_size == 256*256*2
     assert 750 < metadata['minM'] < 1250
     assert 2700 < metadata['maxM'] < 3100
+
+
+def test_video_journey_manifest_and_poster(client):
+    response = client.get('/')
+    data = manifest(response)['journey']
+    assert data['mode'] == 'video'
+    assert data['cues'][0] == [0, 0]
+    assert data['cues'][-1][1] == data['cues'][-2][1]
+    assert [p[0] for p in data['cues']] == sorted(p[0] for p in data['cues'])
+    assert b'id="journey-video"' in response.data
+    for name in ['src', 'poster', 'town_poster']:
+        assert not data[name].startswith(('C:', 'file:'))
+        asset = client.get('/static/' + data[name])
+        assert asset.status_code == 200
+        assert 'immutable' in asset.headers['Cache-Control']
+    video = re.search(rb'<video[^>]*id="journey-video"[^>]*>', response.data)[0]
+    assert b'autoplay' not in video and b'loop' not in video
+
+
+def test_journey_media_range_request(client):
+    path = '/static/' + EXPERIENCE['journey']['src']
+    response = client.get(path, headers={'Range': 'bytes=0-1023'})
+    assert response.status_code == 206
+    assert len(response.data) == 1024
+    assert response.headers['Content-Type'].startswith('video/mp4')
+    assert response.headers['Cache-Control'] == 'public, max-age=31536000, immutable'
