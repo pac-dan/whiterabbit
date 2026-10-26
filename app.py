@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-from app import create_app, socketio, db
+from app import create_app, db
 
 # Create Flask application
 app = create_app()
@@ -236,10 +236,8 @@ def seed_db():
 
 
 if __name__ == '__main__':
-    # Run the application with SocketIO
-    # For production, use gunicorn with eventlet worker
-    socketio.run(
-        app,
+    # Development server only; production runs on Vercel or gunicorn
+    app.run(
         debug=app.config.get('DEBUG', False),
         host='0.0.0.0',
         port=5000

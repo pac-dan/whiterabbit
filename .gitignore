@@ -81,3 +81,8 @@ dump.rdb
 # SSL Certificates (keep structure, not actual certs)
 deployment/ssl/*
 !deployment/ssl/.gitkeep
+
+# Run ledgers
+.runs/
+
+.vercel

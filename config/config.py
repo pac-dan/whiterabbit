@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# SQLAlchemy 2.0+ only accepts postgresql:// (Render, Neon and others hand out postgres://)
+if os.getenv('DATABASE_URL', '').startswith('postgres://'):
+    os.environ['DATABASE_URL'] = os.environ['DATABASE_URL'].replace('postgres://', 'postgresql://', 1)
+
 
 def validate_production_secrets():
     """Validate that all required secrets are set in production and not placeholders"""
@@ -83,15 +87,9 @@ class Config:
         'pool_recycle': 300,
     }
 
-    # Session
-    SESSION_TYPE = 'redis'
+    # Session (Flask's signed cookie)
     SESSION_PERMANENT = True
     PERMANENT_SESSION_LIFETIME = timedelta(hours=1)
-    SESSION_USE_SIGNER = True
-    SESSION_KEY_PREFIX = 'snowboard_session:'
-
-    # Redis
-    REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 
     # Flask-Login
     REMEMBER_COOKIE_DURATION = timedelta(days=7)
@@ -134,10 +132,6 @@ class Config:
     WTF_CSRF_CHECK_DEFAULT = True
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5000').split(',')
 
-    # SocketIO
-    SOCKETIO_MESSAGE_QUEUE = REDIS_URL
-    SOCKETIO_ASYNC_MODE = 'eventlet'
-
     # Claude AI Configuration
     CLAUDE_MODEL = 'claude-sonnet-4-5-20250929'
     CLAUDE_MAX_TOKENS = 1024
@@ -172,10 +166,6 @@ class DevelopmentConfig(Config):
     # Verbose logging
     SQLALCHEMY_ECHO = False  # Set to True to see SQL queries
 
-    # Socket.IO development settings
-    SOCKETIO_LOGGER = True
-    SOCKETIO_ENGINEIO_LOGGER = True
-
 
 class ProductionConfig(Config):
     """Production configuration"""
@@ -197,11 +187,12 @@ class ProductionConfig(Config):
     REMEMBER_COOKIE_HTTPONLY = True
 
     # Database connection pooling
+    # Vercel (VERCEL=1) runs many short-lived instances, so each keeps a tiny pool
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
         'pool_recycle': 300,
-        'pool_size': 10,
-        'max_overflow': 20,
+        'pool_size': 1 if os.getenv('VERCEL') else 10,
+        'max_overflow': 2 if os.getenv('VERCEL') else 20,
     }
 
     # Production logging

@@ -464,7 +464,7 @@ def health_check():
     Health check endpoint for monitoring and load balancers
     Returns JSON with status of critical services
     """
-    from app import db, redis_client
+    from app import db
     import sys
     
     health_status = {
@@ -481,17 +481,6 @@ def health_check():
     except Exception as e:
         health_status['services']['database'] = f'error: {str(e)}'
         health_status['status'] = 'unhealthy'
-    
-    # Check Redis connectivity (if configured)
-    if redis_client:
-        try:
-            redis_client.ping()
-            health_status['services']['redis'] = 'ok'
-        except Exception as e:
-            health_status['services']['redis'] = f'error: {str(e)}'
-            # Redis is optional, so don't mark as unhealthy
-    else:
-        health_status['services']['redis'] = 'not configured'
     
     # Return appropriate status code
     status_code = 200 if health_status['status'] == 'healthy' else 503

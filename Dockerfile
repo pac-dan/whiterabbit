@@ -7,8 +7,7 @@ WORKDIR /app
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    FLASK_APP=app.py \
-    EVENTLET_NO_GREENDNS=yes
+    FLASK_APP=app.py
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -32,5 +31,5 @@ RUN mkdir -p app/static/uploads && chmod 755 app/static/uploads
 # Expose port
 EXPOSE 5000
 
-# Run with gunicorn and eventlet worker
-CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--bind", "0.0.0.0:5000", "wsgi:app"]
+# Run with gunicorn
+CMD ["gunicorn", "-w", "2", "--bind", "0.0.0.0:5000", "wsgi:app"]

@@ -11,12 +11,10 @@ services:
     environment:
       - FLASK_ENV=production
       - DATABASE_URL=mysql+pymysql://snowboard_user:${DB_PASSWORD}@db:3306/snowboard_media
-      - REDIS_URL=redis://redis:6379/0
     env_file:
       - .env
     depends_on:
       - db
-      - redis
     volumes:
       - ./app/static/uploads:/app/app/static/uploads
     networks:
@@ -40,18 +38,6 @@ services:
       - snowboard_network
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
-  # Redis for sessions and WebSocket
-  redis:
-    image: redis:7-alpine
-    container_name: snowboard_media_redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - snowboard_network
-
   # Nginx Reverse Proxy (Production)
   nginx:
     image: nginx:alpine
@@ -71,8 +57,6 @@ services:
 
 volumes:
   mysql_data:
-    driver: local
-  redis_data:
     driver: local
 
 networks:

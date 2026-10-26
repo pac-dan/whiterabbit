@@ -1,0 +1,14 @@
+.venv/
+.runs/
+.claude/
+tests/
+docs/
+deployment/
+migrations/
+*.db
+.env
+node_modules/
+# Local CLI helpers only; the name clashes with the app/ package on Vercel
+app.py
+# Unused: Vercel's Flask support serves wsgi.py directly
+api/

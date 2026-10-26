@@ -6,12 +6,6 @@ Flask-WTF==1.2.1
 Flask-Migrate==4.1.0
 Flask-Mail==0.9.1
 
-# Real-time Communication
-Flask-SocketIO==5.3.5
-python-socketio==5.10.0
-redis==5.0.1
-eventlet==0.33.3
-
 # Database
 PyMySQL==1.1.0
 psycopg2-binary==2.9.9

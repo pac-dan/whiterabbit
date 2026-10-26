@@ -2,7 +2,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
-from flask_socketio import SocketIO
 from flask_cors import CORS
 from flask_talisman import Talisman
 from flask_limiter import Limiter
@@ -11,7 +10,6 @@ from flask_compress import Compress
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from config import get_config
-import redis
 from app.services.email_service import mail
 
 # Initialize extensions
@@ -19,16 +17,12 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
-socketio = SocketIO()
 compress = Compress()
 csrf = CSRFProtect()
 talisman = None  # Will be initialized conditionally in create_app
 
-# Rate limiter will be initialized in create_app with proper storage
+# Rate limiter will be initialized in create_app
 limiter = None
-
-# Redis connection
-redis_client = None
 
 
 def create_app(config_name=None):
@@ -72,49 +66,16 @@ def create_app(config_name=None):
     # CSRF Protection - now properly initialized
     # Note: Individual routes can be exempted using @csrf.exempt decorator
     
-    # Initialize rate limiter with Redis storage for production
+    # Initialize rate limiter with in-memory storage
+    # (on Vercel each function instance keeps its own counts)
     logger.info("[4/10] Initializing rate limiter...")
     global limiter
-    
-    # Only try Redis if explicitly configured (not the default localhost)
-    redis_url = app.config.get('REDIS_URL', '')
-    use_redis = redis_url and not redis_url.startswith('redis://localhost')
-    
-    if use_redis:
-        try:
-            # Try to use Redis for rate limiting (required for multi-worker production)
-            from flask_limiter import Limiter
-            from flask_limiter.util import get_remote_address
-            redis_test = redis.from_url(redis_url, socket_connect_timeout=3)
-            redis_test.ping()
-            
-            limiter = Limiter(
-                get_remote_address,
-                app=app,
-                default_limits=["200 per day", "50 per hour"],
-                storage_uri=redis_url
-            )
-            app.logger.info("[OK] Rate limiter using Redis storage (production-ready)")
-        except Exception as e:
-            # Fall back to memory storage
-            from flask_limiter import Limiter
-            from flask_limiter.util import get_remote_address
-            limiter = Limiter(
-                get_remote_address,
-                app=app,
-                default_limits=["200 per day", "50 per hour"]
-            )
-            app.logger.warning(f"[WARN] Rate limiter Redis failed, using memory ({str(e)[:80]})")
-    else:
-        # Use memory storage directly
-        from flask_limiter import Limiter
-        from flask_limiter.util import get_remote_address
-        limiter = Limiter(
-            get_remote_address,
-            app=app,
-            default_limits=["200 per day", "50 per hour"]
-        )
-        app.logger.info("[OK] Rate limiter using memory storage (development mode)")
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["200 per day", "50 per hour"]
+    )
+    app.logger.info("[OK] Rate limiter using memory storage")
     
     # Initialize compression for better performance & SEO
     compress.init_app(app)
@@ -136,7 +97,6 @@ def create_app(config_name=None):
             'script-src': [
                 "'self'",
                 "'unsafe-inline'",  # Required for some inline scripts
-                "https://cdn.socket.io",
                 "https://js.stripe.com",
                 "https://player.vimeo.com",
                 "https://assets.calendly.com",
@@ -166,7 +126,7 @@ def create_app(config_name=None):
             'connect-src': [
                 "'self'",
                 "https://api.stripe.com",
-                "wss://*",  # WebSocket connections
+                "wss://*",  # WebSocket connections (Retell voice widget)
                 "ws://*"
             ]
         }
@@ -187,49 +147,6 @@ def create_app(config_name=None):
             }
         )
         app.logger.info("Flask-Talisman enabled: HTTPS enforcement & security headers active")
-
-    # Initialize SocketIO
-    # For development, use threading mode (works without Redis)
-    # For production, use eventlet with Redis message queue
-    logger.info("[5/10] Initializing SocketIO...")
-    socketio_options = {
-        'cors_allowed_origins': app.config['CORS_ORIGINS'],
-        'logger': app.config.get('SOCKETIO_LOGGER', False),
-        'engineio_logger': app.config.get('SOCKETIO_ENGINEIO_LOGGER', False)
-    }
-    
-    # Try to use Redis message queue if available (for production)
-    if use_redis:
-        try:
-            redis_test = redis.from_url(redis_url, socket_connect_timeout=3)
-            redis_test.ping()
-            socketio_options['message_queue'] = redis_url
-            socketio_options['async_mode'] = 'eventlet'
-            app.logger.info("[OK] SocketIO using Redis message queue with eventlet")
-        except Exception as e:
-            # Fall back to threading mode for development
-            socketio_options['async_mode'] = 'threading'
-            app.logger.warning(f"[WARN] SocketIO Redis failed, using threading ({str(e)[:80]})")
-    else:
-        # Use threading mode directly
-        socketio_options['async_mode'] = 'threading'
-        app.logger.info("[OK] SocketIO using threading mode (development)")
-    
-    socketio.init_app(app, **socketio_options)
-
-    # Initialize Redis client if available
-    global redis_client
-    if use_redis:
-        try:
-            redis_client = redis.from_url(redis_url, socket_connect_timeout=3)
-            redis_client.ping()
-            app.logger.info("[OK] Redis client connected successfully")
-        except Exception as e:
-            redis_client = None
-            app.logger.warning(f"[WARN] Redis client failed ({str(e)[:80]})")
-    else:
-        redis_client = None
-        app.logger.info("[OK] Redis client skipped (not configured)")
 
     # Configure Flask-Login
     logger.info("[6/10] Configuring Flask-Login...")
