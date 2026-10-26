@@ -33,7 +33,9 @@ def create_app(config_name=None):
     logger = logging.getLogger(__name__)
     
     logger.info("[1/10] Creating Flask app...")
-    app = Flask(__name__)
+    # Vercel's filesystem is read-only except /tmp; the SQLite fallback lives in the instance folder
+    import os
+    app = Flask(__name__, instance_path='/tmp/instance' if os.getenv('VERCEL') else None)
 
     # Load configuration
     logger.info("[2/10] Loading configuration...")
