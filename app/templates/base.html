@@ -233,6 +233,7 @@
             <div class="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400">
                 <p class="text-xs sm:text-sm">&copy; 2025 Momentum Clips. All rights reserved. | <a href="#" class="hover:text-white transition">Privacy Policy</a> | <a href="#" class="hover:text-white transition">Terms of Service</a></p>
                 <p class="mt-2 text-xs sm:text-sm font-medium">Powered by <span style="color: #8B5CF6;">Momentum Digital</span> <i class="fas fa-robot" style="color: #00D4FF;"></i></p>
+                {% if experience or alpine_page %}<details class="alpine-credits"><summary>Terrain texture credits</summary><p>Contours: Mapzen / AWS Terrain Tiles. Produced using Copernicus data and information funded by the European Union — EU-DEM layers. Global SRTM and GMTED2010 courtesy of the U.S. Geological Survey. Elevations resampled. <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Source attribution</a>.</p></details>{% endif %}
             </div>
         </div>
     </footer>

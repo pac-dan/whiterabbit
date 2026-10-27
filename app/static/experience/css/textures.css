@@ -1,0 +1,23 @@
+/* Original static alpha grain + contours of the real Bansko heightmap.
+   No animated noise, full-screen blend layer or texture on the source footage. */
+:root{--alpine-grain:url('../textures/alpine-grain.png?v=bansko-texture-1');--alpine-contours:url('../textures/bansko-contours.webp?v=bansko-texture-1')}
+.flow-films,.flow-sessions,.flow-close,.ap-intro,.ap-closing{isolation:isolate}
+.flow-sessions::before,.flow-close::before,.flow-films::after,.ap-intro::after,.ap-closing::after{
+ content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:var(--alpine-grain);background-size:128px 128px;opacity:.5;
+ mask-image:linear-gradient(transparent,#000 15%,#000 85%,transparent)
+}
+.flow-close::after,.ap-intro::before,.ap-closing::before{
+ content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:var(--alpine-contours) no-repeat right center;background-size:auto 115%;opacity:.5;
+ mask-image:linear-gradient(90deg,transparent 25%,#000 85%)
+}
+.ap-closing{position:relative}
+.flow-package,.alpine-main .session-card,.alpine-main .review-card{
+ background-image:var(--alpine-grain),linear-gradient(145deg,#14253b,#0a1323);background-size:128px 128px,auto;
+ box-shadow:inset 0 1px 0 #d1f1ff0c
+}
+/* Quiet frosted edges keep images dominant and text on a solid readable surface. */
+.flow-package,.alpine-main .session-card{border-top-color:#b4d9e44d}
+.film-selected-info{border-image:linear-gradient(90deg,transparent,#7de4ed55,#bba1ff55,transparent) 1}
+.alpine-credits{max-width:650px;margin:20px auto 0;font:10px/1.8 Inter,sans-serif;color:#a8bacb}.alpine-credits summary{cursor:pointer}.alpine-credits p{margin:12px 0}.alpine-credits a{text-decoration:underline}
+@media(max-width:767px){.flow-close::after,.ap-intro::before,.ap-closing::before{background-size:auto 85%;opacity:.35}.flow-films::after,.ap-intro::after{opacity:.4}}
+@media(forced-colors:active){.flow-sessions::before,.flow-close::before,.flow-close::after,.flow-films::after,.ap-intro::before,.ap-intro::after,.ap-closing::before,.ap-closing::after{display:none}}

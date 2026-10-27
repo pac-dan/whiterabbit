@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block extra_css %}<meta name="csrf-token" content="{{ csrf_token() }}"><link rel="stylesheet" href="{{ url_for('static', filename='experience/css/experience.css', v=experience_version) }}"><link rel="stylesheet" href="{{ url_for('static', filename='experience/css/motion.css', v=experience_version) }}">{% endblock %}
+{% block extra_css %}<meta name="csrf-token" content="{{ csrf_token() }}"><link rel="stylesheet" href="{{ url_for('static', filename='experience/css/experience.css', v=experience_version) }}"><link rel="stylesheet" href="{{ url_for('static', filename='experience/css/motion.css', v=experience_version) }}"><link rel="stylesheet" href="{{ url_for('static', filename='experience/css/textures.css', v=experience_version) }}">{% endblock %}
 {% block navigation %}{% include 'includes/alpine_nav.html' %}{% endblock %}
 {% block content %}<div class="alpine-main" id="page-content">{% block page_content %}{% endblock %}</div>{% endblock %}
 {% block extra_js %}<script type="module" src="{{ url_for('static', filename='js/public.js', v=experience_version) }}"></script>{% endblock %}
