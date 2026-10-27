@@ -1,5 +1,5 @@
 import {createDocumentScroll,clamp} from './scroll.js?v=bansko-films-2';
-import {createVideoClock,interpolate} from './video-clock.js?v=bansko-films-2';
+import {createVideoClock,createCueCurve,interpolate} from './video-clock.js?v=bansko-texture-1';
 import {createDebug} from './debug.js?v=bansko-video-2';
 import {createPageMotion} from './page-motion.js?v=bansko-films-2';
 const root=document.getElementById('experience'),data=JSON.parse(document.getElementById('experience-data').textContent),config=data.journey;
@@ -11,6 +11,8 @@ let clock=null,scroll=null,gallery=null,loadingGallery=false,raf=0,frames=0,last
 let state={mode:'static',tier:0,fps:0,progress:0,chapter:0,frames:0,drawCalls:0,slots:{}};
 const debug=createDebug(()=>state);
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
+const cue=createCueCurve(config.cues),styleValues=new Map();
+const style=(key,value)=>{if(styleValues.get(key)!==value){root.style.setProperty(key,value);styleValues.set(key,value);}};
 const pageMotion=createPageMotion(root,()=>enabled&&!motion.matches);
 function loadTown(){if(!town.src)town.src=town.dataset.src;const still=document.querySelector('.arrival-still');if(still&&!still.src)still.src=town.dataset.src;}
 function start(){
@@ -37,13 +39,19 @@ galleryObserver.observe(document.getElementById('ring'));
 if(motion.matches)still();else start();
 function tick(time){if(closed)return;raf=requestAnimationFrame(tick);scroll.update(time);if(document.hidden)return;
  const p=scroll.filmProgress,chapter=scroll.chapter,arrival=smooth((p-.78)/.22),galleryTop=scroll.tops[3];
- root.dataset.flowChapter=String(chapter);root.dataset.town=String(p>=.98);
- root.style.setProperty('--journey-x',`${interpolate(config.framing,interpolate(config.cues,p))}%`);
- root.style.setProperty('--arrival',arrival);root.style.setProperty('--frame-top',`${64*(1-arrival)}px`);root.style.setProperty('--frame-height',`${53+47*arrival}svh`);
- root.style.setProperty('--stage-alpha',1-smooth((scrollY-galleryTop)/(innerHeight*.6)));
- if(p>.65)loadTown();if(clock)clock.update(p,time);pageMotion.update();gallery?.update(time,enabled&&!motion.matches);
- rail.forEach((b,i)=>b.setAttribute('aria-current',String(i===chapter)));
- document.getElementById('chapter-status').textContent=data.chapters[chapter].toUpperCase();document.getElementById('mainNav').classList.toggle('is-scrolled',scrollY>30);
+ // Measure animated content before changing inherited stage styles. Avoid a
+ // forced style/layout flush and repeated DOM mutations while the frame holds.
+ pageMotion.update();gallery?.update(time,enabled&&!motion.matches);
+ if(root.dataset.flowChapter!==String(chapter)){
+  root.dataset.flowChapter=String(chapter);rail.forEach((b,i)=>b.setAttribute('aria-current',String(i===chapter)));
+  document.getElementById('chapter-status').textContent=data.chapters[chapter].toUpperCase();
+ }
+ const atTown=String(p>=.98);if(root.dataset.town!==atTown)root.dataset.town=atTown;
+ style('--journey-x',`${interpolate(config.framing,cue(p)).toFixed(3)}%`);
+ style('--arrival',arrival.toFixed(4));style('--frame-top',`${(64*(1-arrival)).toFixed(2)}px`);style('--frame-height',`${(53+47*arrival).toFixed(3)}svh`);
+ style('--stage-alpha',(1-smooth((scrollY-galleryTop)/(innerHeight*.6))).toFixed(4));
+ if(p>.65)loadTown();if(clock)clock.update(p,time);
+ document.getElementById('mainNav').classList.toggle('is-scrolled',scrollY>30);
  const dt=last?time-last:16.67;last=time;frames++;
  state={mode:enabled?'video':'static',flow:true,progress:scroll.progress,filmProgress:p,journeyRange:scroll.journeyRange,chapter,tier:0,fps:1000/dt,frames,drawCalls:0,
   video:clock?.state??{ready:false,paused:true},galleryReady:!!gallery,galleryIndex:gallery?.active??0,slots:{},firstFrameMs:state.firstFrameMs??time};debug.update();
