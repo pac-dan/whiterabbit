@@ -1,0 +1,4 @@
+﻿{% extends 'public_base.html' %}
+{% block extra_css %}{{ super() }}<link rel="stylesheet" href="{{ url_for('static', filename='css/workflows.css', v='functional-1') }}">{% endblock %}
+{% block page_content %}<div class="workflow-shell">{% block workflow %}{% endblock %}</div>{% endblock %}
+{% block extra_js %}{{ super() }}<script type="module" src="{{ url_for('static', filename='js/workflows.js', v='functional-1') }}"></script>{% endblock %}

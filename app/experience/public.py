@@ -41,14 +41,9 @@ def public_context():
                     video=static_media(media['src'], placeholder) if media.get('src') and media.get('type') == 'video' else None)
 
     def checkout_link(package):
-        from app.routes.payment import PACKAGES
-        key = package.name.split()[0].lower()
-        configured = PACKAGES.get(key)
-        if configured and int(Decimal(str(package.price)) * 100) == configured['price']:
-            return dict(url=url_for('payment.checkout', package=key), label='Book this session')
-        return dict(url=url_for('main.contact', subject=f'Session enquiry: {package.name}'), label='Enquire about this session')
+        return dict(url=url_for('payment.checkout', package=package.id), label='Book this session')
 
-    return dict(alpine_page=request.endpoint in PUBLIC_ENDPOINTS,
+    return dict(alpine_page=request.endpoint in PUBLIC_ENDPOINTS or (request.blueprint in ('admin', 'auth', 'payment')),
                 experience_version=VERSION, public_video_media=video_media,
                 public_static_media=static_media, public_checkout_link=checkout_link,
                 experience_content=EXPERIENCE)

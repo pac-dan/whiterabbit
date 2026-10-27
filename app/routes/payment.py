@@ -1,368 +1,158 @@
-"""
-Payment routes for Stripe Checkout
-Flow: Payment → Waiver → Calendly Booking
-"""
-from flask import Blueprint, redirect, url_for, flash, request, current_app, render_template, session
+﻿"""Guest checkout: DB catalogue -> verified payment -> signed waiver -> scheduling."""
+from flask import Blueprint, redirect, url_for, flash, request, current_app, render_template, session, abort
 from app import db, csrf
-from app.services.email_service import EmailService
+from app.models.public_booking import PublicBooking
+from app.models.waiver import Waiver, WAIVER_TEXT, CURRENT_WAIVER_VERSION
+from app.models.public_booking_waiver import PublicBookingWaiver
+from app.services.checkout_service import catalogue, access_token, order_from_token, verify_payment
 from urllib.parse import urlencode
-import hashlib
-from datetime import datetime
+import re
+import stripe
 
 payment_bp = Blueprint('payment', __name__)
 
-# Package configuration
-PACKAGES = {
-    'basic': {
-        'name': 'Basic Session',
-        'price': 15000,  # €150 in cents
-        'duration': '2 hours',
-        'calendly_url': 'https://calendly.com/mail-kevinjh/2hrs'
-    },
-    'pro': {
-        'name': 'Pro Session',
-        'price': 25000,  # €250 in cents
-        'duration': '2.5 hours',
-        'calendly_url': 'https://calendly.com/mail-kevinjh/new-meeting'
-    },
-    'expert': {
-        'name': 'Expert Session',
-        'price': 35000,  # €350 in cents
-        'duration': '3 hours',
-        'calendly_url': 'https://calendly.com/mail-kevinjh/new-meeting-1'
-    }
-}
 
-def _generate_waiver_confirm_token(waiver_id: int) -> str:
-    secret = current_app.config.get('SECRET_KEY', 'default-secret')
-    data = f"{waiver_id}-{secret}"
-    return hashlib.sha256(data.encode()).hexdigest()[:32]
+def _stripe():
+    key = current_app.config.get('STRIPE_SECRET_KEY')
+    if not key or not key.startswith(('sk_test_', 'sk_live_')):
+        raise ValueError('Payments are not configured')
+    stripe.api_key = key
+    return stripe.checkout.Session
 
 
-def get_stripe():
-    """Get configured stripe module"""
-    import stripe
-    stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
-    if stripe_key:
-        stripe.api_key = stripe_key
-    return stripe
+def _order(package, paid=True, signed=False):
+    order = order_from_token(request.values.get('token') or session.get('order_token'), package)
+    if not order or (paid and not order.paid_at) or (signed and not order.latest_waiver_id):
+        abort(403)
+    # Ignore no unrelated booking/waiver identifiers: reject old or tampered links explicitly.
+    for name, expected in [('booking_id', order.id), ('waiver_id', order.latest_waiver_id)]:
+        if request.args.get(name) and request.args.get(name, type=int) != expected:
+            abort(403)
+    return order
+
+
+def _snapshot(order):
+    pkg = catalogue(order.package_key) or {}
+    return dict(pkg, name=order.package_name, price=order.amount_cents,
+                calendly_url=pkg.get('calendly_url', ''))
 
 
 @payment_bp.route('/checkout/<package>')
 def checkout(package):
-    """Create Stripe Checkout session and redirect to payment"""
-    current_app.logger.info(f'Checkout initiated for package: {package}')
-    
-    if package not in PACKAGES:
-        current_app.logger.warning(f'Invalid package: {package}')
-        flash('Invalid package selected.', 'danger')
-        return redirect(url_for('main.packages'))
-    
-    stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
-    current_app.logger.info(f'Stripe key configured: {bool(stripe_key)}')
-    
-    if not stripe_key:
-        current_app.logger.error('STRIPE_SECRET_KEY not configured')
-        flash('Payment system is being configured. Please try again later or contact support.', 'warning')
-        return redirect(url_for('main.packages'))
-    
-    # Validate key format
-    if not (stripe_key.startswith('sk_test_') or stripe_key.startswith('sk_live_')):
-        current_app.logger.error('Invalid STRIPE_SECRET_KEY format')
-        flash('Payment configuration error. Please contact support.', 'danger')
-        return redirect(url_for('main.packages'))
-    
-    pkg = PACKAGES[package]
-    
+    pkg = catalogue(package)
+    if not pkg or pkg['price'] <= 0:
+        abort(404)
+    order = None
     try:
-        # Import stripe and configure (Stripe v7.x works reliably with explicit submodule import)
-        import stripe
-        from stripe.checkout import Session as CheckoutSession
-        stripe.api_key = stripe_key
-        current_app.logger.info(f"Stripe version: {getattr(stripe, 'VERSION', 'unknown')}")
-        # Safe diagnostics (no secrets): key kind + length can help spot malformed env values
-        current_app.logger.info(
-            "Stripe key diagnostics",
-            extra={
-                "stripe_key_kind": ("sk_live" if stripe_key.startswith("sk_live_") else ("sk_test" if stripe_key.startswith("sk_test_") else "other")),
-                "stripe_key_len": len(stripe_key) if isinstance(stripe_key, str) else None,
-                "stripe_api_key_type": type(getattr(stripe, "api_key", None)).__name__,
-            },
-        )
-        
-        # Create Checkout Session
-        checkout_session = CheckoutSession.create(
-            payment_method_types=['card'],
-            allow_promotion_codes=True,
-            line_items=[{
-                'price_data': {
-                    'currency': 'eur',
-                    'product_data': {
-                        'name': pkg['name'],
-                        'description': f"{pkg['duration']} of professional snowboard filming",
-                    },
-                    'unit_amount': pkg['price'],
-                },
-                'quantity': 1,
-            }],
-            mode='payment',
-            success_url=url_for('payment.success', package=package, _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+        gateway = _stripe()
+        order = PublicBooking(package_key=str(pkg['id']), package_name=pkg['name'],
+                              amount_cents=pkg['price'], currency='eur', status='pending')
+        db.session.add(order)
+        db.session.commit()
+        token = access_token(order)
+        checkout_session = gateway.create(
+            payment_method_types=['card'], mode='payment', client_reference_id=str(order.id),
+            line_items=[{'price_data': {'currency': 'eur', 'unit_amount': order.amount_cents,
+                         'product_data': {'name': order.package_name, 'description': pkg['duration']}}, 'quantity': 1}],
+            success_url=url_for('payment.success', package=package, token=token, _external=True) + '&session_id={CHECKOUT_SESSION_ID}',
             cancel_url=url_for('payment.cancelled', _external=True),
-            metadata={
-                'package': package,
-                'package_name': pkg['name']
-            },
-        )
-        
-        current_app.logger.info(f'Checkout session created: {checkout_session.id}')
+            metadata={'order_id': str(order.id), 'package': str(pkg['id'])},
+            idempotency_key=f'checkout-order-{order.id}')
+        order.stripe_checkout_session_id = checkout_session.id
+        db.session.commit()
+        session['order_token'] = token
         return redirect(checkout_session.url, code=303)
-        
-    except stripe.error.StripeError as e:
-        current_app.logger.error(f'Stripe Error: {str(e)}')
-        flash('Unable to process payment. Please try again.', 'danger')
-        return redirect(url_for('main.packages'))
-    except Exception as e:
-        # Full traceback is critical here: we are seeing AttributeError post-200 from Stripe,
-        # which suggests an internal library issue (not Stripe credentials).
-        key_kind = 'sk_live' if stripe_key.startswith('sk_live_') else ('sk_test' if stripe_key.startswith('sk_test_') else 'other')
-        current_app.logger.exception(
-            'Payment Error (unexpected exception after Stripe call)',
-            extra={
-                'package': package,
-                'stripe_key_kind': key_kind,
-                'stripe_key_present': bool(stripe_key),
-            },
-        )
-        flash('Unable to process payment. Please try again.', 'danger')
-        return redirect(url_for('main.packages'))
+    except (stripe.StripeError, ValueError):
+        db.session.rollback()
+        current_app.logger.warning('Checkout unavailable; no payment access granted')
+        flash('Online payment is unavailable. Please contact us to arrange your session.', 'warning')
+        return redirect(url_for('main.contact', subject=f'Book {pkg["name"]}'))
 
 
 @payment_bp.route('/success/<package>')
 def success(package):
-    """Handle successful payment - redirect to waiver"""
+    order = _order(package, paid=False)
     session_id = request.args.get('session_id')
-    
-    if not session_id:
-        flash('Invalid payment session.', 'danger')
-        return redirect(url_for('main.packages'))
-    
-    # Verify the payment was successful
-    stripe_key = current_app.config.get('STRIPE_SECRET_KEY')
-    if stripe_key:
-        try:
-            import stripe
-            stripe.api_key = stripe_key
-            from stripe.checkout import Session as CheckoutSession
-            checkout_session = CheckoutSession.retrieve(session_id)
-            if checkout_session.payment_status != 'paid':
-                flash('Payment was not completed. Please try again.', 'warning')
-                return redirect(url_for('main.packages'))
-        except stripe.error.StripeError as e:
-            current_app.logger.error(f'Stripe verification error: {str(e)}')
-    
-    # Store package info in session for waiver flow
-    session['paid_package'] = package
-    session['payment_session_id'] = session_id
-
-    # Create/update a public booking record (no user login)
+    if not session_id or session_id != order.stripe_checkout_session_id:
+        abort(403)
     try:
-        from app.models.public_booking import PublicBooking
-        # Use Checkout Session fields if available
-        booking = PublicBooking.query.filter_by(stripe_checkout_session_id=session_id).first()
-        if not booking:
-            booking = PublicBooking(
-                package_key=package,
-                package_name=PACKAGES[package]['name'],
-                stripe_checkout_session_id=session_id,
-                status='paid'
-            )
-            db.session.add(booking)
-
-        # Best-effort: attach Stripe payment_intent and amount
-        if 'checkout_session' in locals():
-            booking.stripe_payment_intent_id = getattr(checkout_session, 'payment_intent', None)
-            booking.amount_cents = int(getattr(checkout_session, 'amount_total', 0) or 0)
-            booking.currency = str(getattr(checkout_session, 'currency', 'eur') or 'eur')
-            booking.paid_at = datetime.utcnow()
-        db.session.commit()
-        session['public_booking_id'] = booking.id
-    except Exception:
-        current_app.logger.exception('Failed to create/update PublicBooking on payment success')
-    
-    # Redirect to waiver signing
-    flash('Payment successful! Please sign the liability waiver to continue.', 'success')
+        verified = verify_payment(_stripe().retrieve(session_id))
+        if verified.id != order.id:
+            abort(403)
+    except (stripe.StripeError, ValueError):
+        db.session.rollback()
+        flash('We could not verify this payment yet. Retry the payment return link or contact us; do not pay again.', 'warning')
+        return redirect(url_for('main.contact'))
+    session['order_token'] = access_token(order)
     return redirect(url_for('payment.waiver', package=package))
+
+
+@payment_bp.route('/webhook', methods=['POST'])
+@csrf.exempt
+def webhook():
+    secret = current_app.config.get('STRIPE_WEBHOOK_SECRET')
+    if not secret:
+        return {'error': 'Webhook not configured'}, 503
+    try:
+        event = stripe.Webhook.construct_event(request.get_data(), request.headers.get('Stripe-Signature', ''), secret)
+    except (ValueError, stripe.SignatureVerificationError):
+        return {'error': 'Invalid signature'}, 400
+    if event['type'] in ('checkout.session.completed', 'checkout.session.async_payment_succeeded'):
+        payload = event['data']['object']
+        if payload.get('payment_status') == 'paid':
+            try:
+                verify_payment(payload)
+            except ValueError:
+                db.session.rollback()
+                return {'error': 'Payment mismatch'}, 400
+    return {'received': True}
 
 
 @payment_bp.route('/waiver/<package>', methods=['GET', 'POST'])
 def waiver(package):
-    """Display and process liability waiver after payment"""
-    if package not in PACKAGES:
-        flash('Invalid package.', 'danger')
-        return redirect(url_for('main.packages'))
-    
-    # Check if payment was made
-    if session.get('paid_package') != package:
-        flash('Please complete payment first.', 'warning')
-        return redirect(url_for('payment.checkout', package=package))
-    
-    pkg = PACKAGES[package]
-    
-    # Import waiver text
-    from app.models.waiver import WAIVER_TEXT
-    
+    order = _order(package)
+    if order.latest_waiver_id:
+        return redirect(url_for('payment.book_time', package=package, token=access_token(order)))
     if request.method == 'POST':
-        legal_name = request.form.get('legal_name_typed')
-        email = request.form.get('email')
-        agreed = request.form.get('agree_to_terms')
-        
-        if not legal_name or not email or not agreed:
-            flash('Please fill in all required fields and agree to the terms.', 'danger')
-            return render_template('payment/waiver.html', package=package, pkg=pkg, waiver_text=WAIVER_TEXT)
-        
-        # Store waiver in database (field names must match Waiver model)
-        from app.models.waiver import Waiver, CURRENT_WAIVER_VERSION
-        new_waiver = Waiver(
-            booking_id=None,
-            client_name=legal_name,
-            client_email=email,
-            legal_name_signature=legal_name,
-            ip_address=request.remote_addr,
-            user_agent=request.headers.get('User-Agent'),
-            waiver_version=CURRENT_WAIVER_VERSION,
-        )
-        
-        db.session.add(new_waiver)
-        db.session.commit()
-
-        # Link waiver to a public booking record and update customer info
-        try:
-            from app.models.public_booking import PublicBooking
-            from app.models.public_booking_waiver import PublicBookingWaiver
-            public_booking_id = session.get('public_booking_id')
-            booking = None
-            if public_booking_id:
-                booking = PublicBooking.query.get(public_booking_id)
-            if not booking:
-                # Fallback: try to find by Stripe session id in this flow
-                stripe_session_id = session.get('payment_session_id')
-                if stripe_session_id:
-                    booking = PublicBooking.query.filter_by(stripe_checkout_session_id=stripe_session_id).first()
-
-            if booking:
-                booking.customer_email = email
-                booking.customer_name = legal_name
-                booking.latest_waiver_id = new_waiver.id
-                booking.status = 'waiver_signed'
-                db.session.add(PublicBookingWaiver(public_booking_id=booking.id, waiver_id=new_waiver.id))
-                db.session.commit()
-                session['public_booking_id'] = booking.id
-        except Exception:
-            current_app.logger.exception('Failed to link waiver to PublicBooking')
-        
-        # Clear payment session and redirect to Calendly with redirect back to our confirmation page
-        session.pop('paid_package', None)
-        session.pop('payment_session_id', None)
-
-        # Store minimal data for confirmation/email
-        session['last_waiver_id'] = new_waiver.id
-        session['last_package'] = package
-
-        confirm_token = _generate_waiver_confirm_token(new_waiver.id)
-        confirm_url = url_for('payment.complete', package=package, _external=True, waiver_id=new_waiver.id, token=confirm_token)
-
-        flash('Waiver signed successfully! Now select your preferred time slot.', 'success')
-        return redirect(url_for('payment.book_time', package=package, waiver_id=new_waiver.id, token=confirm_token, booking_id=session.get('public_booking_id')))
-    
-    return render_template('payment/waiver.html', package=package, pkg=pkg, waiver_text=WAIVER_TEXT)
+        name = request.form.get('legal_name_typed', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        if not (3 <= len(name) <= 100 and len(email) <= 200 and re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email)
+                and request.form.get('agree_to_terms') == 'on'):
+            flash('Enter your full name, a valid email address and accept the waiver.', 'danger')
+        else:
+            signed = Waiver(client_name=name, client_email=email, legal_name_signature=name,
+                            ip_address=request.remote_addr, user_agent=request.headers.get('User-Agent', '')[:500],
+                            waiver_version=CURRENT_WAIVER_VERSION)
+            db.session.add(signed)
+            db.session.flush()
+            order.customer_name, order.customer_email = name, email
+            order.latest_waiver_id, order.status = signed.id, 'waiver_signed'
+            db.session.add(PublicBookingWaiver(public_booking_id=order.id, waiver_id=signed.id))
+            db.session.commit()
+            return redirect(url_for('payment.book_time', package=package, token=access_token(order)))
+    return render_template('payment/waiver.html', package=package, pkg=_snapshot(order), waiver_text=WAIVER_TEXT)
 
 
 @payment_bp.route('/cancelled')
 def cancelled():
-    """Handle cancelled payment"""
-    flash('Payment was cancelled. You can try again when you\'re ready.', 'info')
+    flash('Checkout closed. No booking is confirmed until payment is verified.', 'info')
     return redirect(url_for('main.packages'))
 
 
 @payment_bp.route('/book-time/<package>')
 def book_time(package):
-    """Embedded Calendly step that redirects back to our final confirmation page."""
-    if package not in PACKAGES:
-        flash('Invalid package.', 'danger')
-        return redirect(url_for('main.packages'))
-
-    waiver_id = request.args.get('waiver_id', type=int)
-    token = request.args.get('token', type=str)
-    booking_id = request.args.get('booking_id', type=int)
-    if not waiver_id or not token:
-        flash('Missing booking details. Please contact support.', 'danger')
-        return redirect(url_for('main.packages'))
-
-    expected = _generate_waiver_confirm_token(waiver_id)
-    if token != expected:
-        flash('Invalid booking token. Please contact support.', 'danger')
-        return redirect(url_for('main.packages'))
-
-    pkg = PACKAGES[package]
-    confirm_url = url_for('payment.complete', package=package, _external=True, waiver_id=waiver_id, token=token, booking_id=booking_id)
-    calendly_url = pkg['calendly_url']
-    joiner = '&' if '?' in calendly_url else '?'
-    calendly_embed_url = f"{calendly_url}{joiner}{urlencode({'hide_gdpr_banner': 1, 'redirect_url': confirm_url})}"
-
-    return render_template('payment/book_time.html', pkg=pkg, package_key=package, waiver_id=waiver_id, token=token, calendly_url=calendly_embed_url)
+    order = _order(package, signed=True)
+    pkg = _snapshot(order)
+    calendar = pkg['calendly_url']
+    if calendar:
+        calendar += ('&' if '?' in calendar else '?') + urlencode({'name': order.customer_name, 'email': order.customer_email})
+    return render_template('payment/book_time.html', pkg=pkg, package_key=package,
+                           calendly_url=calendar, token=access_token(order), booking=order)
 
 
 @payment_bp.route('/complete/<package>')
 def complete(package):
-    """Final confirmation after Calendly booking - send confirmation email + show done page."""
-    if package not in PACKAGES:
-        flash('Invalid package.', 'danger')
-        return redirect(url_for('main.packages'))
-
-    waiver_id = request.args.get('waiver_id', type=int)
-    token = request.args.get('token', type=str)
-    booking_id = request.args.get('booking_id', type=int)
-    if not waiver_id or not token:
-        flash('Missing confirmation details. Please contact support.', 'danger')
-        return redirect(url_for('main.packages'))
-
-    expected = _generate_waiver_confirm_token(waiver_id)
-    if token != expected:
-        flash('Invalid confirmation token. Please contact support.', 'danger')
-        return redirect(url_for('main.packages'))
-
-    from app.models.waiver import Waiver
-    waiver = Waiver.query.get_or_404(waiver_id)
-    pkg = PACKAGES[package]
-
-    # Update booking record with any Calendly details (best-effort)
-    try:
-        from app.models.public_booking import PublicBooking
-        if booking_id:
-            booking = PublicBooking.query.get(booking_id)
-            if booking:
-                booking.status = 'scheduled'
-                # Capture common Calendly redirect params if present
-                booking.calendly_invitee_uuid = request.args.get('invitee_uuid') or booking.calendly_invitee_uuid
-                booking.calendly_event_uuid = request.args.get('event_uuid') or booking.calendly_event_uuid
-                db.session.commit()
-    except Exception:
-        current_app.logger.exception('Failed to update PublicBooking on complete')
-
-    # Idempotency: don't spam email on refresh
-    if session.get('confirmation_emailed_waiver_id') != waiver_id:
-        try:
-            email_service = EmailService()
-            email_service.send_email(
-                to=waiver.client_email,
-                subject='Booking Confirmed',
-                template='package_confirmation',
-                waiver=waiver,
-                package=pkg,
-                package_key=package,
-            )
-            session['confirmation_emailed_waiver_id'] = waiver_id
-        except Exception:
-            current_app.logger.exception('Failed to send package confirmation email')
-
-    return render_template('payment/complete.html', waiver=waiver, pkg=pkg, package_key=package)
+    order = _order(package, signed=True)
+    # A return URL is not proof of a Calendly event. Staff confirms the actual date/time.
+    return render_template('payment/complete.html', pkg=_snapshot(order), booking=order,
+                           waiver=db.session.get(Waiver, order.latest_waiver_id), package_key=package)
