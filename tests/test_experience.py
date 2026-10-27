@@ -123,7 +123,7 @@ def test_refinement_order_and_empty_film_collection(client):
     sections = re.findall(r'<section id="([^"]+)"[^>]*data-chapter=', text)
     assert sections == ['summit', 'drop', 'arrival', 'ring', 'sessions', 'bansko']
     data = manifest(response)
-    assert len(data['films']['cards']) == 1
+    assert len(data['films']['cards']) == len(EXPERIENCE['films']['moments']) == 5
     assert data['films']['cards'][0]['concept'] is True
     assert 'Generated concept film' in text
     assert 'id="hero-book"' in text
@@ -131,10 +131,29 @@ def test_refinement_order_and_empty_film_collection(client):
 
 
 def test_refinement_database_films_are_not_padded(client, sample_video):
+    sample_video.thumbnail_url = '/static/images/hero_1.jpg'
+    db.session.commit()
     cards = manifest(client.get('/'))['films']['cards']
-    assert len(cards) == 2
-    assert cards[1]['title'] == sample_video.title
-    assert cards[1]['link'] == f'/gallery/{sample_video.id}'
+    assert len(cards) == 6
+    assert cards[-1]['title'] == sample_video.title
+    assert cards[-1]['link'] == f'/gallery/{sample_video.id}'
+
+
+def test_unillustrated_database_film_is_not_disguised_as_client_work(client, sample_video):
+    cards = manifest(client.get('/'))['films']['cards']
+    assert len(cards) == 5
+    assert all(c['concept'] for c in cards)
+    assert client.get(f'/gallery/{sample_video.id}').status_code == 200
+
+
+def test_concept_moments_have_real_posters_and_valid_start_times(client):
+    cards = manifest(client.get('/'))['films']['cards']
+    assert len({c['poster'] for c in cards}) == 5
+    assert [c['start'] for c in cards] == sorted(c['start'] for c in cards)
+    for card in cards:
+        assert 0 <= card['start'] < 9
+        assert client.get('/static/' + card['poster']).status_code == 200
+        assert card['missing'] is False
 
 
 def test_refinement_responsive_media(client):

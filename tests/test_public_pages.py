@@ -38,7 +38,11 @@ def test_gallery_filter_and_detail(client, sample_video):
     text = client.get('/gallery?style=Test+Style').get_data(as_text=True)
     assert sample_video.title in text
     assert 'selected>Test Style' in text
-    assert 'experience/placeholders/ring-' in text
+    assert 'experience/media/moments/moment-' in text
+    assert 'CONCEPT ARTWORK / PREVIEW PENDING' in text
+    for src in re.findall(r'<img[^>]+src="([^"]+)"', text):
+        if src.startswith('/static/'):
+            assert client.get(src.replace('&amp;', '&')).status_code == 200
     assert 'img.youtube.com' not in text
     assert f'/gallery/{sample_video.id}' in text
     r = client.get(f'/gallery/{sample_video.id}')

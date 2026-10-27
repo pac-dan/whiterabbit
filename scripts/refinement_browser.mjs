@@ -3,7 +3,7 @@ import {existsSync,readdirSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 export const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-export const run=path.join(root,'.runs/2026-10-26-homepage-refinement');
+export const run=process.env.REFINEMENT_RUN?path.resolve(process.env.REFINEMENT_RUN):path.join(root,'.runs/2026-10-26-homepage-refinement');
 export const out=path.join(run,'evidence');
 export const base=process.env.REFINEMENT_BASE||'http://127.0.0.1:5000';
 export const views=[{width:1440,height:900},{width:1366,height:768},{width:390,height:844},{width:375,height:812}];
