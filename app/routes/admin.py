@@ -17,6 +17,11 @@ from app.utils.validators import (
 )
 from datetime import datetime, timedelta
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
+from app.services.admin_forms import SCHEMAS, validate_record
+from app.models.package_schedule import PackageSchedule
+from app.services.email_service import EmailService
+from urllib.parse import urlparse
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -123,10 +128,21 @@ def update_booking_status(booking_id):
     new_status = request.form.get('status')
     admin_notes = request.form.get('admin_notes')
 
-    if new_status:
-        booking.status = new_status
-    if admin_notes is not None:
-        booking.admin_notes = admin_notes
+    if new_status not in ('paid', 'waiver_signed', 'scheduled', 'cancelled') or not booking.paid_at:
+        flash('Choose a valid status for a verified paid order.', 'danger')
+        return redirect(url_for('admin.view_booking', booking_id=booking_id))
+    if new_status == 'waiver_signed' and not booking.latest_waiver_id:
+        flash('This order has no signed waiver.', 'danger')
+        return redirect(url_for('admin.view_booking', booking_id=booking_id))
+    if new_status == 'scheduled':
+        try:
+            booking.calendly_event_start = datetime.strptime(request.form.get('scheduled_at', ''), '%Y-%m-%dT%H:%M')
+            booking.calendly_timezone = 'UTC'
+        except ValueError:
+            flash('Enter the confirmed session date and time in UTC.', 'danger')
+            return redirect(url_for('admin.view_booking', booking_id=booking_id))
+    booking.status = new_status
+    if admin_notes is not None: booking.admin_notes = admin_notes[:10000]
     db.session.commit()
     flash('Booking updated successfully.', 'success')
 
@@ -139,15 +155,54 @@ def update_booking_status(booking_id):
 def deliver_booking(booking_id):
     """Mark booking as completed and add video links"""
     booking = PublicBooking.query.get_or_404(booking_id)
-    video_links = request.form.get('video_links')
-
-    booking.status = 'completed'
-    booking.video_links = video_links
-    booking.delivered_at = datetime.utcnow()
+    links = [line.strip() for line in request.form.get('video_links', '').splitlines() if line.strip()]
+    if not booking.paid_at or not booking.customer_email or not links or any(urlparse(link).scheme != 'https' or not urlparse(link).hostname for link in links):
+        flash('A verified order, customer email and valid HTTPS film links are required.', 'danger')
+        return redirect(url_for('admin.view_booking', booking_id=booking_id))
+    booking.video_links = '\n'.join(links)
     db.session.commit()
-
-    flash('Booking marked as completed and video links delivered.', 'success')
+    if booking.delivered_at and request.form.get('resend') != 'on':
+        flash('Delivery already sent. Select resend to send it again.', 'info')
+    elif EmailService().send_email(to=booking.customer_email, subject='Your Momentum Clips films', body=f'Your films for {booking.package_name}:\n\n{booking.video_links}\n\nThank you for riding with us.'):
+        booking.status = 'completed'
+        booking.delivered_at = datetime.utcnow()
+        db.session.commit()
+        flash('Film links emailed to the customer.', 'success')
+    else:
+        flash('Links saved, but email delivery failed. Check mail settings and retry; delivery is not marked complete.', 'warning')
     return redirect(url_for('admin.view_booking', booking_id=booking_id))
+
+
+def _edit_record(kind, record=None):
+    model, endpoint = {'package': (Package, 'admin.packages'), 'video': (Video, 'admin.videos'), 'testimonial': (Testimonial, 'admin.testimonials')}[kind]
+    calendar = db.session.get(PackageSchedule, record.id) if kind == 'package' and record else None
+    if request.method == 'POST':
+        values, errors = validate_record(kind, request.form)
+        if not errors:
+            record = record or model()
+            calendar_url = values.pop('calendly_url', '')
+            for key, value in values.items(): setattr(record, key, value)
+            if kind == 'video' and not record.is_comparison:
+                record.before_youtube_id = record.after_youtube_id = None
+            db.session.add(record)
+            try:
+                db.session.flush()
+                if kind == 'package':
+                    calendar = calendar or PackageSchedule(package_id=record.id)
+                    calendar.calendly_url = calendar_url
+                    db.session.add(calendar)
+                db.session.commit()
+                flash('Saved successfully.', 'success')
+                return redirect(url_for(endpoint))
+            except IntegrityError:
+                db.session.rollback()
+                errors.append('This record already exists. Check the video ID or other unique fields.')
+        for error in errors: flash(error, 'danger')
+    values = {field[0]: getattr(record, field[0], field[5]) if record else field[5] for field in SCHEMAS[kind]}
+    if kind == 'package': values['calendly_url'] = calendar.calendly_url if calendar else ''
+    if request.method == 'POST':
+        values.update({f[0]: request.form.get(f[0], '') == 'on' if f[2] == 'checkbox' else request.form.get(f[0], '') for f in SCHEMAS[kind]})
+    return render_template('admin/record_form.html', kind=kind, record=record, fields=SCHEMAS[kind], values=values)
 
 
 # Package Management
@@ -165,91 +220,14 @@ def packages():
 @login_required
 @admin_required
 def new_package():
-    """Create a new package"""
-    if request.method == 'POST':
-        # Validate required fields
-        name = sanitize_string(request.form.get('name', ''))
-        price = request.form.get('price')
-        duration = request.form.get('duration')
-        
-        if not validate_required(name, 'Package name'):
-            return render_template('admin/package_form.html', package=None)
-        
-        if not validate_text_length(name, 'Package name', min_length=3, max_length=100):
-            return render_template('admin/package_form.html', package=None)
-        
-        if not validate_required(price, 'Price'):
-            return render_template('admin/package_form.html', package=None)
-        
-        if not validate_price(price):
-            return render_template('admin/package_form.html', package=None)
-        
-        if not validate_required(duration, 'Duration'):
-            return render_template('admin/package_form.html', package=None)
-        
-        if not validate_integer(duration, 'Duration', min_value=1, max_value=480):
-            return render_template('admin/package_form.html', package=None)
-        
-        # Validate optional numeric fields
-        max_riders = request.form.get('max_riders', 1)
-        if not validate_integer(max_riders, 'Max riders', min_value=1, max_value=20):
-            return render_template('admin/package_form.html', package=None)
-        
-        video_count = request.form.get('video_count', 1)
-        if not validate_integer(video_count, 'Video count', min_value=1, max_value=50):
-            return render_template('admin/package_form.html', package=None)
-        
-        description = sanitize_string(request.form.get('description', ''))
-        if description and not validate_text_length(description, 'Description', max_length=2000):
-            return render_template('admin/package_form.html', package=None)
-        
-        package = Package(
-            name=name,
-            description=description,
-            price=float(price),
-            duration=int(duration),
-            features=sanitize_string(request.form.get('features', '')),
-            max_riders=int(max_riders),
-            includes_drone=request.form.get('includes_drone', False, type=bool),
-            video_count=int(video_count),
-            is_active=request.form.get('is_active', True, type=bool),
-            display_order=request.form.get('display_order', 0, type=int)
-        )
-
-        db.session.add(package)
-        db.session.commit()
-
-        flash('Package created successfully.', 'success')
-        return redirect(url_for('admin.packages'))
-
-    return render_template('admin/package_form.html', package=None)
+    return _edit_record('package')
 
 
 @admin_bp.route('/packages/<int:package_id>/edit', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_package(package_id):
-    """Edit a package"""
-    package = Package.query.get_or_404(package_id)
-
-    if request.method == 'POST':
-        package.name = request.form.get('name', package.name)
-        package.description = request.form.get('description', package.description)
-        package.price = request.form.get('price', package.price, type=float)
-        package.duration = request.form.get('duration', package.duration, type=int)
-        package.features = request.form.get('features', package.features)
-        package.max_riders = request.form.get('max_riders', package.max_riders, type=int)
-        package.includes_drone = request.form.get('includes_drone', package.includes_drone, type=bool)
-        package.video_count = request.form.get('video_count', package.video_count, type=int)
-        package.is_active = request.form.get('is_active', package.is_active, type=bool)
-        package.display_order = request.form.get('display_order', package.display_order, type=int)
-
-        db.session.commit()
-
-        flash('Package updated successfully.', 'success')
-        return redirect(url_for('admin.packages'))
-
-    return render_template('admin/package_form.html', package=package)
+    return _edit_record('package', Package.query.get_or_404(package_id))
 
 
 @admin_bp.route('/packages/<int:package_id>/delete', methods=['POST'])
@@ -260,10 +238,11 @@ def delete_package(package_id):
     package = Package.query.get_or_404(package_id)
 
     # Check if package has bookings
-    if package.booking_count > 0:
+    if package.booking_count > 0 or PublicBooking.query.filter_by(package_key=str(package.id)).first():
         flash('Cannot delete package with existing bookings. Deactivate it instead.', 'warning')
         return redirect(url_for('admin.packages'))
 
+    PackageSchedule.query.filter_by(package_id=package.id).delete()
     db.session.delete(package)
     db.session.commit()
 
@@ -286,97 +265,14 @@ def videos():
 @login_required
 @admin_required
 def new_video():
-    """Add a new video"""
-    if request.method == 'POST':
-        # Validate required fields
-        title = sanitize_string(request.form.get('title', ''))
-        youtube_id = sanitize_string(request.form.get('youtube_id', ''))
-        
-        if not validate_required(title, 'Title'):
-            return render_template('admin/video_form.html', video=None)
-        
-        if not validate_text_length(title, 'Title', min_length=3, max_length=200):
-            return render_template('admin/video_form.html', video=None)
-        
-        if not validate_required(youtube_id, 'YouTube ID'):
-            return render_template('admin/video_form.html', video=None)
-        
-        if not validate_youtube_id(youtube_id):
-            return render_template('admin/video_form.html', video=None)
-        
-        # Validate optional fields
-        thumbnail_url = sanitize_string(request.form.get('thumbnail_url', ''))
-        if thumbnail_url and not validate_url(thumbnail_url, 'Thumbnail URL'):
-            return render_template('admin/video_form.html', video=None)
-        
-        description = sanitize_string(request.form.get('description', ''))
-        if description and not validate_text_length(description, 'Description', max_length=1000):
-            return render_template('admin/video_form.html', video=None)
-        
-        video = Video(
-            title=title,
-            description=description,
-            youtube_id=youtube_id,
-            thumbnail_url=thumbnail_url,
-            location_tag=sanitize_string(request.form.get('location_tag', '')),
-            style_tag=sanitize_string(request.form.get('style_tag', '')),
-            rider_level=sanitize_string(request.form.get('rider_level', '')),
-            is_featured=request.form.get('is_featured', False, type=bool),
-            is_published=request.form.get('is_published', True, type=bool),
-            display_order=request.form.get('display_order', 0, type=int)
-        )
-
-        if request.form.get('is_comparison'):
-            before_id = sanitize_string(request.form.get('before_youtube_id', ''))
-            after_id = sanitize_string(request.form.get('after_youtube_id', ''))
-            
-            if not validate_youtube_id(before_id) or not validate_youtube_id(after_id):
-                return render_template('admin/video_form.html', video=None)
-            
-            video.is_comparison = True
-            video.before_youtube_id = before_id
-            video.after_youtube_id = after_id
-
-        db.session.add(video)
-        db.session.commit()
-
-        flash('Video added successfully.', 'success')
-        return redirect(url_for('admin.videos'))
-
-    return render_template('admin/video_form.html', video=None)
+    return _edit_record('video')
 
 
 @admin_bp.route('/videos/<int:video_id>/edit', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_video(video_id):
-    """Edit a video"""
-    video = Video.query.get_or_404(video_id)
-
-    if request.method == 'POST':
-        video.title = request.form.get('title', video.title)
-        video.description = request.form.get('description', video.description)
-        video.youtube_id = request.form.get('youtube_id', video.youtube_id)
-        video.thumbnail_url = request.form.get('thumbnail_url', video.thumbnail_url)
-        video.location_tag = request.form.get('location_tag', video.location_tag)
-        video.style_tag = request.form.get('style_tag', video.style_tag)
-        video.rider_level = request.form.get('rider_level', video.rider_level)
-        video.is_featured = request.form.get('is_featured', video.is_featured, type=bool)
-        video.is_published = request.form.get('is_published', video.is_published, type=bool)
-        video.display_order = request.form.get('display_order', video.display_order, type=int)
-        
-        # Handle before/after comparison
-        video.is_comparison = bool(request.form.get('is_comparison'))
-        if video.is_comparison:
-            video.before_youtube_id = request.form.get('before_youtube_id')
-            video.after_youtube_id = request.form.get('after_youtube_id')
-
-        db.session.commit()
-
-        flash('Video updated successfully.', 'success')
-        return redirect(url_for('admin.videos'))
-
-    return render_template('admin/video_form.html', video=video)
+    return _edit_record('video', Video.query.get_or_404(video_id))
 
 
 @admin_bp.route('/videos/<int:video_id>/delete', methods=['POST'])
@@ -407,77 +303,14 @@ def testimonials():
 @login_required
 @admin_required
 def new_testimonial():
-    """Add a new testimonial"""
-    if request.method == 'POST':
-        # Validate required fields
-        client_name = sanitize_string(request.form.get('client_name', ''))
-        testimonial_text = sanitize_string(request.form.get('testimonial_text', ''))
-        rating = request.form.get('rating')
-        
-        if not validate_required(client_name, 'Client name'):
-            return render_template('admin/testimonial_form.html', testimonial=None)
-        
-        if not validate_text_length(client_name, 'Client name', min_length=2, max_length=100):
-            return render_template('admin/testimonial_form.html', testimonial=None)
-        
-        if not validate_required(testimonial_text, 'Testimonial text'):
-            return render_template('admin/testimonial_form.html', testimonial=None)
-        
-        if not validate_text_length(testimonial_text, 'Testimonial text', min_length=10, max_length=1000):
-            return render_template('admin/testimonial_form.html', testimonial=None)
-        
-        if not validate_required(rating, 'Rating'):
-            return render_template('admin/testimonial_form.html', testimonial=None)
-        
-        if not validate_rating(rating):
-            return render_template('admin/testimonial_form.html', testimonial=None)
-        
-        # Validate optional fields
-        client_photo_url = sanitize_string(request.form.get('client_photo_url', ''))
-        if client_photo_url and not validate_url(client_photo_url, 'Client photo URL'):
-            return render_template('admin/testimonial_form.html', testimonial=None)
-        
-        testimonial = Testimonial(
-            client_name=client_name,
-            client_photo_url=client_photo_url,
-            client_location=sanitize_string(request.form.get('client_location', '')),
-            testimonial_text=testimonial_text,
-            rating=int(rating),
-            project_type=sanitize_string(request.form.get('project_type', '')),
-            is_featured=request.form.get('is_featured', False, type=bool),
-            is_published=request.form.get('is_published', True, type=bool),
-            verified_purchase=request.form.get('verified_purchase', False, type=bool)
-        )
-
-        db.session.add(testimonial)
-        db.session.commit()
-
-        flash('Testimonial added successfully.', 'success')
-        return redirect(url_for('admin.testimonials'))
-
-    return render_template('admin/testimonial_form.html', testimonial=None)
+    return _edit_record('testimonial')
 
 
 @admin_bp.route('/testimonials/<int:testimonial_id>/edit', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_testimonial(testimonial_id):
-    """Edit a testimonial"""
-    testimonial = Testimonial.query.get_or_404(testimonial_id)
-
-    if request.method == 'POST':
-        testimonial.client_name = request.form.get('client_name', testimonial.client_name)
-        testimonial.testimonial_text = request.form.get('testimonial_text', testimonial.testimonial_text)
-        testimonial.rating = request.form.get('rating', testimonial.rating, type=int)
-        testimonial.is_featured = request.form.get('is_featured', testimonial.is_featured, type=bool)
-        testimonial.is_published = request.form.get('is_published', testimonial.is_published, type=bool)
-
-        db.session.commit()
-
-        flash('Testimonial updated successfully.', 'success')
-        return redirect(url_for('admin.testimonials'))
-
-    return render_template('admin/testimonial_form.html', testimonial=testimonial)
+    return _edit_record('testimonial', Testimonial.query.get_or_404(testimonial_id))
 
 
 @admin_bp.route('/testimonials/<int:testimonial_id>/delete', methods=['POST'])
@@ -574,5 +407,5 @@ def waivers_by_email(email):
 def social_media():
     """Social media management dashboard"""
     # TODO: Integrate with Ayrshare API
-    flash('Social media automation coming soon!', 'info')
+
     return render_template('admin/social.html')

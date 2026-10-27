@@ -237,8 +237,8 @@ def create_app(config_name=None):
     def format_currency(value):
         """Format a number as currency"""
         if value is None:
-            return "$0.00"
-        return f"${value:,.2f}"
+            return "?0.00"
+        return f"?{value:,.2f}"
 
     # Context processors
     logger.info("[10/10] Setting up template context processors...")
