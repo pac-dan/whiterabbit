@@ -1,3 +1,11 @@
+# Momentum Clips ? current operating guide
+
+The supported application is Flask/Jinja with plain JavaScript and a guest checkout flow. Start with [the functional operations guide](docs/functional-operations.md) for package management, admin setup, Stripe verification, waiver/scheduling, film delivery, enquiries and deployment prerequisites. The site has no JavaScript build step.
+
+The historical feature list below includes retired account booking, chat and social automation plans. Those are not claims of active functionality. Public customers do not need an account. Social publishing automation is not connected. Use the current guide instead of the historical Redis/Socket.IO setup instructions.
+
+---
+
 # Momentum Clips - Professional Snowboard Video Production
 
 > Premium slope footage & editing services platform with AI-powered customer service

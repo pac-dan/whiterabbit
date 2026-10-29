@@ -1,4 +1,5 @@
 from app import db, bcrypt
+from hashlib import sha256
 from flask_login import UserMixin
 from flask import current_app
 from datetime import datetime
@@ -87,7 +88,7 @@ class User(UserMixin, db.Model):
             Secure token string
         """
         serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
-        return serializer.dumps({'user_id': self.id}, salt='password-reset-salt')
+        return serializer.dumps({'user_id': self.id, 'credential': sha256(self.password_hash.encode()).hexdigest()}, salt='password-reset-salt')
 
     @staticmethod
     def verify_reset_token(token, expires_in=3600):
@@ -111,4 +112,5 @@ class User(UserMixin, db.Model):
         if not user_id:
             return None
 
-        return User.query.get(user_id)
+        user = db.session.get(User, user_id)
+        return user if user and user.is_admin and user.is_active and data.get('credential') == sha256(user.password_hash.encode()).hexdigest() else None

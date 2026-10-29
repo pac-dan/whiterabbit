@@ -1,2 +1,2 @@
-﻿{% extends 'admin/base.html' %}
+{% extends 'admin/base.html' %}
 {% block admin_content %}<h1>Accounts.</h1><p>Public customer accounts are retired. Customers book as guests; these are existing staff and historical records.</p><div class="workflow-panel workflow-table"><table><thead><tr><th>Name</th><th>Email</th><th>Access</th></tr></thead><tbody>{% for row in users %}<tr><td><a href="{{ url_for('admin.view_user', user_id=row.id) }}">{{ row.name }}</a></td><td>{{ row.email }}</td><td>{{ 'Admin' if row.is_admin else 'Historical customer' }} · {{ 'Active' if row.is_active else 'Disabled' }}</td></tr>{% else %}<tr><td colspan="3">No accounts.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

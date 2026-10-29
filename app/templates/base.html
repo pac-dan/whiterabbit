@@ -63,7 +63,7 @@
     <title>{% block page_title %}Momentum Clips - Professional Slope Footage & Editing{% endblock %}</title>
 
     <!-- Favicon (SVG inline to avoid 404) -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🏂%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
 
     <!-- Tailwind CSS -->
     {% if not experience and not alpine_page %}<script src="https://cdn.tailwindcss.com"></script>{% endif %}
@@ -163,8 +163,8 @@
                                 <i class="fas {% if category == 'success' %}fa-check-circle text-green-500{% elif category == 'danger' or category == 'error' %}fa-exclamation-circle text-red-500{% elif category == 'warning' %}fa-exclamation-triangle text-yellow-500{% else %}fa-info-circle text-blue-500{% endif %} mr-3"></i>
                                 <p class="text-[#0F172A]">{{ message }}</p>
                             </div>
-                            <button data-dismiss-flash class="ml-4 text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-times"></i>
+                            <button aria-label="Dismiss message" data-dismiss-flash class="ml-4 text-gray-400 hover:text-gray-600">
+                                <span aria-hidden="true">?</span>
                             </button>
                         </div>
                     </div>
@@ -222,7 +222,7 @@
                     <p class="text-sm sm:text-base text-gray-400 mb-3 sm:mb-4">Get the latest videos and deals</p>
                     <form method="POST" action="{{ url_for('main.newsletter_subscribe') }}" class="flex">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <input type="email" name="email" placeholder="Your email" required class="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-l-lg text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#00D4FF]">
+                        <input type="email" name="email" aria-label="Newsletter email address" maxlength="120" placeholder="Your email" required class="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-l-lg text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#00D4FF]">
                         <button type="submit" class="bg-[#00D4FF] px-3 sm:px-4 py-2 rounded-r-lg hover:bg-[#00B8E6] transition">
                             <i class="fas fa-arrow-right"></i>
                         </button>

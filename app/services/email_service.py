@@ -28,6 +28,9 @@ class EmailService:
         Returns:
             True if sent successfully
         """
+        if not current_app.config.get('MAIL_SUPPRESS_SEND') and not (current_app.config.get('MAIL_USERNAME') and current_app.config.get('MAIL_PASSWORD')):
+            current_app.logger.warning('Email is not configured; message was not sent')
+            return False
         try:
             msg = Message(
                 subject=f'[{self.app_name}] {subject}',

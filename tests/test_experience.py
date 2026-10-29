@@ -75,11 +75,10 @@ def test_other_pages(client):
         response = client.get(path)
         assert response.status_code == 200, path
         assert b'experience/js/main.js' not in response.data
+        assert b'cdn.tailwindcss.com' not in response.data
+        assert b'alpine-page' in response.data
         if path == '/auth/login':
-            assert b'cdn.tailwindcss.com' in response.data
-        else:
-            assert b'cdn.tailwindcss.com' not in response.data
-            assert b'alpine-page' in response.data
+            assert b'css/workflows.css' in response.data
 
 
 def test_terrain_binary_and_extrema():

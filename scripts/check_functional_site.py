@@ -60,6 +60,13 @@ try:
             failures=set(re.findall(r'^FAILED (\S+)',result.stdout,re.M))
             known={'tests/test_models.py::TestPackageModel::test_create_package','tests/test_routes.py::TestAuthRoutes::test_register_page','tests/test_routes.py::TestBookingRoutes::test_booking_index','tests/test_routes.py::TestBookingRoutes::test_new_booking_requires_auth'}
             assert failures <= known and result.returncode in (0,1), report
+            assert (ROOT/'docs/functional-operations.md').stat().st_size > 1000
+            service_command=[sys.executable,'-m','flask','--app','wsgi:app','service-readiness']
+            import os
+            readiness=subprocess.run(service_command,cwd=ROOT,env=dict(os.environ,FLASK_ENV='development',PYTHONUTF8='1'),capture_output=True,text=True,encoding='utf-8',errors='replace')
+            (OUT/'service-readiness.txt').write_text(readiness.stdout+readiness.stderr,encoding='utf-8')
+            report['service_readiness']={'command':service_command,'exit':readiness.returncode,'configuration_only':True}
+            assert readiness.returncode==0
         else: assert result.returncode==0 and 'passed' in result.stdout, report
         report['pass']=True
     elif group=='preview':
@@ -75,7 +82,8 @@ try:
         config=json.loads((RUN/'review-contract.json').read_text())
         state_path=Path(config['runDir'])/'latest.json'
         report['state']=json.loads(state_path.read_text()) if state_path.exists() else None
-        assert report['state'] and report['state'].get('verdict'), 'External review not yet available'
+        assert report['state'] and report['state'].get('status')=='passed', 'Independent passing review not yet available'
+        assert Path(report['state']['ledgerDir']).resolve()==RUN.resolve(), 'Review is for a different task'
         report['pass']=True
     else: raise ValueError(group)
 except Exception as exc:

@@ -48,8 +48,8 @@ def login():
 
             # Redirect to next page or homepage
             next_page = request.args.get('next')
-            if not next_page or urlparse(next_page).netloc != '':
-                next_page = url_for('main.index')
+            if not next_page or not next_page.startswith('/') or next_page.startswith('//') or '\\' in next_page or urlparse(next_page).netloc or urlparse(next_page).scheme:
+                next_page = url_for('admin.dashboard')
 
             return redirect(next_page)
         else:
@@ -84,8 +84,8 @@ def register():
             flash('Passwords do not match.', 'danger')
             return render_template('auth/register.html')
 
-        if len(password) < 8:
-            flash('Password must be at least 8 characters long.', 'danger')
+        if len(password) < 8 or len(password.encode('utf-8')) > 72:
+            flash('Password must be at least 8 characters and at most 72 UTF-8 bytes.', 'danger')
             return render_template('auth/register.html')
 
         # Check if user already exists
@@ -149,9 +149,9 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
 
         # Always show success message for security
-        flash('If an account with that email exists, a password reset link has been sent.', 'info')
+        flash('If an active admin account matches, a reset link will be sent when email delivery is available. Contact the site owner if it does not arrive.', 'info')
 
-        if user:
+        if user and user.is_admin and user.is_active:
             try:
                 email_service = EmailService()
                 reset_token = user.generate_reset_token()
@@ -186,8 +186,8 @@ def reset_password(token):
             flash('Passwords do not match.', 'danger')
             return render_template('auth/reset_password.html', token=token)
 
-        if len(password) < 8:
-            flash('Password must be at least 8 characters long.', 'danger')
+        if len(password) < 8 or len(password.encode('utf-8')) > 72:
+            flash('Password must be at least 8 characters and at most 72 UTF-8 bytes.', 'danger')
             return render_template('auth/reset_password.html', token=token)
 
         user.set_password(password)

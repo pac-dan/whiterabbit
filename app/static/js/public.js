@@ -82,16 +82,3 @@ search?.addEventListener('input', () => {
   document.getElementById('faq-empty').hidden = count > 0;
 });
 
-document.getElementById('contact-form')?.addEventListener('submit', event => {
-  event.preventDefault();
-  const form = event.currentTarget, values = new FormData(form);
-  const body = `From: ${values.get('name')} <${values.get('email')}>\n\n${values.get('message')}`;
-  const draft = document.getElementById('contact-draft');
-  draft.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(values.get('subject'))}&body=${encodeURIComponent(body)}`;
-  draft.hidden = false;
-  document.getElementById('contact-status').textContent = 'Your draft is ready. Open your email app to review and send.';
-});
-document.getElementById('contact-form')?.addEventListener('input', () => {
-  document.getElementById('contact-draft').hidden = true;
-  document.getElementById('contact-status').textContent = '';
-});

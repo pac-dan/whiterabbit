@@ -6,7 +6,7 @@ from .content import EXPERIENCE, VERSION
 
 PUBLIC_ENDPOINTS = frozenset('main.' + name for name in (
     'packages', 'package_detail', 'gallery', 'video_detail',
-    'testimonials', 'about', 'faq', 'contact'))
+    'testimonials', 'about', 'faq', 'contact', 'waiver_standalone', 'waiver_form', 'waiver_submit'))
 
 
 def public_context():
@@ -43,7 +43,7 @@ def public_context():
     def checkout_link(package):
         return dict(url=url_for('payment.checkout', package=package.id), label='Book this session')
 
-    return dict(alpine_page=request.endpoint in PUBLIC_ENDPOINTS or (request.blueprint in ('admin', 'auth', 'payment')),
+    return dict(alpine_page=request.endpoint != 'main.index',
                 experience_version=VERSION, public_video_media=video_media,
                 public_static_media=static_media, public_checkout_link=checkout_link,
                 experience_content=EXPERIENCE)

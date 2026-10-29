@@ -108,3 +108,8 @@ def test_functional_admin_access_and_template_pages(client,admin_user,sample_pac
         assert response.status_code==200,path
         assert b'cdn.tailwindcss.com' not in response.data
         assert b'css/workflows.css' in response.data
+
+def test_functional_admin_deactivated_staff_rejected(client,admin_user):
+    login(client,admin_user)
+    admin_user.is_active=False;db.session.commit()
+    assert client.get('/admin/').status_code==302

@@ -30,7 +30,7 @@ def admin_required(f):
     """Decorator to require admin access"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
+        if not current_user.is_authenticated or not current_user.is_admin or not current_user.is_active:
             flash('You do not have permission to access this page.', 'danger')
             return redirect(url_for('main.index'))
         return f(*args, **kwargs)
@@ -409,3 +409,26 @@ def social_media():
     # TODO: Integrate with Ayrshare API
 
     return render_template('admin/social.html')
+
+@admin_bp.route('/inquiries', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def inquiries():
+    from app.models.inquiry import Inquiry
+    if request.method == 'POST':
+        row = Inquiry.query.get_or_404(request.form.get('inquiry_id', type=int))
+        row.resolved = request.form.get('resolved') == 'on'
+        db.session.commit()
+        flash('Enquiry updated.', 'success')
+        return redirect(url_for('admin.inquiries'))
+    rows = Inquiry.query.order_by(Inquiry.resolved, Inquiry.created_at.desc()).paginate(page=request.args.get('page',1,type=int), per_page=20,error_out=False)
+    return render_template('admin/inquiries.html', inquiries=rows)
+
+
+@admin_bp.route('/subscribers')
+@login_required
+@admin_required
+def subscribers():
+    from app.models.newsletter import Newsletter
+    rows = Newsletter.query.order_by(Newsletter.subscribed_at.desc()).paginate(page=request.args.get('page',1,type=int),per_page=50,error_out=False)
+    return render_template('admin/subscribers.html', subscribers=rows)

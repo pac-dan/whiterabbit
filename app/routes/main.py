@@ -136,9 +136,24 @@ def testimonials():
     )
 
 
-@main_bp.route('/contact')
+@main_bp.route('/contact', methods=['GET', 'POST'])
+@limiter.limit('5 per hour', methods=['POST'])
 def contact():
-    """Contact page"""
+    """Persist enquiries before optional mail notification; never lose them to SMTP failure."""
+    from app.models.inquiry import Inquiry
+    if request.method == 'POST':
+        fields = {key: request.form.get(key, '').strip() for key in ('name','email','subject','message')}
+        valid = (2 <= len(fields['name']) <= 100 and len(fields['email']) <= 200
+                 and re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', fields['email'])
+                 and 2 <= len(fields['subject']) <= 200 and 10 <= len(fields['message']) <= 3000)
+        if not valid:
+            flash('Please check your name, email, subject and message.', 'danger')
+            return render_template('contact.html'), 400
+        enquiry = Inquiry(**fields)
+        db.session.add(enquiry)
+        db.session.commit()
+        flash(f'Your message is saved with the team. Reference ENQ-{enquiry.id}.', 'success')
+        return redirect(url_for('main.contact'))
     return render_template('contact.html')
 
 
@@ -212,9 +227,9 @@ def newsletter_subscribe():
     
     # Validate email
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if not email or not re.match(email_regex, email):
+    if not email or len(email) > 120 or not re.fullmatch(email_regex, email):
         flash('Please enter a valid email address.', 'danger')
-        return redirect(request.referrer or url_for('main.index'))
+        return redirect(url_for('main.index'))
     
     try:
         # Check if already subscribed
@@ -246,19 +261,19 @@ def newsletter_subscribe():
             except Exception as e:
                 current_app.logger.error(f'Newsletter welcome email error: {str(e)}')
             
-            flash('Thanks for subscribing! Check your email for a welcome message.', 'success')
+            flash('Thanks for subscribing! Your email has been added to our list.', 'success')
         
-        return redirect(request.referrer or url_for('main.index'))
+        return redirect(url_for('main.index'))
         
     except IntegrityError:
         db.session.rollback()
         flash('You are already subscribed!', 'info')
-        return redirect(request.referrer or url_for('main.index'))
+        return redirect(url_for('main.index'))
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f'Newsletter subscription error: {str(e)}')
         flash('An error occurred. Please try again later.', 'danger')
-        return redirect(request.referrer or url_for('main.index'))
+        return redirect(url_for('main.index'))
 
 
 # ============== WAIVER ROUTES ==============
@@ -314,7 +329,7 @@ def waiver_submit(token):
     agreement = request.form.get('agreement')
     
     # Validate
-    if not legal_name or len(legal_name) < 3:
+    if not 3 <= len(legal_name) <= 100:
         flash('Please enter your full legal name.', 'danger')
         return redirect(url_for('main.waiver_form', token=token))
     
@@ -323,7 +338,7 @@ def waiver_submit(token):
         return redirect(url_for('main.waiver_form', token=token))
     
     # Get client info
-    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+    ip_address = request.remote_addr
     if ip_address:
         ip_address = ip_address.split(',')[0].strip()  # Get first IP if multiple
     user_agent = request.headers.get('User-Agent', '')[:500]  # Limit length
@@ -398,11 +413,11 @@ def waiver_standalone():
     agreement = request.form.get('agreement')
     
     # Validate
-    if not legal_name or len(legal_name) < 3:
+    if not 3 <= len(legal_name) <= 100:
         flash('Please enter your full legal name.', 'danger')
         return redirect(url_for('main.waiver_standalone'))
     
-    if not client_email or '@' not in client_email:
+    if len(client_email) > 200 or len(client_name) > 100 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', client_email):
         flash('Please enter a valid email address.', 'danger')
         return redirect(url_for('main.waiver_standalone'))
     
@@ -411,7 +426,7 @@ def waiver_standalone():
         return redirect(url_for('main.waiver_standalone'))
     
     # Get client info
-    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+    ip_address = request.remote_addr
     if ip_address:
         ip_address = ip_address.split(',')[0].strip()
     user_agent = request.headers.get('User-Agent', '')[:500]
@@ -462,6 +477,12 @@ def decode_waiver_token(token):
         if generate_waiver_token(booking.id) == token:
             return booking.id
     raise ValueError("Invalid token")
+
+
+@main_bp.route('/favicon.ico')
+@limiter.exempt
+def favicon():
+    return redirect(url_for('static', filename='images/logo.png'), code=302)
 
 
 @main_bp.route('/health')

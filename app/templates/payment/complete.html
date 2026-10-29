@@ -1,3 +1,3 @@
-﻿{% extends 'workflow_base.html' %}
+{% extends 'workflow_base.html' %}
 {% block page_title %}Session receipt — Momentum Clips{% endblock %}
 {% block workflow %}<p class="ap-eyebrow">MC-{{ booking.id }} / YOUR SESSION</p><h1>You're on your way.</h1><section class="workflow-panel"><h2>{{ pkg.name }}</h2><p>Payment received: €{{ '%.2f'|format(pkg.price / 100) }}. Waiver signed by {{ waiver.client_name }}.</p>{% if booking.calendly_event_start %}<p>Session time: {{ booking.calendly_event_start|datetime }} {{ booking.calendly_timezone or 'UTC' }}.</p>{% else %}<p>Your session time still needs confirmation. If you booked through Calendly, keep its confirmation email. Otherwise, contact the team to arrange your dates.</p>{% endif %}<a class="exp-button" href="{{ url_for('main.contact', subject='Session MC-' ~ booking.id) }}">Contact the team ↗</a><a class="ap-text-link" href="{{ url_for('main.index') }}">Back to the mountain</a></section>{% endblock %}

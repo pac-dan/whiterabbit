@@ -1,2 +1,2 @@
-﻿{% extends 'admin/base.html' %}
+{% extends 'admin/base.html' %}
 {% block admin_content %}<h1>Waiver history.</h1><p>{{ email }}</p>{% for waiver in waivers %}<section class="workflow-panel"><h2>{{ waiver.client_name }}</h2><p>Signed {{ waiver.signed_at|datetime }} · version {{ waiver.waiver_version }}</p><p>Electronic signature: {{ waiver.legal_name_signature }}</p><p>IP: {{ waiver.ip_address }} · {{ waiver.user_agent }}</p>{% if waiver_to_booking.get(waiver.id) %}<a class="ap-text-link" href="{{ url_for('admin.view_booking', booking_id=waiver_to_booking[waiver.id]) }}">Linked order MC-{{ waiver_to_booking[waiver.id] }}</a>{% endif %}</section>{% else %}<p>No signatures found.</p>{% endfor %}{% endblock %}

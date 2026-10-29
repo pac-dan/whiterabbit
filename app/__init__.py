@@ -206,6 +206,10 @@ def create_app(config_name=None):
         from flask import render_template
         return render_template('errors/403.html'), 403
 
+    from app.models.inquiry import Inquiry
+    from app.commands import register_commands
+    register_commands(app)
+
     # Create database tables
     logger.info("[9/10] Creating database tables...")
     with app.app_context():

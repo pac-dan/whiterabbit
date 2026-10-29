@@ -21,17 +21,18 @@ def test_package_prices_and_checkout_guard(client, sample_package, app):
     text = client.get('/packages').get_data(as_text=True)
     assert 'Test Package' in text and '299.99' in text
     assert f'/packages/{sample_package.id}' in text
-    assert 'Session+enquiry' in text or 'Session%20enquiry' in text
+    assert f'/payment/checkout/{sample_package.id}' in text
     assert '/payment/checkout/test' not in text
     text = client.get(f'/packages/{sample_package.id}').get_data(as_text=True)
     assert 'Feature 1' in text and '299.99' in text
     basic = Package(name='Basic Session', description='A configured live session', price=150, duration=2, features=None)
     db.session.add(basic); db.session.commit()
     text = client.get('/packages').get_data(as_text=True)
-    assert '/payment/checkout/basic' in text
+    assert f'/payment/checkout/{basic.id}' in text
     basic.price = 200; db.session.commit()
     text = client.get('/packages').get_data(as_text=True)
-    assert '/payment/checkout/basic' not in text
+    assert f'/payment/checkout/{basic.id}' in text
+    assert '200.00' in text
 
 
 def test_gallery_filter_and_detail(client, sample_video):
@@ -68,9 +69,10 @@ def test_supporting_pages_and_safe_draft(client):
     assert faq.count('<details data-faq>') == 13
     assert 'How do I book a session?' in faq
     contact = client.get('/contact?subject=%22%3E%3Cscript%3Ebad%3C/script%3E').get_data(as_text=True)
-    assert 'Prepare email draft' in contact
+    assert 'Send your message' in contact
     assert '<script>bad</script>' not in contact
-    assert 'id="contact-draft" class="ap-text-link" hidden' in contact
+    assert 'id="contact-message-form" action="/contact" method="post"' in contact
+    assert 'name="csrf_token"' in contact
 
 
 def test_homepage_and_commerce_still_use_their_own_shell(client):
@@ -78,5 +80,6 @@ def test_homepage_and_commerce_still_use_their_own_shell(client):
     assert 'experience/js/main.js' in home and 'experience-data' in home
     assert 'alpine-page' not in re.search(r'<body[^>]*>', home)[0]
     login = client.get('/auth/login').get_data(as_text=True)
-    assert 'css/public.css' not in login
-    assert 'cdn.tailwindcss.com' in login
+    assert 'css/public.css' in login
+    assert 'css/workflows.css' in login
+    assert 'cdn.tailwindcss.com' not in login
